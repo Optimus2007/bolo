@@ -99,7 +99,7 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 
 - 2026-11-11: Roadmap (user): ship Bolo v0.1 (listen→understand→act) first. Then Phase 6 "Bolo-Awaaz", our own female voice
   distilled from Indic Parler (a voice made from a description only) into a tiny VITS-style TTS. Later, a Jarvis-like Mac agent with Bolo as the fast layer.
-- 2026-11-11: The assistant persona is **Kiwi** (wake phrase "Hey Kiwi"). "Bolo" is a bad wake word: it's a common Hindi word.
+- 2026-11-11: Assistant names: **Myna** for the public release ("Hey Myna", a talking bird); **Kiwi** as the user's personal wake word. The wake word is customizable (the detector is trained on synthetic TTS clips of the phrase). "Bolo" is a bad wake word: it's a common Hindi word.
   Wake UX: chime + menu-bar icon, ~8 s silence auto-sleep (configurable), "Kiwi, bas" / hotkey to sleep. Check for name collisions before release.
 
 ## Open questions
