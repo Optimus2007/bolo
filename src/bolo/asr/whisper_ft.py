@@ -24,12 +24,26 @@ from ..audio.metrics import corpus_scores
 BASE = "Oriserve/Whisper-Hindi2Hinglish-Swift"
 
 
-def load_manifest(path: Path | str) -> list[dict]:
+class HumanAudioError(ValueError):
+    pass
+
+
+def is_human(r: dict) -> bool:
+    """Rows from `bolo record` carry speaker consent; TTS rows carry `tts_model`."""
+    return "consent" in r or ("speaker_id" in r and "tts_model" not in r)
+
+
+def load_manifest(path: Path | str, for_training: bool = False) -> list[dict]:
     root = Path(path).parent
+    if for_training and "recordings" in Path(path).resolve().parts:
+        raise HumanAudioError("refusing to train on recordings/: human recordings are EVALUATION-ONLY (see docs/AUDIO.md)")
     rows = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.strip():
             r = json.loads(line)
+            if for_training and is_human(r):
+                raise HumanAudioError(f"refusing to train on human recording {r.get('utt_id')}: speakers consented to "
+                                      "evaluation only")
             r["_wav"] = str(root / r["audio"])
             rows.append(r)
     return rows
@@ -121,6 +135,9 @@ def train(model, processor, train_rows: list[dict], dev_rows: list[dict], out_di
     import torch
     from torch.utils.data import DataLoader
 
+    bad = [r.get("utt_id") for r in train_rows + dev_rows if is_human(r)]
+    if bad:  # second guard: train/dev must be synthetic only
+        raise HumanAudioError(f"{len(bad)} human recordings in train/dev (e.g. {bad[0]}); they are evaluation-only")
     random.seed(seed)
     torch.manual_seed(seed)
     out = Path(out_dir)

@@ -81,3 +81,22 @@ def test_http_roundtrip(tmp_path):
         assert post("/api/withdraw", json.dumps({"speaker_id": sid}).encode())["removed"] == 1
     finally:
         httpd.shutdown()
+
+
+def test_human_recordings_cannot_be_used_for_training(tmp_path):
+    from bolo.asr import whisper_ft as W
+
+    st = Store(tmp_path / "recordings", TEST)
+    sid = st.add_speaker("friend", {"record": True, "project_use": True}, {})
+    st.save(sid, st.prompts[0]["prompt_id"], wav())
+    man = tmp_path / "recordings" / "manifest.jsonl"
+    assert len(W.load_manifest(man)) == 1  # evaluation use is fine
+    with pytest.raises(W.HumanAudioError):
+        W.load_manifest(man, for_training=True)
+    other = tmp_path / "copy.jsonl"
+    other.write_text(man.read_text())  # copied elsewhere: still caught by its consent field
+    with pytest.raises(W.HumanAudioError):
+        W.load_manifest(other, for_training=True)
+    rows = W.load_manifest(man)
+    with pytest.raises(W.HumanAudioError):
+        W.train(None, None, rows, [], tmp_path / "out")

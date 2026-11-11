@@ -5,7 +5,7 @@ Two very different kinds of audio. They are never mixed in reporting.
 | | Synthetic speech (TRAIN) | Human recordings (EVAL) |
 |---|---|---|
 | Source | Indic Parler-TTS reading the synthetic text dataset | Real people via `bolo record` |
-| Used for | Whisper fine-tuning (train/dev), a synthetic test | The headline speech benchmark (Phase 5) |
+| Used for | Whisper fine-tuning (train/dev), a synthetic test | **Testing only**: the headline speech benchmark. **Never used for training** (enforced in code: `whisper_ft.HumanAudioError`) |
 | Where it lives | Kaggle/Colab working dir → `data/tts/` locally (gitignored) | `recordings/` on the laptop only (gitignored) |
 | Committed to git | Never (only scripts that regenerate it) | Never |
 | Licence | Generated with an Apache-2.0 model from our own text; shareable | Speakers' consent decides (see below) |

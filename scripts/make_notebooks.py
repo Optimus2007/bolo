@@ -172,7 +172,7 @@ from bolo.asr import whisper_ft as W
 from bolo.config import load_config
 from bolo.normalize import Normalizer
 nz = Normalizer.from_config(load_config())
-rows = W.load_manifest(TTS_MAN)
+rows = W.load_manifest(TTS_MAN, for_training=True)
 split = {s: [r for r in rows if r["split"] == s] for s in ("train", "dev", "test")}
 print({k: len(v) for k, v in split.items()})
 DEV = "cuda"
