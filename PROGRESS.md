@@ -102,6 +102,11 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 - 2026-11-11: Assistant names: **Myna** for the public release ("Hey Myna", a talking bird); **Kiwi** as the user's personal wake word. The wake word is customizable (the detector is trained on synthetic TTS clips of the phrase). "Bolo" is a bad wake word: it's a common Hindi word.
   Wake UX: chime + menu-bar icon, ~8 s silence auto-sleep (configurable), "Kiwi, bas" / hotkey to sleep. Check for name collisions before release.
 
+- 2026-11-11: Safety lock: `scripts/pre-commit` (installed in .git/hooks) refuses commits containing audio, `recordings/`,
+  speakers.json, data/eval per-utterance outputs, weights, credentials, HF tokens or private share links. Human recordings and
+  their per-utterance transcripts never go to git. Only aggregate numbers do, and per-group numbers need >=3 speakers.
+  After a fresh clone: `cp scripts/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit`.
+
 ## Open questions
 - No real noise corpus yet (MUSAN ~11 GB, ESC-50 NC). Augmentation noise is synthetic for now.
 - No LICENSE file yet (pyproject says Apache-2.0). Add it in Phase 7.

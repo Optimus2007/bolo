@@ -1,0 +1,12 @@
+#!/bin/sh
+# Bolo safety hook: refuse commits that contain audio, human recordings, weights, or secrets.
+# Install: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+bad=$(git diff --cached --name-only --diff-filter=ACMR | grep -iE '\.(wav|mp3|m4a|webm|ogg|opus|flac|aac|safetensors|bin|pt|pth|ckpt|onnx|gguf|npz)$|(^|/)recordings/|speakers\.json$|(^|/)data/eval/|kaggle\.json$|credentials\.json$|\.env$')
+if [ -n "$bad" ]; then
+  echo "BLOCKED by Bolo safety hook: these files must never be committed:"; echo "$bad" | sed 's/^/  /'
+  echo "(audio / recordings / weights / credentials stay local; see docs/AUDIO.md)"; exit 1
+fi
+if git diff --cached -U0 | grep -E '^\+' | grep -qE 'hf_[A-Za-z0-9]{30,}|trycloudflare\.com/\?invite=[A-Za-z0-9_-]{8,}|"(access|refresh)_token"[[:space:]]*:'; then
+  echo "BLOCKED by Bolo safety hook: the staged changes look like they contain a token or a private share link."; exit 1
+fi
+exit 0
