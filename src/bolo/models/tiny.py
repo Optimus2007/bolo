@@ -203,26 +203,27 @@ class BoloTiny:
         self.temperature = 1.0
 
     # ----- data -----
-    def encode_row(self, text: str, spans: list[dict], intent: str):
+    def encode_row(self, text: str, spans: list[dict], intent: str, soft=None):
         words, tags = word_tags(self.norm, text, spans, intent)
         words, tags = words[: self.tc.max_len], tags[: self.tc.max_len]
         if not words:
             words, tags = ["<empty>"], ["O"]
-        return words, [self.label_id[t] for t in tags], self.intents.index(intent)
+        return words, [self.label_id[t] for t in tags], self.intents.index(intent), soft
 
     def groups_from_rows(self, rows: list[dict], use_views: bool) -> list[list[tuple]]:
         groups = []
         for r in rows:
-            g = [self.encode_row(r["text"], r["spans"], r["intent"])]
+            g = [self.encode_row(r["text"], r["spans"], r["intent"], r.get("teacher_intent"))]
             if use_views:
-                g += [self.encode_row(v["text"], v["spans"], r["intent"]) for v in r.get("views", [])]
+                g += [self.encode_row(v["text"], v["spans"], r["intent"], v.get("teacher_intent"))
+                      for v in r.get("views", [])]
             groups.append(g)
         return groups
 
     # ----- training -----
     def fit(self, train_rows: list[dict], dev_rows: list[dict], epochs: int = 20, batch_size: int = 64,
             lr: float = 2e-3, use_views: bool = False, consistency: float = 0.0, seed: int = 0,
-            augment: bool = False, log=print) -> dict:
+            augment: bool = False, kd_alpha: float = 0.0, kd_temp: float = 2.0, log=print) -> dict:
         torch.manual_seed(seed)
         rng = random.Random(seed)
         groups = self.groups_from_rows(train_rows, use_views or consistency > 0)
@@ -243,17 +244,24 @@ class BoloTiny:
             for i in range(0, len(groups), batch_size):
                 gb = groups[i:i + batch_size]
                 if aug is not None:
-                    gb = [[(*aug(rng, w, t), y) for (w, t, y) in g] for g in gb]
+                    gb = [[(*aug(rng, w, t), y, sft) for (w, t, y, sft) in g] for g in gb]
                 items = [x for g in gb for x in g]
-                seqs = [w for w, _, _ in items]
+                seqs = [w for w, _, _, _ in items]
                 flat, offs, lens = _batch(self.feat, seqs, self.tc.max_len)
                 il, tl = self.model(flat, offs, lens)
-                y_int = torch.tensor([y for _, _, y in items])
+                y_int = torch.tensor([y for _, _, y, _ in items])
                 y_tag = torch.full(tl.shape[:2], -100, dtype=torch.long)
-                for b, (_, t, _) in enumerate(items):
+                for b, (_, t, _, _) in enumerate(items):
                     y_tag[b, :len(t)] = torch.tensor(t)
                 loss = F.cross_entropy(il, y_int) + F.cross_entropy(tl.reshape(-1, tl.shape[-1]),
                                                                     y_tag.reshape(-1), ignore_index=-100)
+                if kd_alpha > 0:
+                    idx = [b for b, it in enumerate(items) if it[3] is not None]
+                    if idx:
+                        tp = torch.tensor([items[b][3] for b in idx]).clamp_min(1e-6)
+                        tp = (tp.log() / kd_temp).softmax(-1)  # re-temper teacher probs
+                        sp = F.log_softmax(il[idx] / kd_temp, -1)
+                        loss = loss + kd_alpha * kd_temp ** 2 * F.kl_div(sp, tp, reduction="batchmean")
                 if consistency > 0:
                     loss = loss + consistency * self._consistency_loss(gb, il, tl, lens)
                 opt.zero_grad()

@@ -158,6 +158,23 @@ class EncoderTagger:
                 preds.append({"intent": intent, "slots": slots, "confidence": round(conf.item(), 4)})
         return preds
 
+    @torch.no_grad()
+    def intent_probs(self, texts: list[str]) -> list[list[float]]:
+        out = []
+        for _, il, _, _ in self._forward_texts(texts):
+            out += F.softmax(il / self.temperature, -1).tolist()
+        return out
+
+    @classmethod
+    def load(cls, cfg: Config, model_dir, device: str | None = None) -> "EncoderTagger":
+        d = Path(model_dir)
+        meta = json.loads((d / "config.json").read_text())
+        obj = cls(cfg, meta["base"], device=device)
+        obj.model.load_state_dict(torch.load(d / "model.pt", map_location="cpu", weights_only=True))
+        obj.model.to(obj.device)
+        obj.temperature = meta["temperature"]
+        return obj
+
     def to(self, device: str):
         self.device = device
         self.model.to(device)

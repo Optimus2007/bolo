@@ -1,0 +1,59 @@
+{
+ "rules": {
+  "strict": {
+   "exact_match": 0.849,
+   "intent_acc": 0.91,
+   "slot_f1": 0.8634,
+   "false_action_rate": 0.1871,
+   "deva_em": 0.7399
+  },
+  "grounded": {
+   "exact_match": 0.932,
+   "intent_acc": 0.94,
+   "slot_f1": 0.9582,
+   "false_action_rate": 0.0935,
+   "deva_em": 0.8786,
+   "over_abstain_rate": 0.0546
+  },
+  "absent_entity_abstain_rate": 0.7319,
+  "absent_rows": 567
+ },
+ "bolo-tiny/phono_views_aug-s0": {
+  "strict": {
+   "exact_match": 0.881,
+   "intent_acc": 0.942,
+   "slot_f1": 0.8783,
+   "false_action_rate": 0.0791,
+   "deva_em": 0.8208
+  },
+  "grounded": {
+   "exact_match": 0.958,
+   "intent_acc": 0.966,
+   "slot_f1": 0.9706,
+   "false_action_rate": 0.036,
+   "deva_em": 0.9306,
+   "over_abstain_rate": 0.0314
+  },
+  "absent_entity_abstain_rate": 0.7055,
+  "absent_rows": 567
+ },
+ "muril_aug-s0": {
+  "strict": {
+   "exact_match": 0.916,
+   "intent_acc": 0.955,
+   "slot_f1": 0.9138,
+   "false_action_rate": 0.036,
+   "deva_em": 0.8613
+  },
+  "grounded": {
+   "exact_match": 0.964,
+   "intent_acc": 0.973,
+   "slot_f1": 0.9736,
+   "false_action_rate": 0.036,
+   "deva_em": 0.948,
+   "over_abstain_rate": 0.0244
+  },
+  "absent_entity_abstain_rate": 0.7072,
+  "absent_rows": 567
+ }
+}

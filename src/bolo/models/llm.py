@@ -90,7 +90,9 @@ class LLMPredictor:
         out = []
         for i in range(0, len(texts), self.batch_size):
             chunk = texts[i:i + self.batch_size]
-            prompts = [self.tokenizer.encode(PROMPT.format(text=t)) for t in chunk]
+            # mlx-lm's completion datasets train through the chat template, so inference must match
+            prompts = [self.tokenizer.apply_chat_template([{"role": "user", "content": PROMPT.format(text=t)}],
+                                                          add_generation_prompt=True) for t in chunk]
             resp = batch_generate(self.model, self.tokenizer, prompts, max_tokens=self.max_tokens,
                                   return_logprobs=True)
             for j, text in enumerate(resp.texts):

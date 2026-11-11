@@ -43,6 +43,8 @@ for m in order:
     rs = rows[m]
     params = f"{rs[0]['params'] / 1e6:.2f}M" if rs[0]["params"] else "–"
     lat = st.mean(r["latency_ms"]["p50"] for r in rs if "latency_ms" in r)
+    if m.startswith("qwen"):
+        m += " (MLX GPU latency)"
     lines.append(f"| {m} | {len(rs)} | {params} | " + " | ".join(ms([f(r) for r in rs]) for _, f in cols)
                  + f" | {lat:.2f} |")
 Path("results/text/SUMMARY.md").write_text("\n".join(lines) + "\n")

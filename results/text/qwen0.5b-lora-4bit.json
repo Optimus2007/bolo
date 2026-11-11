@@ -1,0 +1,147 @@
+{
+ "threshold": 0.0,
+ "test": {
+  "n": 1000,
+  "intent_acc": 0.777,
+  "slot": {
+   "p": 0.637,
+   "r": 0.5449,
+   "f1": 0.5874
+  },
+  "slot_lenient": {
+   "p": 0.637,
+   "r": 0.5449,
+   "f1": 0.5874
+  },
+  "exact_match": 0.565,
+  "exact_match_lenient": 0.565,
+  "abstain": {
+   "p": 0.427,
+   "r": 0.8417,
+   "f1": 0.5666
+  },
+  "false_action_rate": 0.1583,
+  "over_abstain_rate": 0.1823,
+  "wrong_action_rate": 0.3829,
+  "aurc": 0.2195,
+  "breakdown": {
+   "script": {
+    "deva": {
+     "n": 173,
+     "exact_match": 0.3757
+    },
+    "mixed": {
+     "n": 139,
+     "exact_match": 0.4748
+    },
+    "roman": {
+     "n": 688,
+     "exact_match": 0.6308
+    }
+   },
+   "template": {
+    "heldout": {
+     "n": 182,
+     "exact_match": 0.3407
+    },
+    "seen": {
+     "n": 818,
+     "exact_match": 0.6149
+    }
+   },
+   "text_seen_in_train": {
+    "False": {
+     "n": 860,
+     "exact_match": 0.514
+    },
+    "True": {
+     "n": 140,
+     "exact_match": 0.8786
+    }
+   },
+   "mixing": {
+    "balanced": {
+     "n": 233,
+     "exact_match": 0.5236
+    },
+    "en-heavy": {
+     "n": 248,
+     "exact_match": 0.6935
+    },
+    "hi-heavy": {
+     "n": 515,
+     "exact_match": 0.5184
+    },
+    "n/a": {
+     "n": 4,
+     "exact_match": 1.0
+    }
+   },
+   "none_reason": {
+    "ambiguous": {
+     "n": 24,
+     "exact_match": 0.75,
+     "abstain_recall": 0.75
+    },
+    "filler": {
+     "n": 12,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "incomplete": {
+     "n": 25,
+     "exact_match": 0.64,
+     "abstain_recall": 0.64
+    },
+    "ood": {
+     "n": 22,
+     "exact_match": 0.8182,
+     "abstain_recall": 0.8182
+    },
+    "unsupported": {
+     "n": 56,
+     "exact_match": 0.9464,
+     "abstain_recall": 0.9464
+    }
+   }
+  }
+ },
+ "test_unseen_text": {
+  "n": 860,
+  "intent_acc": 0.7523,
+  "slot": {
+   "p": 0.6003,
+   "r": 0.5025,
+   "f1": 0.5471
+  },
+  "slot_lenient": {
+   "p": 0.6003,
+   "r": 0.5025,
+   "f1": 0.5471
+  },
+  "exact_match": 0.514,
+  "exact_match_lenient": 0.514,
+  "abstain": {
+   "p": 0.3421,
+   "r": 0.8041,
+   "f1": 0.48
+  },
+  "false_action_rate": 0.1959,
+  "over_abstain_rate": 0.1966,
+  "wrong_action_rate": 0.4241,
+  "aurc": 0.2826
+ },
+ "script_consistency": 0.5467,
+ "script_consistency_note": "computed on first 300 test rows",
+ "latency_ms": {
+  "p50": 198.0,
+  "p95": 242.8,
+  "note": "MLX GPU, batch 1, 50 utts"
+ },
+ "parse_failures": 5,
+ "model": "qwen0.5b-lora-4bit",
+ "seed": 0,
+ "params": 494033000,
+ "size_mb": 278.1,
+ "data": "data/text/v0"
+}

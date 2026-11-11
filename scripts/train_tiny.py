@@ -24,6 +24,13 @@ VARIANTS = {
     "phono_cons03_aug": dict(features="phono", use_views=True, consistency=0.3, augment=True),
     "plain_views_aug": dict(features="plain", use_views=True, consistency=0.0, augment=True),
     "phono_aug": dict(features="phono", use_views=False, consistency=0.0, augment=True),
+    # + LLM paraphrases of train rows (labels preserved), optionally with MuRIL distillation
+    "phono_views_aug_para": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                 train_files=["train", "para_train"]),
+    "phono_views_aug_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                               train_files=["train_kd"], kd_alpha=0.5),
+    "phono_views_aug_para_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                    train_files=["train_kd", "para_train_kd"], kd_alpha=0.5),
 }
 
 ap = argparse.ArgumentParser()
@@ -36,7 +43,6 @@ args = ap.parse_args()
 torch.set_num_threads(args.threads)
 
 cfg = load_config()
-train = load_rows(f"{args.data}/train.jsonl")
 dev = load_rows(f"{args.data}/dev.jsonl")
 test = load_rows(f"{args.data}/test.jsonl")
 Path("results/text").mkdir(parents=True, exist_ok=True)
@@ -45,8 +51,9 @@ for seed in args.seeds:
     for name in args.variants:
         v = VARIANTS[name]
         m = BoloTiny(cfg, TinyConfig(features=v["features"]))
+        train_rows = [r for f in v.get("train_files", ["train"]) for r in load_rows(f"{args.data}/{f}.jsonl")]
         print(f"== {name} seed {seed}: {m.n_params():,} params")
-        info = m.fit(train, dev, epochs=args.epochs, use_views=v["use_views"], consistency=v["consistency"],
+        info = m.fit(train_rows, dev, epochs=args.epochs, kd_alpha=v.get("kd_alpha", 0.0), use_views=v["use_views"], consistency=v["consistency"],
                      augment=v.get("augment", False),
                      seed=seed, log=lambda s: print("  ", s) if s.startswith(("epoch 1/", f"epoch {args.epochs}/")) else None)
         out_dir = Path(f"models/bolo-tiny/{name}-s{seed}")
