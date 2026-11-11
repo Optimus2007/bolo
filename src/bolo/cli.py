@@ -38,7 +38,7 @@ def _cmd_record(args: argparse.Namespace) -> None:
     from .record.server import serve
 
     serve(root=args.root, test_path=args.test, port=args.port, open_browser=not args.no_browser,
-          share=args.share, minutes=args.minutes)
+          share=args.share, minutes=args.minutes, n_read=args.n_read, n_free=args.n_free)
 
 
 def _cmd_eval(args: argparse.Namespace) -> None:
@@ -89,6 +89,8 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--share", action="store_true",
                    help="share a private HTTPS link (Cloudflare quick tunnel); audio is stored only on this laptop")
     r.add_argument("--minutes", type=int, default=120, help="auto-close the shared link after this many minutes")
+    r.add_argument("--n-read", type=int, default=40, help="read prompts per speaker (main part, ~4 min)")
+    r.add_argument("--n-free", type=int, default=15, help="optional 'say it your way' bonus prompts per speaker")
     r.set_defaults(func=_cmd_record)
 
     e = sub.add_parser("eval", help="speech -> text -> action benchmark (ASR + NLU + grounding + latency)")

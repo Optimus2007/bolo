@@ -54,7 +54,7 @@ def test_store_consent_keys_save_withdraw(tmp_path):
     # same pseudonym from someone else -> new id, never a takeover
     sid2, key2 = st.add_speaker("speaker 07", CONSENT, {})
     assert sid2 == "speaker-07-2" and key2 != key
-    p = st.prompts[0]
+    p = st.prompts_for(sid)[0]
     with pytest.raises(ValueError):
         st.save("ghost", key, p["prompt_id"], wav())
     with pytest.raises(AuthError):
@@ -92,7 +92,7 @@ def test_http_roundtrip_local(tmp_path):
             _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": {}}).encode())
         j = _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": CONSENT}).encode())
         sid, H = j["speaker_id"], {"X-Speaker-Key": j["speaker_key"]}
-        pid = st.prompts[1]["prompt_id"]
+        pid = st.prompts_for(sid)[1]["prompt_id"]
         assert _req(base, f"/api/upload?speaker={sid}&prompt_id={pid}", wav(), H)["ok"]
         assert _req(base, f"/api/prompts?speaker={sid}", headers=H)["done"] == [pid]
         assert _req(base, f"/api/prompts?speaker={sid}")["done"] == []  # no key -> nothing revealed
@@ -119,7 +119,8 @@ def test_share_mode_requires_invite(tmp_path):
         assert _req(base, "/api/session", headers=H)["shared"] is True
         j = _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": CONSENT}).encode(), H)
         H2 = {**H, "X-Speaker-Key": j["speaker_key"]}
-        assert _req(base, f"/api/upload?speaker={j['speaker_id']}&prompt_id={st.prompts[0]['prompt_id']}", wav(), H2)["ok"]
+        pid = st.prompts_for(j["speaker_id"])[0]["prompt_id"]
+        assert _req(base, f"/api/upload?speaker={j['speaker_id']}&prompt_id={pid}", wav(), H2)["ok"]
         assert st.manifest()[0]["via"] == "link"
     finally:
         httpd.shutdown()
@@ -135,7 +136,7 @@ def test_human_recordings_cannot_be_used_for_training(tmp_path):
 
     st = Store(tmp_path / "recordings", TEST)
     sid, key = st.add_speaker("friend", CONSENT, {})
-    st.save(sid, key, st.prompts[0]["prompt_id"], wav())
+    st.save(sid, key, st.prompts_for(sid)[0]["prompt_id"], wav())
     man = tmp_path / "recordings" / "manifest.jsonl"
     assert len(W.load_manifest(man)) == 1  # evaluation use is fine
     with pytest.raises(W.HumanAudioError):
@@ -147,3 +148,23 @@ def test_human_recordings_cannot_be_used_for_training(tmp_path):
     rows = W.load_manifest(man)
     with pytest.raises(W.HumanAudioError):
         W.train(None, None, rows, [], tmp_path / "out")
+
+
+def test_short_balanced_assignment_covers_everything(tmp_path):
+    st = Store(tmp_path, TEST, n_read=40, n_free=15)
+    ids, keys = [], []
+    for name in ("a", "b", "c"):
+        sid, k = st.add_speaker(name, CONSENT, {})
+        ids.append(sid); keys.append(k)
+    sets = [st.prompts_for(s) for s in ids]
+    for ps in sets:
+        assert sum(p["kind"] == "read" for p in ps) == 40 and sum(p["kind"] == "free" for p in ps) == 15
+        assert len({p["intent"] for p in ps if p["kind"] == "read"}) == 9  # every command type for every speaker
+    reads = [{p["prompt_id"] for p in ps if p["kind"] == "read"} for ps in sets]
+    assert len(reads[0] | reads[1]) >= 76  # two speakers cover almost all 80 read prompts
+    assert len(reads[0] | reads[1] | reads[2]) == 80  # three cover all of them
+    frees = set().union(*({p["prompt_id"] for p in ps if p["kind"] == "free"} for ps in sets))
+    assert len(frees) >= 40  # three speakers cover all 40 bonus prompts
+    other = next(p for p in st.prompts if p["prompt_id"] not in {q["prompt_id"] for q in sets[0]})
+    with pytest.raises(ValueError):
+        st.save(ids[0], keys[0], other["prompt_id"], wav())  # only your own prompts

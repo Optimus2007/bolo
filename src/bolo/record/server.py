@@ -58,7 +58,8 @@ class AuthError(Exception):
 
 
 class Store:
-    def __init__(self, root: Path, test_path: Path):
+    def __init__(self, root: Path, test_path: Path, n_read: int = 40, n_free: int = 15):
+        self.n_read, self.n_free = n_read, n_free
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
         (self.root / "audio").mkdir(exist_ok=True)
@@ -94,7 +95,9 @@ class Store:
             while sid in sp:  # never take over an existing speaker
                 sid = f"{base}-{n}"
                 n += 1
-            sp[sid] = {"pseudonym": pseudonym[:40], "key_sha256": _hash(key), "via": via, "consent": {
+            assigned = self._assign(sid, sp)
+            sp[sid] = {"pseudonym": pseudonym[:40], "key_sha256": _hash(key), "via": via, "assigned": assigned,
+                       "consent": {
                 "record": True, "project_use": True, "evaluation_only": True,
                 "public_release": bool(consent.get("public_release")),
                 "given_at": time.strftime("%Y-%m-%dT%H:%M:%S")}, "meta": allowed_meta}
@@ -123,6 +126,40 @@ class Store:
         (self.root / "manifest.jsonl").write_text(
             "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
 
+    def _assign(self, sid: str, speakers: dict) -> list[str]:
+        """Give each speaker a short, intent-balanced subset, preferring prompts that earlier speakers were NOT given,
+        so a few speakers together still cover the whole prompt set."""
+        import random
+
+        rng = random.Random(f"assign-{sid}")
+        used: dict[str, int] = {}
+        for other in speakers.values():
+            for pid in other.get("assigned", []):
+                used[pid] = used.get(pid, 0) + 1
+        out = []
+        for kind, k in (("read", self.n_read), ("free", self.n_free)):
+            by_intent: dict[str, list[dict]] = {}
+            for p in self.prompts:
+                if p["kind"] == kind:
+                    by_intent.setdefault(p["intent"], []).append(p)
+            for v in by_intent.values():  # least-used first, random among ties
+                rng.shuffle(v)
+                v.sort(key=lambda p: used.get(p["prompt_id"], 0))
+            intents, picked = sorted(by_intent), []
+            i = len(speakers) * k  # rotate which intents get the leftover slots, speaker to speaker
+            while len(picked) < min(k, sum(len(v) for v in by_intent.values())):
+                v = by_intent[intents[i % len(intents)]]
+                if v:
+                    picked.append(v.pop(0)["prompt_id"])
+                i += 1
+            out += picked
+        return out
+
+    def prompts_for(self, sid: str) -> list[dict]:
+        sp = self.speaker(sid) or {}
+        ids = sp.get("assigned")
+        return [self.by_id[i] for i in ids if i in self.by_id] if ids else self.prompts
+
     def done(self, sid: str) -> list[str]:
         return [r["prompt_id"] for r in self.manifest() if r["speaker_id"] == sid]
 
@@ -130,7 +167,7 @@ class Store:
              mic: dict | None = None) -> dict:
         sp = self.check_key(sid, key)
         p = self.by_id.get(prompt_id)
-        if p is None:
+        if p is None or (sp.get("assigned") and prompt_id not in sp["assigned"]):
             raise ValueError("unknown prompt")
         dur = validate_wav(wav_bytes)
         d = self.root / "audio" / sid
@@ -237,10 +274,10 @@ def make_handler(store: Store, invite: str | None = None):
             elif u.path == "/api/prompts":
                 sid, key = q.get("speaker", ""), self.headers.get("X-Speaker-Key", "")
                 try:
-                    done = store.done(sid) if sid and store.check_key(sid, key) else []
+                    ok = bool(sid) and bool(store.check_key(sid, key))
                 except (ValueError, AuthError):
-                    done = []
-                self._json({"prompts": store.prompts, "done": done})
+                    ok = False
+                self._json({"prompts": store.prompts_for(sid) if ok else [], "done": store.done(sid) if ok else []})
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
@@ -296,8 +333,9 @@ def start_tunnel(port: int, timeout: float = 45.0) -> tuple[subprocess.Popen, st
 
 
 def serve(root: Path | str = "recordings", test_path: Path | str = "data/text/v0/test.jsonl",
-          port: int = 8765, open_browser: bool = True, share: bool = False, minutes: int = 120):
-    store = Store(Path(root), Path(test_path))
+          port: int = 8765, open_browser: bool = True, share: bool = False, minutes: int = 120,
+          n_read: int = 40, n_free: int = 15):
+    store = Store(Path(root), Path(test_path), n_read=n_read, n_free=n_free)
     invite = secrets.token_urlsafe(12) if share else None
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(store, invite))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()

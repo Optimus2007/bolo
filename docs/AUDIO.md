@@ -39,7 +39,9 @@ uv run bolo record            # opens http://127.0.0.1:8765/  (local only, not r
   age range; region; mic type). Voice is used only to check that accuracy is equal across groups. Group results are
   reported only when a group has at least 3 speakers (`MIN_SPEAKERS_PER_GROUP`), so no individual can be singled out.
   Do not type real names. Voice itself is personal data: treat every file as private.
-- **Prompts** come only from the held-out **test** split (`recordings/prompts_v0.jsonl`, 120 prompts):
+- **Prompts** come only from the held-out **test** split (`recordings/prompts_v0.jsonl`, a pool of 120). Each speaker gets a
+  short personal set: **40 read + 15 optional bonus** (`--n-read/--n-free`), balanced over all 9 intents and preferring
+  prompts earlier speakers were not given. So ~4 minutes per person, and two speakers together cover all 80 read prompts:
   - `read` (80, shown first): read a test sentence (Roman shown, mixed-script hint below).
   - `free` (40, optional **bonus round** offered after all read prompts): only the goal is shown (“Call Ankita on WhatsApp”); the speaker says it in their own words.
     These measure real phrasing variation that no template covers. The label is the goal (intent + slots).
