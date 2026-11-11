@@ -47,15 +47,25 @@ _Last updated: 2026-11-11 (Phase 5 done on synthetic and public speech; real com
 - User records their own voice with `bolo record` (single speaker for now: results are labelled as 1 speaker).
 
 ## Next
-- Phase 5: `bolo eval` speech benchmark on human recordings (local), vs plain Whisper + Swift + fine-tune.
+- Real command recordings from friends (10 people, 40 prompts each), then `bolo eval` on them: the headline numbers.
+- Phase 6 (needs approval): Myna's voice (Bolo-Awaaz) and wake word. Phase 7: owner publishes per docs/RELEASE_CHECKLIST.md.
 - Optional: regenerate paraphrases with an Apache-2.0 model (Qwen2.5-1.5B or 7B) for a releasable dataset.
 - Tune the grounding threshold on real recordings.
 
 ## How to resume
 ```
-cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
+cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev,train,speech]"
+cp scripts/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit      # safety lock (after a fresh clone)
 .venv/bin/pytest -q && .venv/bin/bolo generate --out data/text/v0 --sample-out samples/text_v0_sample.jsonl
+.venv/bin/bolo understand "volume 40 pe kar do"                          # text -> action
+.venv/bin/bolo understand some.wav --audio --ground                      # speech -> action (uses models/bolo-whisper-fp16)
+caffeinate -d & .venv/bin/bolo record --share                            # friends record via a private link
+.venv/bin/bolo eval --manifest recordings/manifest.jsonl say=data/say/manifest.jsonl --asr swift,models/bolo-whisper-fp16 --nlu rules,tiny --out results/speech/human_v1.json
+python scripts/kaggle_push.py status | fetch ft | abl                   # Kaggle (private)
+python scripts/prepare_release.py                                        # stage release files (no publishing)
 ```
+Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle output of bolo-whisper-ft), models/bolo-whisper-fp16
+(`python -c` in results history, or re-save from fp32), models/bolo-tiny (scripts/train_tiny.py).
 
 ## Decisions
 - Layout: `src/bolo` (package), `configs/` (YAML schema), `scripts/`, `notebooks/` (Kaggle/Colab),
