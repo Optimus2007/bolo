@@ -63,6 +63,15 @@ def _cmd_eval(args: argparse.Namespace) -> None:
     print(md)
 
 
+def _cmd_understand(args: argparse.Namespace) -> None:
+    from .pipeline import Bolo, scan_mac
+
+    env = scan_mac() if args.ground else None
+    b = Bolo.load(asr=args.asr if args.audio else None, env=env)
+    out = b.listen(args.input) if args.audio else b.understand(args.input)
+    print(json.dumps(out, ensure_ascii=False, indent=1))
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bolo", description="Hinglish voice-command toolkit")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -103,6 +112,14 @@ def main(argv: list[str] | None = None) -> None:
     e.add_argument("--limit", type=int, default=0, help="max utterances per set (0 = all)")
     e.add_argument("--out", default="results/speech/benchmark.json")
     e.set_defaults(func=_cmd_eval)
+
+    u = sub.add_parser("understand", help="text (or a .wav with --audio) -> intent + slots (never executes anything)")
+    u.add_argument("input", help="a Hinglish command, or a path to a 16-bit WAV with --audio")
+    u.add_argument("--audio", action="store_true")
+    u.add_argument("--asr", default="Oriserve/Whisper-Hindi2Hinglish-Swift", help="Whisper model id or local dir")
+    u.add_argument("--ground", action="store_true",
+                   help="match folders/files/apps against what exists on this Mac (read-only scan of ~ and /Applications)")
+    u.set_defaults(func=_cmd_understand)
 
     args = p.parse_args(argv)
     args.func(args)
