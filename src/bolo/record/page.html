@@ -42,6 +42,8 @@
     <div class="check"><input type="checkbox" id="c_record"><label for="c_record">I agree to be recorded reading or saying short voice commands.</label></div>
     <div class="check"><input type="checkbox" id="c_project"><label for="c_project">The recordings may be used to evaluate and improve the Bolo project (kept private).</label></div>
     <div class="check"><input type="checkbox" id="c_public"><label for="c_public">Optional: my recordings may be included in a future <b>public</b> open dataset (CC BY 4.0). Leave unchecked if unsure.</label></div>
+    <label for="voice">Optional: voice (self-described, used only for group-level accuracy checks)</label>
+    <select id="voice"><option value="">prefer not to say</option><option>female</option><option>male</option><option>other</option></select>
     <label for="age">Optional: age range</label>
     <select id="age"><option value="">prefer not to say</option><option>18-24</option><option>25-34</option><option>35-49</option><option>50+</option></select>
     <label for="region">Optional: region you grew up in (state or city)</label>
@@ -97,7 +99,7 @@ $("start").onclick = async () => {
   if (!$("c_record").checked || !$("c_project").checked)
     return setStatus($("cstatus"), "Both required consent boxes must be checked to record.", "err");
   const body = { pseudonym, consent: { record:true, project_use:true, public_release:$("c_public").checked },
-                 meta: { age_range:$("age").value, region:$("region").value, mic:$("mic").value } };
+                 meta: { voice:$("voice").value, age_range:$("age").value, region:$("region").value, mic:$("mic").value } };
   const r = await fetch("/api/speaker", { method:"POST", body:JSON.stringify(body) });
   const j = await r.json();
   if (!r.ok) return setStatus($("cstatus"), j.error, "err");

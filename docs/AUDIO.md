@@ -23,7 +23,9 @@ uv run bolo record            # opens http://127.0.0.1:8765/  (local only, not r
 - **Withdraw** deletes that speaker's audio files, manifest rows and speaker entry. To withdraw for someone
   later: start `bolo record`, enter the same pseudonym (it maps to the same id), and press *Delete my recordings*.
   Or delete `recordings/audio/<id>/` and their rows by hand.
-- **Minimal personal data.** Only a pseudonym and optional coarse fields (age range, region, mic type).
+- **Minimal personal data.** Only a pseudonym and optional coarse fields (voice, self-described as female/male/other;
+  age range; region; mic type). Voice is used only to check that accuracy is equal across groups. Group results are
+  reported only when a group has at least 3 speakers (`MIN_SPEAKERS_PER_GROUP`), so no individual can be singled out.
   Do not type real names. Voice itself is personal data: treat every file as private.
 - **Prompts** come only from the held-out **test** split (`recordings/prompts_v0.jsonl`, 120 prompts):
   - `read` (80): read a test sentence (Roman shown, mixed-script hint below).

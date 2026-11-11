@@ -38,3 +38,16 @@ def test_eval_with_stub_asr(tmp_path):
     assert S["asr"]["perfect"]["nlu"]["rules"]["grounded"] == S["oracle"]["rules"]["grounded"]
     assert "human_read" in to_markdown(res) and (tmp_path / "u.jsonl").exists()
     assert refs
+
+
+def test_group_breakdown_hides_small_groups():
+    from bolo.speech_eval import group_breakdown
+
+    rows, preds = [], []
+    for spk, voice in [("a", "female"), ("b", "female"), ("c", "female"), ("d", "male")]:
+        for _ in range(2):
+            rows.append({"speaker": spk, "speaker_meta": {"voice": voice}, "intent": "open_app", "slots": {"app": "vlc"}})
+            preds.append({"intent": "open_app", "slots": {"app": "vlc"}})
+    g = group_breakdown(rows, preds)["voice"]
+    assert g["groups"]["female"] == {"speakers": 3, "n": 6, "exact_match": 1.0}
+    assert "male" not in g["groups"] and g["hidden_small_groups"] == 1

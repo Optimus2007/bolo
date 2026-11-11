@@ -63,6 +63,7 @@ def load_set(manifest: Path | str, test_path: Path | str, name: str | None = Non
             "intent": m.get("intent", g.get("intent")), "slots": m.get("slots", g.get("slots", {})),
             "ref": m.get("transcript") if "transcript" in m else m.get("asr_text"),
             "script": "speech", "meta": g.get("meta", {}), "duration_s": m.get("duration_s"),
+            "speaker_meta": m.get("speaker_meta") or {},
         })
     return rows
 
@@ -145,6 +146,32 @@ def nlu_block(model, thr, cfg, env, rows, texts) -> tuple[dict, list[dict], floa
     return {"strict": _summ(score(rows, strict)), "grounded": _summ(score(rows, grounded))}, grounded, ms
 
 
+MIN_SPEAKERS_PER_GROUP = 3  # privacy: never report a group small enough to identify someone
+
+
+def group_breakdown(rows: list[dict], preds: list[dict], keys=("voice", "mic", "age_range")) -> dict:
+    """Exact-action accuracy per self-reported speaker group; groups with < MIN_SPEAKERS_PER_GROUP speakers are hidden."""
+    from .evaluate import _exact
+
+    out = {}
+    for k in keys:
+        groups: dict[str, list[int]] = {}
+        for i, r in enumerate(rows):
+            v = (r.get("speaker_meta") or {}).get(k)
+            if v:
+                groups.setdefault(v, []).append(i)
+        shown = {}
+        for v, idx in sorted(groups.items()):
+            spk = {rows[i]["speaker"] for i in idx}
+            if len(spk) >= MIN_SPEAKERS_PER_GROUP:
+                shown[v] = {"speakers": len(spk), "n": len(idx),
+                            "exact_match": round(sum(_exact(rows[i], preds[i]) for i in idx) / len(idx), 4)}
+        hidden = len(groups) - len(shown)
+        if shown or hidden:
+            out[k] = {"groups": shown, "hidden_small_groups": hidden}
+    return out
+
+
 def pct(xs: list[float], q: float) -> float:
     xs = sorted(xs)
     return round(xs[min(len(xs) - 1, int(q * len(xs)))], 1) if xs else 0.0
@@ -187,7 +214,8 @@ def run(sets: dict[str, list[dict]], asr_names: list[str], nlu_names: list[str],
                 blk, preds, nms = nlu_block(model, thr, cfg, env, rows, [clean(h) for h in hyps])
                 e2e = [m + nms for m in ms]
                 A["nlu"][nname] = {**blk, "nlu_ms": round(nms, 2),
-                                   "e2e_ms": {"median": pct(e2e, 0.5), "p90": pct(e2e, 0.9)}}
+                                   "e2e_ms": {"median": pct(e2e, 0.5), "p90": pct(e2e, 0.9)},
+                                   "by_group": group_breakdown(rows, preds)}
                 for r, h, p in zip(rows, hyps, preds):
                     utts.append({"set": sname, "utt_id": r["utt_id"], "asr": aname, "nlu": nname, "ref": r["ref"],
                                  "hyp": h, "gold": {"intent": r["intent"], "slots": r["slots"]},
@@ -218,5 +246,11 @@ def to_markdown(res: dict) -> str:
                          f"{B['strict']['intent_acc']:.3f} | {B['strict']['exact_match']:.3f} | "
                          f"{B['grounded']['exact_match']:.3f} | {B['grounded']['false_action_rate']} | "
                          f"{A['latency_ms']['median']} | {A['rtf']} |")
+        groups = [(a, n, B["by_group"]) for a, A in S["asr"].items() for n, B in A["nlu"].items() if B.get("by_group")]
+        for a, n, bg in groups:
+            for k, v in bg.items():
+                cells = ", ".join(f"{g}: {x['exact_match']:.3f} ({x['speakers']} spk, n={x['n']})" for g, x in v["groups"].items())
+                hid = f"; {v['hidden_small_groups']} group(s) hidden (<{MIN_SPEAKERS_PER_GROUP} speakers)" if v["hidden_small_groups"] else ""
+                L.append(f"- E2E EM by {k} [{a} + {n}]: {cells or '—'}{hid}")
         L.append("")
     return "\n".join(L)

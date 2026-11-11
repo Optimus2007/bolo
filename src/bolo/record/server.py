@@ -63,7 +63,7 @@ class Store:
             raise ValueError("recording requires consent to record and to project use")
         sid = slugify(pseudonym)
         allowed_meta = {k: str(v)[:60] for k, v in (meta or {}).items()
-                        if k in ("age_range", "region", "first_language", "mic") and v}
+                        if k in ("voice", "age_range", "region", "first_language", "mic") and v}
         with self.lock:
             sp = self._speakers()
             sp[sid] = {"pseudonym": pseudonym[:40], "consent": {
