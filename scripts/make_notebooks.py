@@ -223,7 +223,39 @@ for u in bad[:25]:
 '''),
 ])
 
+# --- ablation: can we keep the command gain and forget less? (frozen encoder, shorter training) ---
+_ft_setup = [c for c in FT["cells"] if c["cell_type"] == "code"][:2]
+ABL = nb([
+    ("markdown", """
+# Bolo 03: Whisper fine-tune ablation
+
+Same data and code as notebook 02, no baselines. Variants:
+- `freeze_enc`: encoder frozen, only the decoder trains (less forgetting of general acoustics?)
+- `short`: full model, 2 epochs instead of 5
+Each is scored on the same synthetic test (held-out voices). Output: `/kaggle/working/ablation/<variant>/` + `results_ablation.json`.
+"""),
+    ("code", "".join(_ft_setup[0]["source"])),
+    ("code", "".join(_ft_setup[1]["source"])),
+    ("code", r'''
+VARIANTS = {"freeze_enc": dict(epochs=5, freeze_encoder=True, lr=1e-5),
+            "short": dict(epochs=2, freeze_encoder=False, lr=1e-5)}
+for name, v in VARIANTS.items():
+    proc = WhisperProcessor.from_pretrained(W.BASE)
+    model = WhisperForConditionalGeneration.from_pretrained(W.BASE)
+    out = f"{WORK}/ablation/{name}"
+    t0 = time.time()
+    res = W.train(model, proc, split["train"], split["dev"], out, device=DEV, normalizer=nz, batch_size=32,
+                  warmup=50, eval_every=150, seed=0, **v)
+    best = WhisperForConditionalGeneration.from_pretrained(out, torch_dtype=torch.float16).to(DEV)
+    s, _ = W.evaluate(best, WhisperProcessor.from_pretrained(out), split["test"], nz, language="en", device=DEV)
+    RESULTS["finetuned"][name] = {**s, "config": v, "minutes": round((time.time() - t0) / 60, 1), "best_dev": res["best"]}
+    print(name, RESULTS["finetuned"][name], flush=True)
+    del model, best; torch.cuda.empty_cache()
+json.dump(RESULTS, open(WORK + "/results_ablation.json", "w"), indent=1, ensure_ascii=False)
+'''),
+])
+
 OUT.mkdir(exist_ok=True)
-for name, book in [("01_tts_synth.ipynb", TTS), ("02_whisper_finetune.ipynb", FT)]:
+for name, book in [("01_tts_synth.ipynb", TTS), ("02_whisper_finetune.ipynb", FT), ("03_whisper_ablation.ipynb", ABL)]:
     (OUT / name).write_text(json.dumps(book, indent=1, ensure_ascii=False))
     print("wrote", OUT / name)

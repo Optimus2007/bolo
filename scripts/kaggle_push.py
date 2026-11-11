@@ -19,7 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "data/kaggle"
 KAGGLE = ["uvx", "--with", "six", "kaggle"]
-KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb")}
+KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb"),
+           "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb")}
 TRIAL_N = {"tts": ('N = {"train": 5000, "dev": 300, "test": 1000}', 'N = {"train": 64, "dev": 16, "test": 32}'),
            "ft": ('CFG = dict(epochs=5,', 'CFG = dict(max_steps=20, epochs=1,')}
 
@@ -79,7 +80,7 @@ def kernel(which: str, trial: bool, gpu: bool):
     meta = {"id": f"{u}/{slug}", "title": slug, "code_file": nbname, "language": "python",
             "kernel_type": "notebook", "is_private": True, "enable_gpu": gpu, "enable_internet": True,
             "dataset_sources": [f"{u}/bolo-bundle"], "kernel_sources": [], "competition_sources": []}
-    if which == "ft":
+    if which in ("ft", "abl"):
         meta["kernel_sources"] = [f"{u}/{KERNELS['tts'][0]}"]
     (d / "kernel-metadata.json").write_text(json.dumps(meta, indent=1))
     print(kg("kernels", "push", "-p", str(d)))
@@ -100,14 +101,14 @@ def fetch(which: str):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["dataset", "tts", "ft", "status", "fetch"])
+    ap.add_argument("cmd", choices=["dataset", "tts", "ft", "abl", "status", "fetch"])
     ap.add_argument("which", nargs="?")
     ap.add_argument("--trial", action="store_true")
     ap.add_argument("--no-gpu", action="store_true")
     a = ap.parse_args()
     if a.cmd == "dataset":
         dataset()
-    elif a.cmd in ("tts", "ft"):
+    elif a.cmd in ("tts", "ft", "abl"):
         kernel(a.cmd, a.trial, not a.no_gpu)
     elif a.cmd == "status":
         status()
