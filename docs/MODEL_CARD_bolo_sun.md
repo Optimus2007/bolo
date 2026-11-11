@@ -9,8 +9,8 @@ script, the way people type Hinglish: *"client folder mein claude code khol do"*
 |---|---|
 | Task | Speech recognition for short Hinglish voice commands, Roman script output |
 | Base model | `Oriserve/Whisper-Hindi2Hinglish-Swift` (itself a fine tune of `openai/whisper-base`) |
-| Size | 73M parameters, about 290 MB in float32 |
-| Speed | about 127 ms per command on a MacBook Air M2 (MPS), batch of one |
+| Size | 73M parameters: 142 MB in float16 (default, same accuracy), 290 MB in float32 |
+| Speed | about 100 ms per command on a MacBook Air M2 (MPS, float16), 127 ms in float32, batch of one |
 | Decoding | `language="en", task="transcribe"`, the same prefix as the base model |
 | Licence | Apache 2.0, the same as the base model |
 

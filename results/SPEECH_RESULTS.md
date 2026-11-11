@@ -62,6 +62,9 @@ so the loss comes from two things: it learned our spelling conventions ("hai" wh
 but gives up some command accuracy. Absolute numbers on this set are inflated for every model because its segment
 boundaries are loose (see `results/speech/openslr104_test.md`).
 
+Stored in float16 (142 MB instead of 290 MB), Bolo Sun gives exactly the same transcripts on this set and runs in
+100 ms instead of 127 ms (`results/speech/say_fp16.json`).
+
 ## What we take from this
 
 1. **Fine tuning on synthetic command speech works, and it carries over to a synthesiser it never heard.** Word errors

@@ -1,0 +1,91 @@
+{
+ "sets": {
+  "say_read": {
+   "n": 80,
+   "speakers": 4,
+   "hours": 0.046,
+   "asr": {
+    "models/bolo-whisper-fp16": {
+     "latency_ms": {
+      "median": 100.2,
+      "p90": 109.4
+     },
+     "rtf": 0.048,
+     "nlu": {
+      "tiny": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.9,
+        "exact_match": 0.6,
+        "exact_match_lenient": 0.625,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.0282,
+        "wrong_action_rate": 0.4348,
+        "slot_f1": 0.5694
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.9,
+        "exact_match": 0.825,
+        "exact_match_lenient": 0.825,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.0986,
+        "wrong_action_rate": 0.1094,
+        "slot_f1": 0.8489
+       },
+       "nlu_ms": 0.45,
+       "e2e_ms": {
+        "median": 100.7,
+        "p90": 109.8
+       },
+       "by_group": {}
+      }
+     },
+     "wer": {
+      "wer": 0.1326,
+      "cer": 0.0692,
+      "phonetic_wer": 0.1213,
+      "sentence_exact": 0.475,
+      "n": 80
+     }
+    }
+   },
+   "oracle": {
+    "tiny": {
+     "strict": {
+      "n": 80,
+      "intent_acc": 0.925,
+      "exact_match": 0.8875,
+      "exact_match_lenient": 0.8875,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0282,
+      "wrong_action_rate": 0.1014,
+      "slot_f1": 0.8889
+     },
+     "grounded": {
+      "n": 80,
+      "intent_acc": 0.9625,
+      "exact_match": 0.95,
+      "exact_match_lenient": 0.95,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0423,
+      "wrong_action_rate": 0.0147,
+      "slot_f1": 0.965
+     },
+     "nlu_ms": 0.5
+    }
+   }
+  }
+ },
+ "asr_systems": {
+  "models/bolo-whisper-fp16": [
+   "models/bolo-whisper-fp16",
+   "en"
+  ]
+ },
+ "nlu": [
+  "tiny"
+ ],
+ "device": "mps",
+ "created": "2026-11-11T23:45:49"
+}

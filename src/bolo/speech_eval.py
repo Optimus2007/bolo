@@ -87,12 +87,15 @@ class WhisperASR:
 
         self.dev = dev or device()
         self.proc = WhisperProcessor.from_pretrained(path)
-        self.model = WhisperForConditionalGeneration.from_pretrained(path, torch_dtype=torch.float32).to(self.dev).eval()
+        # models saved in float16 (e.g. models/bolo-whisper-fp16) run in float16 on GPU/MPS, float32 on CPU
+        half = "fp16" in str(path) and self.dev != "cpu"
+        self.dtype = torch.float16 if half else torch.float32
+        self.model = WhisperForConditionalGeneration.from_pretrained(path, torch_dtype=self.dtype).to(self.dev).eval()
         self.language = language
         self.torch = torch
 
     def __call__(self, wav) -> str:
-        feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev)
+        feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev, self.dtype)
         kw = {"task": "transcribe", "max_new_tokens": 64}
         if self.language:
             kw["language"] = self.language

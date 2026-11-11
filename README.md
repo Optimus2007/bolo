@@ -10,7 +10,7 @@ Everything runs on your own laptop or phone. No audio leaves the device, nothing
 
 ```
 "bhai rust learning folder mein terminal kholo"
-        │  speech recogniser (fine tuned Whisper)            about 125 ms on an M2
+        │  Bolo Sun, the speech recogniser (142 MB)          about 100 ms on an M2
         ▼
 "bhai rust learning folder mein terminal kholo"
         │  Bolo Tiny (0.8 MB, built from scratch)            about 1 ms
@@ -73,7 +73,7 @@ Bolo Tiny ends up within a point of a model a thousand times its size once groun
 | Perfect transcript (the ceiling) | 0% | 95.0% | 0% | |
 | Plain Whisper base | 120.7% | 38.8% | 0% | 131 ms |
 | Hinglish Whisper (Oriserve Swift) | 28.8% | 62.5% | 0% | 129 ms |
-| **Bolo Sun (our fine tune)** | **13.3%** | **82.5%** | **0%** | **127 ms** |
+| **Bolo Sun (our fine tune)** | **13.3%** | **82.5%** | **0%** | **127 ms (100 ms in float16)** |
 
 On 977 synthetic test clips in voices it never heard in training, Bolo Sun gets 10.6% word errors against 29.5% for
 Swift. These clips and the macOS voices are still synthetic.
@@ -112,7 +112,7 @@ uv run bolo understand "documents folder mein terminal kholo" --ground    # chec
 Understand a recording (a 16 bit WAV file):
 
 ```bash
-uv run bolo understand command.wav --audio --asr models/bolo-whisper
+uv run bolo understand command.wav --audio            # uses models/bolo-whisper-fp16 if present
 ```
 
 From Python:
@@ -120,7 +120,7 @@ From Python:
 ```python
 from bolo.pipeline import Bolo, scan_mac
 
-bolo = Bolo.load(asr="models/bolo-whisper", env=scan_mac())
+bolo = Bolo.load(asr="models/bolo-whisper-fp16", env=scan_mac())
 bolo.understand("volume 40 pe kar do")
 # {'intent': 'set_volume', 'slots': {'level': 40}, 'abstain': False, ...}
 bolo.listen("command.wav")
