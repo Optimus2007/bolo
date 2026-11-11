@@ -1,6 +1,6 @@
 # PROGRESS
 
-_Last updated: 2026-11-11 (Phase 3)_
+_Last updated: 2026-11-11 (Phase 4)_
 
 ## Done
 - Phase 0: private GitHub repo, .gitignore, folder structure, first commit.
@@ -16,11 +16,18 @@ _Last updated: 2026-11-11 (Phase 3)_
   (`grounding.py`), Bolo-tiny ONNX int8 export (0.8 MB, no accuracy loss), LLM paraphrases (train + reviewed test).
   Results in `results/RESULTS.md`. 56 tests passing.
 
+- Phase 4 (code ready; heavy runs are on the user): `bolo record` (local consent-first recorder, `src/bolo/record/`),
+  numpy audio augmentation (`src/bolo/audio/augment.py`), ASR metrics incl. phonetic WER (`audio/metrics.py`),
+  TTS planning/synthesis (`audio/tts.py`), Whisper fine-tune/eval loop (`asr/whisper_ft.py`),
+  `scripts/make_kaggle_bundle.py`, `scripts/make_notebooks.py` → `notebooks/01_tts_synth.ipynb`,
+  `notebooks/02_whisper_finetune.ipynb`, `docs/AUDIO.md` (datasheet + consent policy). 71 tests passing.
+  Local smoke test of the Whisper pipeline on MPS with 16 macOS `say` clips passed (pipeline check only).
+
 ## In progress
-- Waiting for go-ahead on Phase 4 (recording tool + synthetic speech + ASR notebooks).
+- User: record self/friends with `bolo record`; run notebook 01 (TTS) then 02 (fine-tune) on Kaggle.
 
 ## Next
-- Phase 4: `bolo record`, TTS synthetic audio notebook (Kaggle), Whisper fine-tune notebook.
+- Phase 5: `bolo eval` speech benchmark on human recordings (local), vs plain Whisper + Swift + fine-tune.
 - Optional: regenerate paraphrases with an Apache-2.0 model (Qwen2.5-1.5B or 7B) for a releasable dataset.
 - Tune the grounding threshold on real recordings.
 
@@ -63,7 +70,22 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 - 2026-11-11: Paraphrase quality: 56% of test paraphrases kept after review; MuRIL agreed with 74% of train paraphrases.
 - 2026-11-11: Negative results kept: consistency loss (−1.4 EM), MuRIL distillation (−4.0 EM).
 
+- 2026-11-11: Phase 4 design. Recorder = stdlib http.server bound to 127.0.0.1 with an inline page. The browser
+  resamples to 16 kHz WAV (no ffmpeg on the machine). Browser AEC/NS/AGC are off. Prompts come from the TEST split only:
+  80 read + 40 free ("say it your way"). The free prompts are labelled by goal, not transcript.
+- 2026-11-11: Synthetic voices split by speaker (test voices never in train). English voices only read Roman text
+  of English-heavy commands.
+- 2026-11-11: Whisper training uses a plain PyTorch loop (not Seq2SeqTrainer) to be robust to Kaggle's transformers
+  version. Decode/train prefix language="en" (as on the Swift card); baselines also run with "hi".
+- 2026-11-11: Phonetic WER is reported alongside raw WER/CER (Roman Hinglish has no standard spelling). Devanagari
+  hypotheses are transliterated before scoring, which still penalises loanwords (टर्मिनल→tarminal). This is documented.
+- 2026-11-11: TTS synthesis code (`tts.synthesize`) is NOT run locally (the model is >2 GB). The notebook starts with a
+  small trial N. Known risk: the parler-tts batch API (`audios_length`) is based on its INFERENCE.md.
+- Real recordings never leave the laptop (not uploaded to Kaggle). Speech eval in Phase 5 is local.
+
 ## Open questions
+- No real noise corpus yet (MUSAN ~11 GB, ESC-50 NC). Augmentation noise is synthetic for now.
+- No LICENSE file yet (pyproject says Apache-2.0). Add it in Phase 7.
 - OpenSLR-104 license: OpenSLR says CC BY-SA 4.0, Srota card says CC BY 4.0. Treat as BY-SA.
 - HiACC license on Zenodo: not yet confirmed.
 - Qwen Research License: do its terms cover outputs (our paraphrases)? Until resolved, treat them as research-only.
