@@ -20,7 +20,7 @@ from bolo.audio.augment import read_wav, resample, SR
 from bolo.audio.metrics import corpus_scores
 from bolo.config import load_config
 from bolo.normalize import Normalizer
-from bolo.speech_eval import ASR_SYSTEMS, WhisperASR, pct
+from bolo.speech_eval import WhisperASR, asr_spec, pct
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--root", default="data/public/openslr104/test")
@@ -67,7 +67,7 @@ res = {"dataset": "OpenSLR-104 Hindi-English test (CC BY-SA 4.0)", "n": len(samp
        "recordings": len({t[1] for t in sample}), "speakers": len({utt2spk.get(t[0]) for t in sample}), "asr": {}}
 utts = []
 for name in a.asr.split(","):
-    path, lang = ASR_SYSTEMS[name]
+    path, lang = asr_spec(name)
     if path.startswith("models/") and not Path(path).exists():
         print("skip", name)
         continue

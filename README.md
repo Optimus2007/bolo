@@ -68,11 +68,26 @@ Bolo Tiny ends up within a point of a model a thousand times its size once groun
 
 **From speech to action** (80 clips spoken by the built in macOS voices, so still synthetic)
 
-<!-- SPEECH_TABLE -->
+| Speech model | Word errors | Correct action | Wrong actions | Time per command |
+|---|---|---|---|---|
+| Perfect transcript (the ceiling) | 0% | 95.0% | 0% | |
+| Plain Whisper base | 120.7% | 38.8% | 0% | 131 ms |
+| Hinglish Whisper (Oriserve Swift) | 28.8% | 62.5% | 0% | 129 ms |
+| **Bolo Sun (our fine tune)** | **13.3%** | **82.5%** | **0%** | **127 ms** |
+
+On 977 synthetic test clips in voices it never heard in training, Bolo Sun gets 10.6% word errors against 29.5% for
+Swift. These clips and the macOS voices are still synthetic.
 
 **Real human Hinglish speech** (300 clips from the OpenSLR 104 tutorial recordings, speech recognition only)
 
-<!-- OPENSLR_TABLE -->
+| Speech model | Word errors |
+|---|---|
+| Plain Whisper base | 149.7% |
+| **Hinglish Whisper (Oriserve Swift)** | **55.2%** |
+| Bolo Sun | 59.1% |
+
+This one is a fair warning: on long general speech Bolo Sun is a little worse than the model it started from, because it
+specialised in commands. A 50/50 weight blend of the two (`scripts/wise_ft.py`) gets most of that back if you need it.
 
 The full reports with every metric and caveat live in `results/`.
 

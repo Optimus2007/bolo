@@ -1,0 +1,137 @@
+{
+ "data": {
+  "train": 4922,
+  "dev": 289,
+  "test": 977
+ },
+ "baselines": {
+  "openai/whisper-base|hi": {
+   "wer": 1.809,
+   "cer": 0.6166,
+   "phonetic_wer": 1.7902,
+   "sentence_exact": 0.0962,
+   "n": 977,
+   "sec_per_utt": 0.1108
+  },
+  "openai/whisper-base|en": {
+   "wer": 0.7479,
+   "cer": 0.4563,
+   "phonetic_wer": 0.7306,
+   "sentence_exact": 0.1238,
+   "n": 977,
+   "sec_per_utt": 0.0346
+  },
+  "openai/whisper-small|hi": {
+   "wer": 0.8124,
+   "cer": 0.4554,
+   "phonetic_wer": 0.7545,
+   "sentence_exact": 0.0082,
+   "n": 977,
+   "sec_per_utt": 0.0903
+  },
+  "Oriserve/Whisper-Hindi2Hinglish-Swift|en": {
+   "wer": 0.295,
+   "cer": 0.1391,
+   "phonetic_wer": 0.2564,
+   "sentence_exact": 0.2518,
+   "n": 977,
+   "sec_per_utt": 0.0346
+  },
+  "Oriserve/Whisper-Hindi2Hinglish-Swift|hi": {
+   "wer": 0.2937,
+   "cer": 0.1388,
+   "phonetic_wer": 0.2536,
+   "sentence_exact": 0.2426,
+   "n": 977,
+   "sec_per_utt": 0.0345
+  }
+ },
+ "finetuned": {
+  "bolo-whisper|en": {
+   "wer": 0.1057,
+   "cer": 0.0481,
+   "phonetic_wer": 0.0919,
+   "sentence_exact": 0.5947,
+   "n": 977,
+   "sec_per_utt": 0.0308
+  }
+ },
+ "train": {
+  "config": {
+   "epochs": 5,
+   "batch_size": 32,
+   "lr": 1e-05,
+   "warmup": 50,
+   "eval_every": 150,
+   "seed": 0,
+   "freeze_encoder": false
+  },
+  "base": "Oriserve/Whisper-Hindi2Hinglish-Swift",
+  "minutes": 17.7,
+  "log": [
+   {
+    "wer": 0.1138,
+    "cer": 0.0618,
+    "phonetic_wer": 0.1061,
+    "sentence_exact": 0.5917,
+    "n": 289,
+    "sec_per_utt": 0.1292,
+    "step": 150
+   },
+   {
+    "wer": 0.1042,
+    "cer": 0.0576,
+    "phonetic_wer": 0.0971,
+    "sentence_exact": 0.5986,
+    "n": 289,
+    "sec_per_utt": 0.0648,
+    "step": 300
+   },
+   {
+    "wer": 0.092,
+    "cer": 0.0517,
+    "phonetic_wer": 0.0868,
+    "sentence_exact": 0.6332,
+    "n": 289,
+    "sec_per_utt": 0.0639,
+    "step": 450
+   },
+   {
+    "wer": 0.092,
+    "cer": 0.0505,
+    "phonetic_wer": 0.0868,
+    "sentence_exact": 0.6367,
+    "n": 289,
+    "sec_per_utt": 0.0662,
+    "step": 600
+   },
+   {
+    "wer": 0.0913,
+    "cer": 0.0502,
+    "phonetic_wer": 0.0862,
+    "sentence_exact": 0.6367,
+    "n": 289,
+    "sec_per_utt": 0.0654,
+    "step": 750
+   },
+   {
+    "wer": 0.0913,
+    "cer": 0.0502,
+    "phonetic_wer": 0.0862,
+    "sentence_exact": 0.6367,
+    "n": 289,
+    "sec_per_utt": 0.0649,
+    "step": 765
+   }
+  ],
+  "best": {
+   "wer": 0.0913,
+   "cer": 0.0502,
+   "phonetic_wer": 0.0862,
+   "sentence_exact": 0.6367,
+   "n": 289,
+   "sec_per_utt": 0.0654,
+   "step": 750
+  }
+ }
+}

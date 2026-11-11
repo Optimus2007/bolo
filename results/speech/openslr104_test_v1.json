@@ -1,0 +1,39 @@
+{
+ "dataset": "OpenSLR-104 Hindi-English test (CC BY-SA 4.0)",
+ "n": 300,
+ "minutes": 30.8,
+ "recordings": 30,
+ "speakers": 30,
+ "asr": {
+  "whisper-base": {
+   "wer": 1.4973,
+   "cer": 0.783,
+   "phonetic_wer": 1.4668,
+   "sentence_exact": 0.0,
+   "n": 300,
+   "median_ms": 159.6,
+   "rtf": 0.03,
+   "language": "hi"
+  },
+  "swift": {
+   "wer": 0.5521,
+   "cer": 0.3372,
+   "phonetic_wer": 0.4482,
+   "sentence_exact": 0.03,
+   "n": 300,
+   "median_ms": 160.7,
+   "rtf": 0.027,
+   "language": "en"
+  },
+  "bolo-whisper": {
+   "wer": 0.5907,
+   "cer": 0.3538,
+   "phonetic_wer": 0.4895,
+   "sentence_exact": 0.0167,
+   "n": 300,
+   "median_ms": 158.3,
+   "rtf": 0.027,
+   "language": "en"
+  }
+ }
+}

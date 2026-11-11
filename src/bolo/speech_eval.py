@@ -33,6 +33,11 @@ ASR_SYSTEMS = {
 }
 
 
+def asr_spec(name: str) -> tuple[str, str]:
+    """A known name, or any local dir / HF id (decoded with language "en")."""
+    return ASR_SYSTEMS.get(name) or (name, "en")
+
+
 def device() -> str:
     import torch
 
@@ -184,8 +189,8 @@ def run(sets: dict[str, list[dict]], asr_names: list[str], nlu_names: list[str],
 
     env, nz = environment(cfg), Normalizer.from_config(cfg)
     nlus = list(nlu_models(cfg, nlu_names))
-    asr_factory = asr_factory or (lambda name: WhisperASR(*ASR_SYSTEMS[name]))
-    res = {"sets": {}, "asr_systems": {n: ASR_SYSTEMS.get(n) for n in asr_names}, "nlu": nlu_names,
+    asr_factory = asr_factory or (lambda name: WhisperASR(*asr_spec(name)))
+    res = {"sets": {}, "asr_systems": {n: asr_spec(n) for n in asr_names}, "nlu": nlu_names,
            "device": device(), "created": time.strftime("%Y-%m-%dT%H:%M:%S")}
     utts = []
     for sname, rows in sets.items():
@@ -197,7 +202,7 @@ def run(sets: dict[str, list[dict]], asr_names: list[str], nlu_names: list[str],
                 blk, _, ms = nlu_block(model, thr, cfg, env, ref_rows, [clean(r["ref"]) for r in ref_rows])
                 S["oracle"][nname] = {**blk, "nlu_ms": round(ms, 2)}
         for aname in asr_names:
-            path, _ = ASR_SYSTEMS.get(aname, ("", None))
+            path, _ = asr_spec(aname)
             if path.startswith("models/") and not Path(path).exists():
                 print(f"skip {aname}: {path} not found")
                 continue

@@ -1,6 +1,6 @@
 # PROGRESS
 
-_Last updated: 2026-11-11 (Phase 5 started)_
+_Last updated: 2026-11-11 (Phase 5 done on synthetic and public speech; real command recordings pending)_
 
 ## Done
 - Phase 0: private GitHub repo, .gitignore, folder structure, first commit.
@@ -28,6 +28,15 @@ _Last updated: 2026-11-11 (Phase 5 started)_
   `scripts/make_say_eval.py` = 80 macOS `say` clips (4 voices) as a second, unseen-TTS synthetic set.
   First results: `results/speech/say_v0.md`. `scripts/kaggle_push.py` pushes the bundle and notebooks to Kaggle (private).
   The private dataset `optimus2005/bolo-bundle` is uploaded and the private kernel `bolo-tts-synth` is pushed.
+
+- Phase 5 results (`results/SPEECH_RESULTS.md`): TTS run on Kaggle produced 4,922/289/977 clips. Bolo Sun (Swift fine tuned
+  for 18 min on a T4) gets synthetic test WER 10.6% vs Swift 29.5%. On macOS voices (an unseen synthesiser) it gets WER 13.3% vs 28.8%,
+  and E2E action 82.5% vs 62.5% (oracle 95%). On real OpenSLR-104 speech it is slightly worse (59.1% vs 55.2%): a
+  specialisation trade-off. A WiSE-FT 50/50 blend gets 56.0% there but 78.8% E2E. Default = full fine tune. The model is in
+  models/bolo-whisper (gitignored), the blend in models/bolo-whisper-wise050.
+- Overnight 2026-11-11: Python API `bolo.pipeline.Bolo` + `bolo understand` + read-only `scan_mac`; packaging (LICENSE,
+  configs in the wheel, v0.1.0, `speech` extra; the PyPI name `bolo` was free when checked); README rewritten in plain language;
+  model cards for Bolo Tiny and Bolo Sun.
 
 ## In progress
 - Kaggle TTS run is blocked on an HF token: the user must accept the Indic Parler-TTS terms, create a read token, and add it

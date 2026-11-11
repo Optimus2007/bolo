@@ -116,7 +116,8 @@ def main(argv: list[str] | None = None) -> None:
     u = sub.add_parser("understand", help="text (or a .wav with --audio) -> intent + slots (never executes anything)")
     u.add_argument("input", help="a Hinglish command, or a path to a 16-bit WAV with --audio")
     u.add_argument("--audio", action="store_true")
-    u.add_argument("--asr", default="Oriserve/Whisper-Hindi2Hinglish-Swift", help="Whisper model id or local dir")
+    u.add_argument("--asr", default="models/bolo-whisper" if Path("models/bolo-whisper").exists()
+                   else "Oriserve/Whisper-Hindi2Hinglish-Swift", help="Whisper model id or local dir")
     u.add_argument("--ground", action="store_true",
                    help="match folders/files/apps against what exists on this Mac (read-only scan of ~ and /Applications)")
     u.set_defaults(func=_cmd_understand)
