@@ -78,6 +78,13 @@
     <div class="muted" style="margin-top:12px" id="tip">Tip: press <b>Space</b> to start/stop. Speak naturally, the way you'd talk to your laptop.</div>
   </section>
 
+  <div id="bonusbox" class="card hidden">
+    <div class="row">
+      <button class="primary" id="bonusyes">Continue with bonus prompts</button>
+      <button id="bonusno">Finish, I'm done</button>
+    </div>
+  </div>
+
   <section id="withdrawbox" class="card hidden">
     <strong>Withdraw</strong>
     <p class="muted">Deletes all recordings you made in this session (this browser) from the organiser's laptop.</p>
@@ -95,6 +102,16 @@ let speakerKey = "";
 const api = (path, opts = {}) => fetch(path, { ...opts, headers: { ...(opts.headers || {}), "X-Invite": INVITE, "X-Speaker-Key": speakerKey } });
 function store(k, v) { try { v === undefined ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
 function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+let bonus = [], bonusAsked = false;
+function showBonusChoice() {
+  $("kind").textContent = "main part done 🎉";
+  $("show").textContent = "Thank you! The main part is complete.";
+  $("hint").textContent = "";
+  $("instr").textContent = `Optional bonus round: ${bonus.length} short tasks where you say a request in your own words instead of reading. It helps test how people really talk. You can stop here if you like.`;
+  $("tbox").classList.add("hidden");
+  $("recbtn").classList.add("hidden"); $("play").classList.add("hidden"); $("save").classList.add("hidden"); $("skip").classList.add("hidden");
+  $("bonusbox").classList.remove("hidden");
+}
 let speaker = null, prompts = [], todo = [], cur = null, done = new Set();
 let ctx = null, stream = null, proc = null, chunks = [], recording = false, wavBlob = null, inRate = 48000;
 
@@ -118,7 +135,9 @@ $("start").onclick = async () => {
 async function beginSession() {
   const pj = await (await api("/api/prompts?speaker=" + encodeURIComponent(speaker))).json();
   prompts = pj.prompts; done = new Set(pj.done);
-  todo = prompts.filter(p => !done.has(p.prompt_id));
+  const left = prompts.filter(p => !done.has(p.prompt_id));
+  todo = left.filter(p => p.kind === "read");          // read prompts first: easy warm-up, no thinking needed
+  bonus = left.filter(p => p.kind !== "read");         // "say it your way": optional bonus round at the end
   $("consent").classList.add("hidden"); $("session").classList.remove("hidden"); $("withdrawbox").classList.remove("hidden");
   next();
 }
@@ -144,9 +163,12 @@ async function beginSession() {
 function next() {
   wavBlob = null; $("play").disabled = true; $("save").disabled = true; $("transcript").value = "";
   setStatus($("status"), "");
-  const n = prompts.length, k = done.size;
+  const inBonus = bonusAsked && !bonus.length;
+  const n = inBonus ? prompts.length : prompts.filter(p => p.kind === "read").length;
+  const k = inBonus ? done.size : prompts.filter(p => p.kind === "read" && done.has(p.prompt_id)).length;
   $("progress").textContent = `${k} / ${n} recorded`; $("pbar").style.width = (100 * k / n) + "%";
   cur = todo.shift();
+  if (!cur && bonus.length && !bonusAsked) { bonusAsked = true; return showBonusChoice(); }
   if (!cur) { $("show").textContent = "All done, thank you!"; $("hint").textContent = ""; $("instr").textContent = "";
               $("recbtn").disabled = true; $("skip").disabled = true; $("kind").textContent = "finished"; return; }
   const read = cur.kind === "read";
@@ -154,7 +176,7 @@ function next() {
   $("show").textContent = cur.show;
   $("hint").textContent = read ? cur.hint : "";
   $("instr").textContent = read ? "Read the sentence above (small changes in wording are fine)."
-                                : "Don't read: say this request in your own words, the way you naturally would (Hinglish, Hindi or English).";
+                                : "Bonus: don't read it. Imagine telling a friend to do this on your laptop, in your own words (Hinglish, Hindi or English). Short and casual is perfect, e.g. \"yaar …\".";
   $("tbox").classList.toggle("hidden", read);
 }
 
@@ -228,6 +250,17 @@ $("save").onclick = async () => {
   const j = await r.json();
   if (!r.ok) return setStatus($("status"), j.error, "err");
   done.add(cur.prompt_id); next(); setStatus($("status"), "Saved.", "good");
+};
+$("bonusyes").onclick = () => {
+  todo = bonus; bonus = [];
+  $("bonusbox").classList.add("hidden");
+  ["recbtn", "play", "save", "skip"].forEach(id => $(id).classList.remove("hidden"));
+  next();
+};
+$("bonusno").onclick = () => {
+  $("bonusbox").classList.add("hidden");
+  $("show").textContent = "All done, thank you! 🙏"; $("instr").textContent = "You can close this page.";
+  $("kind").textContent = "finished";
 };
 $("withdraw").onclick = async () => {
   if (!confirm("Delete all recordings for this pseudonym from this computer?")) return;

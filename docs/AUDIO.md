@@ -40,8 +40,8 @@ uv run bolo record            # opens http://127.0.0.1:8765/  (local only, not r
   reported only when a group has at least 3 speakers (`MIN_SPEAKERS_PER_GROUP`), so no individual can be singled out.
   Do not type real names. Voice itself is personal data: treat every file as private.
 - **Prompts** come only from the held-out **test** split (`recordings/prompts_v0.jsonl`, 120 prompts):
-  - `read` (80): read a test sentence (Roman shown, mixed-script hint below).
-  - `free` (40): only the goal is shown (“Call Ankita on WhatsApp”); the speaker says it in their own words.
+  - `read` (80, shown first): read a test sentence (Roman shown, mixed-script hint below).
+  - `free` (40, optional **bonus round** offered after all read prompts): only the goal is shown (“Call Ankita on WhatsApp”); the speaker says it in their own words.
     These measure real phrasing variation that no template covers. The label is the goal (intent + slots).
     A typed transcript is optional; without one, free prompts are scored end-to-end (speech → action) and not by WER.
 - **Format:** browser-captured, resampled in JS to 16 kHz mono 16-bit WAV. Browser echo-cancellation,
