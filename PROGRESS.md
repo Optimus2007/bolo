@@ -42,9 +42,10 @@ _Last updated: 2026-11-11 (Phase 5 done on synthetic and public speech; real com
   and the bolocmd-v0 dataset with HF model cards in data/release/ (gitignored); `docs/RELEASE_CHECKLIST.md` lists the owner-only steps.
 
 ## In progress
-- Kaggle TTS run is blocked on an HF token: the user must accept the Indic Parler-TTS terms, create a read token, and add it
-  as a Kaggle secret `HF_TOKEN` attached to the `bolo-tts-synth` notebook. Claude then runs: trial → full → fine-tune.
-- User records their own voice with `bolo record` (single speaker for now: results are labelled as 1 speaker).
+- Nothing running. All Kaggle jobs (TTS, fine tune, ablation) finished and their results are in results/.
+- Ablation (2026-11-12): frozen encoder and 2 epoch variants forget slightly less (OpenSLR 57.2% / 57.5% vs 59.1%) but
+  lose command accuracy (macOS voices 16.2% / 16.4% vs 13.3% WER, 76.3% vs 82.5% actions). Full fine tune stays default.
+  The variant weights and the OpenSLR download were deleted afterwards.
 
 ## Next
 - Real command recordings from friends (10 people, 40 prompts each), then `bolo eval` on them: the headline numbers.

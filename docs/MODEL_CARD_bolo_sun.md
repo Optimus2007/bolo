@@ -36,6 +36,9 @@ No human recordings were used for training, and the code refuses to use them.
 | macOS voices, correct action with Bolo Tiny | 62.5% | **82.5%** |
 | Real tutorial speech, OpenSLR 104 (300 segments), WER | **55.2%** | 59.1% |
 
+We also tried freezing the encoder and training for only 2 epochs. Both forget a little less on general speech but are
+worse on commands (16.2% and 16.4% WER on the macOS voices), so the full fine tune is the released one.
+
 Full details and caveats: [`results/SPEECH_RESULTS.md`](../results/SPEECH_RESULTS.md).
 
 ## Limits
