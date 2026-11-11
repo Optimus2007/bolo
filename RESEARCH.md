@@ -173,3 +173,25 @@ first): Indic Parler-TTS weights (~3.6 GB, only on Kaggle, so not on your Mac), 
 - `uv` env with Python 3.12 in `.venv/`. Licenses: code Apache-2.0, data CC BY 4.0.
 - Canonical text target = Roman Hinglish (lowercase), with Devanagari accepted as input.
 - Test split holds out slot **values** (folders, contacts, apps) entirely, plus a separate small "unclear/negative" set.
+
+---
+
+## 6. Revised direction (2026-11-11): Bolo-Edge
+
+Decision: no pivot. Bolo becomes **edge-first**: offline Hinglish voice→action that fits under ~100 MB, with a
+latency target under ~300 ms on an M2 Mac and on a mid-range **Android phone** (the second target).
+
+Components:
+1. **Bolo-ASR:** Whisper tiny/base (starting from Oriserve Hinglish-Swift) fine-tuned on Kaggle, Roman output.
+2. **Bolo-tiny:** a tiny (~1–5M params) intent+slot+abstention model **trained from scratch** on our data.
+   Compared against the rule baseline, MuRIL, and Qwen-0.5B LoRA.
+3. **Bolo-bench:** real recorded voices + synthetic audio, `bolo eval`.
+4. Stretch: **direct speech→intent** head on the Whisper-tiny encoder, reported against the two-step pipeline.
+
+**Zero-cost constraint (user decision):** no paid APIs or services. Paraphrasing uses a local MLX model
+(Qwen2.5-3B-Instruct 4-bit, ~1.8 GB) after a templates-first Phase 2. Heavy compute goes on free Kaggle
+GPUs (~30 h/week) or free Colab. Hosting is GitHub (private) now, Hugging Face free tier later (published by the user).
+
+**Android path (free tools):** export ASR to whisper.cpp/GGML or ONNX (sherpa-onnx runs Whisper on Android), and
+Bolo-tiny to ONNX / LiteRT (TFLite). First measure with a command-line benchmark (Termux or `adb`); a
+minimal demo app comes later in Phase 7. Android Studio + SDK is a >2 GB install, so I'll ask before it.

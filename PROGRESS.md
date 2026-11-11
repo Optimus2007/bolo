@@ -25,7 +25,11 @@ _Last updated: 2026-11-11_
   TTS teacher: Indic Parler-TTS (Apache-2.0, gated), run on Kaggle.
 - lipi-hn is CC BY-NC-SA: use it as an eval baseline only, never build on its weights.
 
+- 2026-11-11: Direction = Bolo-Edge (see RESEARCH.md §6). Edge targets: M2 Mac + Android phone.
+  Add Bolo-tiny (from-scratch tiny SLU model) to Phase 3; direct speech→intent as a stretch goal.
+- 2026-11-11: Zero-cost project. No paid APIs. Paraphrasing = local MLX model, after templates-first.
+  Heavy compute = free Kaggle/Colab.
+
 ## Open questions
-- Paraphrasing LLM: local MLX Qwen2.5-3B 4-bit (recommended) vs paid API vs templates only?
 - OpenSLR-104 license: OpenSLR says CC BY-SA 4.0, Srota card says CC BY 4.0. Treat as BY-SA.
 - HiACC license on Zenodo: not yet confirmed.
