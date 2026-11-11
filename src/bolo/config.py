@@ -9,7 +9,9 @@ from pathlib import Path
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CONFIG_DIR = REPO_ROOT / "configs"
+# repo checkout: <repo>/configs ; pip-installed wheel: configs are packaged inside bolo/configs
+DEFAULT_CONFIG_DIR = (REPO_ROOT / "configs") if (REPO_ROOT / "configs" / "schema.yaml").exists() \
+    else Path(__file__).resolve().parent / "configs"
 
 TOKEN_RE = re.compile(r"^(\{[^}]+\}|<[^>]+>|[^\s{}<>]+)$")
 

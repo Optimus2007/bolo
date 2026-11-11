@@ -1,7 +1,7 @@
 [project]
 name = "bolo"
-version = "0.0.1"
-description = "Toolkit for understanding spoken Hinglish voice commands on edge devices"
+version = "0.1.0"
+description = "Offline, private Hinglish voice commands: speech to a safe, grounded action on a laptop or phone"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -12,6 +12,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 train = ["torch>=2.2", "numpy"]
+speech = ["torch>=2.2", "numpy", "transformers>=4.45"]
 
 [project.scripts]
 bolo = "bolo.cli:main"
@@ -22,6 +23,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bolo"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"configs" = "bolo/configs"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
