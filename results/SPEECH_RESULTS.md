@@ -71,6 +71,23 @@ names), and correct actions from 82.5% to 86.3% / 85.0%. With 80 clips these gai
 point the same way and cost 5 to 20 ms, so the Python API uses the short prompt by default and adds the apps found on
 the machine when grounding is on.
 
+## 4. Ablation: can we keep the command gain and forget less?
+
+Two extra variants were trained on Kaggle with the same data (`notebooks/03_whisper_ablation.ipynb`).
+
+| Variant | Synthetic WER | macOS voices WER | Correct action | OpenSLR WER | Train time |
+|---|---|---|---|---|---|
+| Swift (start) | 29.5% | 28.8% | 62.5% | **55.2%** | |
+| **Bolo Sun (full, 5 epochs)** | **10.6%** | **13.3%** | **82.5%** | 59.1% | 18 min |
+| Encoder frozen (5 epochs) | 12.5% | 16.2% | 76.3% | 57.2% | 15 min |
+| Full model, 2 epochs | 12.8% | 16.4% | 76.3% | 57.5% | 7 min |
+| Weight blend 50/50 | | 19.6% | 78.8% | 56.0% | none |
+
+Every way of forgetting less also learns less, and none of them beats the full fine tune on commands, so Bolo Sun stays
+the default. One detail is worth noting: freezing the encoder still loses 2 points on general speech, so a good part of
+the forgetting sits in the decoder (spelling style and vocabulary), not in the acoustic encoder. A future fix would
+mix some general Hinglish text or speech into training, with a licence that allows it.
+
 ## What we take from this
 
 1. **Fine tuning on synthetic command speech works, and it carries over to a synthesiser it never heard.** Word errors

@@ -1,0 +1,55 @@
+{
+ "data": {
+  "train": 4922,
+  "dev": 289,
+  "test": 977
+ },
+ "finetuned": {
+  "freeze_enc": {
+   "wer": 0.125,
+   "cer": 0.0601,
+   "phonetic_wer": 0.1107,
+   "sentence_exact": 0.5445,
+   "n": 977,
+   "sec_per_utt": 0.0952,
+   "config": {
+    "epochs": 5,
+    "freeze_encoder": true,
+    "lr": 1e-05
+   },
+   "minutes": 15.4,
+   "best_dev": {
+    "wer": 0.126,
+    "cer": 0.0664,
+    "phonetic_wer": 0.1177,
+    "sentence_exact": 0.5744,
+    "n": 289,
+    "sec_per_utt": 0.0664,
+    "step": 750
+   }
+  },
+  "short": {
+   "wer": 0.1278,
+   "cer": 0.0586,
+   "phonetic_wer": 0.1124,
+   "sentence_exact": 0.5435,
+   "n": 977,
+   "sec_per_utt": 0.0327,
+   "config": {
+    "epochs": 2,
+    "freeze_encoder": false,
+    "lr": 1e-05
+   },
+   "minutes": 7.3,
+   "best_dev": {
+    "wer": 0.1196,
+    "cer": 0.0645,
+    "phonetic_wer": 0.1113,
+    "sentence_exact": 0.5848,
+    "n": 289,
+    "sec_per_utt": 0.0652,
+    "step": 300
+   }
+  }
+ }
+}

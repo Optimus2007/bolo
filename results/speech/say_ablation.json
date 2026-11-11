@@ -1,0 +1,139 @@
+{
+ "sets": {
+  "say_read": {
+   "n": 80,
+   "speakers": 4,
+   "hours": 0.046,
+   "asr": {
+    "models/bolo-whisper-freezeenc": {
+     "latency_ms": {
+      "median": 122.6,
+      "p90": 134.3
+     },
+     "rtf": 0.059,
+     "nlu": {
+      "tiny": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.8375,
+        "exact_match": 0.525,
+        "exact_match_lenient": 0.5625,
+        "false_action_rate": 0.1111,
+        "over_abstain_rate": 0.0704,
+        "wrong_action_rate": 0.4925,
+        "slot_f1": 0.507
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.825,
+        "exact_match": 0.7625,
+        "exact_match_lenient": 0.7625,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.1831,
+        "wrong_action_rate": 0.1034,
+        "slot_f1": 0.812
+       },
+       "nlu_ms": 0.49,
+       "e2e_ms": {
+        "median": 123.1,
+        "p90": 134.8
+       },
+       "by_group": {}
+      }
+     },
+     "wer": {
+      "wer": 0.1618,
+      "cer": 0.0831,
+      "phonetic_wer": 0.1483,
+      "sentence_exact": 0.45,
+      "n": 80
+     }
+    },
+    "models/bolo-whisper-short": {
+     "latency_ms": {
+      "median": 122.1,
+      "p90": 135.6
+     },
+     "rtf": 0.059,
+     "nlu": {
+      "tiny": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.875,
+        "exact_match": 0.5375,
+        "exact_match_lenient": 0.5875,
+        "false_action_rate": 0.1111,
+        "over_abstain_rate": 0.0563,
+        "wrong_action_rate": 0.4853,
+        "slot_f1": 0.5175
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.85,
+        "exact_match": 0.7625,
+        "exact_match_lenient": 0.7625,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.1268,
+        "wrong_action_rate": 0.1613,
+        "slot_f1": 0.7883
+       },
+       "nlu_ms": 0.48,
+       "e2e_ms": {
+        "median": 122.6,
+        "p90": 136.1
+       },
+       "by_group": {}
+      }
+     },
+     "wer": {
+      "wer": 0.164,
+      "cer": 0.0868,
+      "phonetic_wer": 0.1483,
+      "sentence_exact": 0.3875,
+      "n": 80
+     }
+    }
+   },
+   "oracle": {
+    "tiny": {
+     "strict": {
+      "n": 80,
+      "intent_acc": 0.925,
+      "exact_match": 0.8875,
+      "exact_match_lenient": 0.8875,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0282,
+      "wrong_action_rate": 0.1014,
+      "slot_f1": 0.8889
+     },
+     "grounded": {
+      "n": 80,
+      "intent_acc": 0.9625,
+      "exact_match": 0.95,
+      "exact_match_lenient": 0.95,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0423,
+      "wrong_action_rate": 0.0147,
+      "slot_f1": 0.965
+     },
+     "nlu_ms": 0.86
+    }
+   }
+  }
+ },
+ "asr_systems": {
+  "models/bolo-whisper-freezeenc": [
+   "models/bolo-whisper-freezeenc",
+   "en"
+  ],
+  "models/bolo-whisper-short": [
+   "models/bolo-whisper-short",
+   "en"
+  ]
+ },
+ "nlu": [
+  "tiny"
+ ],
+ "device": "mps",
+ "created": "2026-11-12T00:17:12"
+}
