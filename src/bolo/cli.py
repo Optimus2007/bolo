@@ -40,6 +40,28 @@ def _cmd_record(args: argparse.Namespace) -> None:
     serve(root=args.root, test_path=args.test, port=args.port, open_browser=not args.no_browser)
 
 
+def _cmd_eval(args: argparse.Namespace) -> None:
+    from .config import load_config
+    from .speech_eval import load_set, run, to_markdown
+
+    sets: dict = {}
+    for spec in args.manifest:
+        name, _, path = spec.rpartition("=")
+        for r in load_set(path, args.test, name or None):
+            sets.setdefault(r["set"], []).append(r)
+    if args.limit:
+        sets = {k: v[: args.limit] for k, v in sets.items()}
+    print({k: len(v) for k, v in sets.items()})
+    out = Path(args.out)
+    res = run(sets, args.asr.split(","), args.nlu.split(","), load_config(),
+              utt_out=Path("data/eval") / (out.stem + "_utts.jsonl"))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(res, indent=1, ensure_ascii=False))
+    md = to_markdown(res)
+    out.with_suffix(".md").write_text(md)
+    print(md)
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bolo", description="Hinglish voice-command toolkit")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -64,6 +86,17 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--port", type=int, default=8765)
     r.add_argument("--no-browser", action="store_true")
     r.set_defaults(func=_cmd_record)
+
+    e = sub.add_parser("eval", help="speech -> text -> action benchmark (ASR + NLU + grounding + latency)")
+    e.add_argument("--manifest", nargs="+", default=["recordings/manifest.jsonl"],
+                   help="manifest paths, optionally NAME=path (e.g. say=data/say/manifest.jsonl)")
+    e.add_argument("--test", default="data/text/v0/test.jsonl")
+    e.add_argument("--asr", default="whisper-base,swift,bolo-whisper",
+                   help="comma list from: whisper-base, whisper-small, swift, bolo-whisper")
+    e.add_argument("--nlu", default="rules,tiny", help="comma list from: rules, tiny, muril")
+    e.add_argument("--limit", type=int, default=0, help="max utterances per set (0 = all)")
+    e.add_argument("--out", default="results/speech/benchmark.json")
+    e.set_defaults(func=_cmd_eval)
 
     args = p.parse_args(argv)
     args.func(args)

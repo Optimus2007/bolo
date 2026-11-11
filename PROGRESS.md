@@ -1,6 +1,6 @@
 # PROGRESS
 
-_Last updated: 2026-11-11 (Phase 4)_
+_Last updated: 2026-11-11 (Phase 5 started)_
 
 ## Done
 - Phase 0: private GitHub repo, .gitignore, folder structure, first commit.
@@ -23,8 +23,16 @@ _Last updated: 2026-11-11 (Phase 4)_
   `notebooks/02_whisper_finetune.ipynb`, `docs/AUDIO.md` (datasheet + consent policy). 71 tests passing.
   Local smoke test of the Whisper pipeline on MPS with 16 macOS `say` clips passed (pipeline check only).
 
+- Phase 5 (started): `bolo eval` (`src/bolo/speech_eval.py`): ASR WER/CER/phonetic WER, NLU on ASR output
+  (strict + grounded = end-to-end action), oracle-transcript row, latency/RTF, per set (never pooled).
+  `scripts/make_say_eval.py` = 80 macOS `say` clips (4 voices) as a second, unseen-TTS synthetic set.
+  First results: `results/speech/say_v0.md`. `scripts/kaggle_push.py` pushes the bundle and notebooks to Kaggle (private).
+  The private dataset `optimus2005/bolo-bundle` is uploaded and the private kernel `bolo-tts-synth` is pushed.
+
 ## In progress
-- User: record self/friends with `bolo record`; run notebook 01 (TTS) then 02 (fine-tune) on Kaggle.
+- Kaggle TTS run is blocked on an HF token: the user must accept the Indic Parler-TTS terms, create a read token, and add it
+  as a Kaggle secret `HF_TOKEN` attached to the `bolo-tts-synth` notebook. Claude then runs: trial → full → fine-tune.
+- User records their own voice with `bolo record` (single speaker for now: results are labelled as 1 speaker).
 
 ## Next
 - Phase 5: `bolo eval` speech benchmark on human recordings (local), vs plain Whisper + Swift + fine-tune.
@@ -82,6 +90,12 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 - 2026-11-11: TTS synthesis code (`tts.synthesize`) is NOT run locally (the model is >2 GB). The notebook starts with a
   small trial N. Known risk: the parler-tts batch API (`audios_length`) is based on its INFERENCE.md.
 - Real recordings never leave the laptop (not uploaded to Kaggle). Speech eval in Phase 5 is local.
+
+- 2026-11-11: The user asked Claude to run the Kaggle jobs itself with the existing ~/.kaggle credentials. Everything pushed is
+  private. Only synthetic text and code are uploaded, never recordings.
+- 2026-11-11: Per-utterance speech-eval hypotheses go to data/eval/ (gitignored). Only aggregates go to results/speech/.
+- Known metric artefact: spoken Hindi numbers ("chaalis") vs reference digits ("40") count as WER errors although
+  the NLU still extracts 40. The reference is not changed; noted in the results.
 
 ## Open questions
 - No real noise corpus yet (MUSAN ~11 GB, ESC-50 NC). Augmentation noise is synthetic for now.

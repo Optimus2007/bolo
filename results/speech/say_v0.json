@@ -1,0 +1,215 @@
+{
+ "sets": {
+  "say_read": {
+   "n": 80,
+   "speakers": 4,
+   "hours": 0.046,
+   "asr": {
+    "whisper-base": {
+     "latency_ms": {
+      "median": 126.3,
+      "p90": 159.8
+     },
+     "rtf": 0.064,
+     "nlu": {
+      "rules": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.3875,
+        "exact_match": 0.25,
+        "exact_match_lenient": 0.25,
+        "false_action_rate": 0.3333,
+        "over_abstain_rate": 0.507,
+        "wrong_action_rate": 0.6316,
+        "slot_f1": 0.2523
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.3875,
+        "exact_match": 0.35,
+        "exact_match_lenient": 0.35,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.6479,
+        "wrong_action_rate": 0.24,
+        "slot_f1": 0.4082
+       },
+       "nlu_ms": 0.01,
+       "e2e_ms": {
+        "median": 126.3,
+        "p90": 159.8
+       }
+      },
+      "tiny": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.4875,
+        "exact_match": 0.275,
+        "exact_match_lenient": 0.275,
+        "false_action_rate": 0.4444,
+        "over_abstain_rate": 0.3803,
+        "wrong_action_rate": 0.6458,
+        "slot_f1": 0.3
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.45,
+        "exact_match": 0.3875,
+        "exact_match_lenient": 0.3875,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.5915,
+        "wrong_action_rate": 0.2414,
+        "slot_f1": 0.48
+       },
+       "nlu_ms": 0.52,
+       "e2e_ms": {
+        "median": 126.8,
+        "p90": 160.3
+       }
+      }
+     },
+     "wer": {
+      "wer": 1.2067,
+      "cer": 0.5025,
+      "phonetic_wer": 1.1753,
+      "sentence_exact": 0.1125,
+      "n": 80
+     }
+    },
+    "swift": {
+     "latency_ms": {
+      "median": 124.4,
+      "p90": 138.0
+     },
+     "rtf": 0.06,
+     "nlu": {
+      "rules": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.575,
+        "exact_match": 0.4375,
+        "exact_match_lenient": 0.4625,
+        "false_action_rate": 0.3333,
+        "over_abstain_rate": 0.2394,
+        "wrong_action_rate": 0.4912,
+        "slot_f1": 0.4462
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.625,
+        "exact_match": 0.5875,
+        "exact_match_lenient": 0.5875,
+        "false_action_rate": 0.1111,
+        "over_abstain_rate": 0.3239,
+        "wrong_action_rate": 0.2041,
+        "slot_f1": 0.6393
+       },
+       "nlu_ms": 0.01,
+       "e2e_ms": {
+        "median": 124.4,
+        "p90": 138.0
+       }
+      },
+      "tiny": {
+       "strict": {
+        "n": 80,
+        "intent_acc": 0.7375,
+        "exact_match": 0.4625,
+        "exact_match_lenient": 0.4875,
+        "false_action_rate": 0.2222,
+        "over_abstain_rate": 0.1127,
+        "wrong_action_rate": 0.5385,
+        "slot_f1": 0.4783
+       },
+       "grounded": {
+        "n": 80,
+        "intent_acc": 0.7,
+        "exact_match": 0.625,
+        "exact_match_lenient": 0.625,
+        "false_action_rate": 0.0,
+        "over_abstain_rate": 0.2817,
+        "wrong_action_rate": 0.1961,
+        "slot_f1": 0.7154
+       },
+       "nlu_ms": 0.45,
+       "e2e_ms": {
+        "median": 124.9,
+        "p90": 138.4
+       }
+      }
+     },
+     "wer": {
+      "wer": 0.2876,
+      "cer": 0.1396,
+      "phonetic_wer": 0.2494,
+      "sentence_exact": 0.2125,
+      "n": 80
+     }
+    }
+   },
+   "oracle": {
+    "rules": {
+     "strict": {
+      "n": 80,
+      "intent_acc": 0.8875,
+      "exact_match": 0.8625,
+      "exact_match_lenient": 0.8625,
+      "false_action_rate": 0.2222,
+      "over_abstain_rate": 0.0282,
+      "wrong_action_rate": 0.1268,
+      "slot_f1": 0.8828
+     },
+     "grounded": {
+      "n": 80,
+      "intent_acc": 0.9625,
+      "exact_match": 0.95,
+      "exact_match_lenient": 0.95,
+      "false_action_rate": 0.1111,
+      "over_abstain_rate": 0.0282,
+      "wrong_action_rate": 0.0286,
+      "slot_f1": 0.9722
+     },
+     "nlu_ms": 0.01
+    },
+    "tiny": {
+     "strict": {
+      "n": 80,
+      "intent_acc": 0.925,
+      "exact_match": 0.8875,
+      "exact_match_lenient": 0.8875,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0282,
+      "wrong_action_rate": 0.1014,
+      "slot_f1": 0.8889
+     },
+     "grounded": {
+      "n": 80,
+      "intent_acc": 0.9625,
+      "exact_match": 0.95,
+      "exact_match_lenient": 0.95,
+      "false_action_rate": 0.0,
+      "over_abstain_rate": 0.0423,
+      "wrong_action_rate": 0.0147,
+      "slot_f1": 0.965
+     },
+     "nlu_ms": 0.57
+    }
+   }
+  }
+ },
+ "asr_systems": {
+  "whisper-base": [
+   "openai/whisper-base",
+   "hi"
+  ],
+  "swift": [
+   "Oriserve/Whisper-Hindi2Hinglish-Swift",
+   "en"
+  ]
+ },
+ "nlu": [
+  "rules",
+  "tiny"
+ ],
+ "device": "mps",
+ "created": "2026-11-11T20:34:28"
+}
