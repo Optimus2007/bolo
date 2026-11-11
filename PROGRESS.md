@@ -65,7 +65,7 @@ python scripts/kaggle_push.py status | fetch ft | abl                   # Kaggle
 python scripts/prepare_release.py                                        # stage release files (no publishing)
 ```
 Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle output of bolo-whisper-ft), models/bolo-whisper-fp16
-(`python -c` in results history, or re-save from fp32), models/bolo-tiny (scripts/train_tiny.py).
+(`python scripts/to_fp16.py models/bolo-whisper models/bolo-whisper-fp16`), models/bolo-tiny (scripts/train_tiny.py).
 
 ## Decisions
 - Layout: `src/bolo` (package), `configs/` (YAML schema), `scripts/`, `notebooks/` (Kaggle/Colab),
