@@ -97,6 +97,11 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 - Known metric artefact: spoken Hindi numbers ("chaalis") vs reference digits ("40") count as WER errors although
   the NLU still extracts 40. The reference is not changed; noted in the results.
 
+- 2026-11-11: Roadmap (user): ship Bolo v0.1 (listen→understand→act) first. Then Phase 6 "Bolo-Awaaz", our own female voice
+  distilled from Indic Parler (a voice made from a description only) into a tiny VITS-style TTS. Later, a Jarvis-like Mac agent with Bolo as the fast layer.
+- 2026-11-11: The assistant persona is **Kiwi** (wake phrase "Hey Kiwi"). "Bolo" is a bad wake word: it's a common Hindi word.
+  Wake UX: chime + menu-bar icon, ~8 s silence auto-sleep (configurable), "Kiwi, bas" / hotkey to sleep. Check for name collisions before release.
+
 ## Open questions
 - No real noise corpus yet (MUSAN ~11 GB, ESC-50 NC). Augmentation noise is synthetic for now.
 - No LICENSE file yet (pyproject says Apache-2.0). Add it in Phase 7.
