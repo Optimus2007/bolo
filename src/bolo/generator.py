@@ -202,6 +202,14 @@ class Generator:
             list(SCRIPT_WEIGHTS), weights=list(SCRIPT_WEIGHTS.values()))[0]
         text, spans = self.realise(r, script, noisy=True)
         text = self._decorate(text, script, tpl)
+        # Aligned alternative renderings of the same utterance (same label), for cross-script
+        # consistency training/evaluation. English templates get noisy Roman re-renderings instead.
+        others = ["roman", "roman"] if tpl.lang == "en" else [x for x in SCRIPT_WEIGHTS if x != script]
+        views = []
+        for vs in others:
+            vt, vsp = self.realise(r, vs, noisy=True)
+            views.append({"script": vs, "text": vt,
+                          "spans": [dict(x, value=r.slots[x["slot"]]) for x in vsp]})
         asr_text, _ = self.realise(r, "roman", noisy=False)
         tts_text, _ = self.realise(r, "mixed", noisy=False)
         words = [t for t in r.toks if t.slot is None and t.lang in ("hi", "en")]
@@ -214,6 +222,7 @@ class Generator:
             "intent": tpl.intent,
             "slots": r.slots,
             "spans": [dict(s, value=r.slots[s["slot"]]) for s in spans],
+            "views": views,
             "asr_text": asr_text.lower(),
             "tts_text": tts_text,
             "meta": {

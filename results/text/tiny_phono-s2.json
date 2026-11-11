@@ -1,0 +1,171 @@
+{
+ "threshold": 0.0,
+ "test": {
+  "n": 1000,
+  "intent_acc": 0.872,
+  "slot": {
+   "p": 0.8663,
+   "r": 0.7668,
+   "f1": 0.8135
+  },
+  "slot_lenient": {
+   "p": 0.8792,
+   "r": 0.7782,
+   "f1": 0.8256
+  },
+  "exact_match": 0.789,
+  "exact_match_lenient": 0.799,
+  "abstain": {
+   "p": 0.6065,
+   "r": 0.9424,
+   "f1": 0.738
+  },
+  "false_action_rate": 0.0576,
+  "over_abstain_rate": 0.0987,
+  "wrong_action_rate": 0.1607,
+  "aurc": 0.1103,
+  "breakdown": {
+   "script": {
+    "deva": {
+     "n": 173,
+     "exact_match": 0.7746
+    },
+    "mixed": {
+     "n": 139,
+     "exact_match": 0.705
+    },
+    "roman": {
+     "n": 688,
+     "exact_match": 0.8096
+    }
+   },
+   "template": {
+    "heldout": {
+     "n": 182,
+     "exact_match": 0.5055
+    },
+    "seen": {
+     "n": 818,
+     "exact_match": 0.8521
+    }
+   },
+   "text_seen_in_train": {
+    "False": {
+     "n": 860,
+     "exact_match": 0.7547
+    },
+    "True": {
+     "n": 140,
+     "exact_match": 1.0
+    }
+   },
+   "mixing": {
+    "balanced": {
+     "n": 233,
+     "exact_match": 0.8455
+    },
+    "en-heavy": {
+     "n": 248,
+     "exact_match": 0.7742
+    },
+    "hi-heavy": {
+     "n": 515,
+     "exact_match": 0.7689
+    },
+    "n/a": {
+     "n": 4,
+     "exact_match": 1.0
+    }
+   },
+   "none_reason": {
+    "ambiguous": {
+     "n": 24,
+     "exact_match": 0.9583,
+     "abstain_recall": 0.9583
+    },
+    "filler": {
+     "n": 12,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "incomplete": {
+     "n": 25,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "ood": {
+     "n": 22,
+     "exact_match": 0.8636,
+     "abstain_recall": 0.8636
+    },
+    "unsupported": {
+     "n": 56,
+     "exact_match": 0.9286,
+     "abstain_recall": 0.9286
+    }
+   }
+  }
+ },
+ "test_unseen_text": {
+  "n": 860,
+  "intent_acc": 0.8512,
+  "slot": {
+   "p": 0.8482,
+   "r": 0.7392,
+   "f1": 0.7899
+  },
+  "slot_lenient": {
+   "p": 0.8628,
+   "r": 0.7519,
+   "f1": 0.8035
+  },
+  "exact_match": 0.7547,
+  "exact_match_lenient": 0.7663,
+  "abstain": {
+   "p": 0.5115,
+   "r": 0.9175,
+   "f1": 0.6568
+  },
+  "false_action_rate": 0.0825,
+  "over_abstain_rate": 0.1114,
+  "wrong_action_rate": 0.1837,
+  "aurc": 0.1452
+ },
+ "script_consistency": 0.898,
+ "views_exact_match": 0.759,
+ "latency_ms": {
+  "p50": 0.401,
+  "p95": 0.453
+ },
+ "model": "bolo-tiny/phono",
+ "seed": 2,
+ "params": 690724,
+ "train": {
+  "loss": [
+   4.2389,
+   2.167,
+   0.5651,
+   0.2702,
+   0.152,
+   0.0995,
+   0.0578,
+   0.0432,
+   0.0308,
+   0.0268,
+   0.0186,
+   0.0134,
+   0.012,
+   0.0109,
+   0.0102,
+   0.008,
+   0.0072,
+   0.0069,
+   0.0065,
+   0.0066
+  ],
+  "train_seconds": 27.5,
+  "temperature": 1.7
+ },
+ "size_mb_fp32": 2.77,
+ "data": "data/text/v0"
+}

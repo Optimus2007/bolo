@@ -195,3 +195,40 @@ GPUs (~30 h/week) or free Colab. Hosting is GitHub (private) now, Hugging Face f
 **Android path (free tools):** export ASR to whisper.cpp/GGML or ONNX (sherpa-onnx runs Whisper on Android), and
 Bolo-tiny to ONNX / LiteRT (TFLite). First measure with a command-line benchmark (Termux or `adb`); a
 minimal demo app comes later in Phase 7. Android Studio + SDK is a >2 GB install, so I'll ask before it.
+
+---
+
+## 7. Phase 3 research: methods to borrow, and where Bolo can add novelty (2026-11-11)
+
+### 7a. What the literature offers
+| Area | Key work | Takeaway for Bolo |
+|---|---|---|
+| Tiny on-device text models without a vocabulary | [PRADO (EMNLP 2019)](https://aclanthology.org/D19-1506/), pQRNN ([Google writeup](https://syncedreview.com/2020/09/23/google-approaches-bert-level-performance-using-300x-fewer-parameters-with-extension-of-its-new-nlp-model-prado/)), [pNLP-Mixer (ACL Industry 2023)](https://aclanthology.org/2023.acl-industry.6.pdf), [hashed char n-gram FFNs (Botha et al. 2017)](https://arxiv.org/html/1708.00214), [Subword Semantic Hashing](https://ar5iv.labs.arxiv.org/html/1810.07150) | Projection/hash features + a small encoder reach near-BERT accuracy at 100–300x fewer params with no pretraining. pNLP-Mixer beats pQRNN on MTOP (semantic parsing). Hashing removes the vocabulary, so it handles OOV and misspellings by construction. **Basis of Bolo-tiny.** |
+| Romanized-Hindi spelling variation | [SoundexHindi](https://papers.ssrn.com/author=3579322), [Editex variants for Hindi names (2008)](https://preview.aclanthology.org/fix_video/I08-5014.pdf), [Parikh & Solorio 2021](https://preview.aclanthology.org/fix_video/2021.calcs-1.15.pdf), [phoneme representations for ASR-robust NLU (Fang et al. 2020)](https://bohrium.dp.tech/paper/arxiv/2310.12727), [PhonemeBERT](https://arxiv.org/abs/2102.00804) | Plain Soundex drops vowels and fails on Hindi. Hindi-aware phonetic keys + edit distance work better. Phoneme-level inputs make NLU robust to ASR errors. |
+| Script / code-mix consistency | ["Neither Here Nor There" (2026)](https://arxiv.org/html/2603.19771) trilingual alignment + consistency metric; [IndicKLAR (2026)](https://arxiv.org/pdf/2605.29637) | Consistency across Hindi / English / code-mixed views is measurable and trainable. Nobody (that I found) does this for tiny on-device SLU, where our generator gives **perfectly aligned multi-script views for free**. |
+| Abstention / out-of-scope | [CLINC150](https://arxiv.org/pdf/1909.02027), [energy-based unknown-intent detection](https://ar5iv.labs.arxiv.org/html/2107.12542), [conformal intent classification (2024)](https://arxiv.org/pdf/2403.18973), [selective prediction study](https://arxiv.org/pdf/2203.00211v1.pdf) | Options: an explicit OOS class, a confidence threshold, energy scores, conformal sets. Report risk–coverage curves (AURC), not only accuracy. Most work treats OOS as one bucket. We have **typed negatives** (ood / unsupported near-miss / incomplete / ambiguous). |
+| Small LLMs for structured output | [Grammar Pruning (EMNLP 2025)](https://preview.aclanthology.org/setup/2025.emnlp-main.858), ["Constraint Tax" (2026 preprint)](https://www.alphaxiv.org/abs/2605.26128), [constrained decoding in small LLMs (preprint)](https://arxiv.org/pdf/2609.23742) | Constrained JSON decoding fixes format but can increase "valid but wrong" outputs in sub-3B models. So report exact-match, not just JSON validity, and treat the LLM as a comparison, not the default. |
+| Distillation for on-device SLU | [Alexa Teacher Model (2022)](https://arxiv.org/pdf/2206.07808v1.pdf), [Qwen-0.5B distillation pipeline (2025)](https://arxiv.org/html/2504.13471v2) | In-domain data matters more than size. A later step: distil Qwen/MuRIL into Bolo-tiny on unlabeled paraphrases. |
+| ASR biasing & speech-to-intent | [CB-Whisper](https://arxiv.org/html/2309.09552v3), [Hou et al. Interspeech 2025](https://www.isca-archive.org/interspeech_2025/hou25_interspeech.pdf), [TCPGen-Whisper](https://arxiv.org/html/2509.09197v1), [zero-shot trie biasing](https://web3.arxiv.org/pdf/2508.17796), [Skit-S2I (Indian-accented speech-to-intent)](https://arxiv.org/pdf/2212.13015), [edge Whisper tiny/base](https://arxiv.org/pdf/2502.01649) | Biasing Whisper with the user's own entity list (folders, contacts) improves entity recall. A naive comma-list prompt can hallucinate, so measure it. Whisper-small → SLURP intent ≈ 0.77 acc (Skit-S2I paper), so a tiny direct speech→intent model is a real open question. |
+| Synthetic code-mixing | [Pratapa et al. EC theory (MSR)](https://www.microsoft.com/en-us/research/blog/cracking-code-mixing-an-important-step-in-making-human-computer-interaction-more-engaging/), [GCM toolkit (EACL 2021 demo)](https://preview.aclanthology.org/moar-dois/2021.eacl-demos.24.pdf), [CALCS 2021 comparison](https://aclanthology.org/2021.calcs-1.6) | Linguistically constrained switching is principled, but simpler methods are often competitive. Our templates already put switches at phrase boundaries. Revisit for v1 paraphrasing. |
+
+### 7b. Bolo's candidate contributions (to our knowledge, not established in prior work for Hinglish edge SLU)
+1. **Phonetic projection embeddings (PhonoHash).** Each token → Devanagari→Roman transliteration →
+   a Hinglish-aware phonetic key and a consonant skeleton (kholo/kolo/khollo → same key; karo/kro → same
+   skeleton) → hashed character n-grams of raw + key + skeleton into a small Bloom-style table. No vocabulary,
+   script-invariant, typo-tolerant. Ablated against plain char-n-gram hashing.
+2. **Cross-script consistency training.** The generator realises one utterance as Roman / Devanagari / mixed /
+   noisy views with aligned labels. We add a consistency loss (symmetric KL between views' intent and
+   tag distributions) and report a **script-consistency score** (does the model give the same action for all views?).
+3. **Typed abstention evaluation.** Abstention measured per negative type (out-of-domain vs unsupported near-miss vs
+   incomplete vs ambiguous), with risk–coverage / AURC and a "false action rate". A false action (doing the wrong
+   thing) is worse than asking again.
+4. **Environment-grounded slot resolution.** At action time, slot spans are matched against the user's actual
+   folders / apps / contacts by phonetic key + edit distance. If nothing matches, Bolo abstains. The same entity
+   list later biases Whisper. Evaluated as strict vs grounded slot accuracy (Phase 5: end-to-end).
+5. Later (Phase 4/5): ASR-noise-aware text training (train on Whisper's real outputs for TTS audio), and a tiny
+   direct speech→intent head on the Whisper-tiny encoder.
+
+Honesty note: every ingredient above exists separately in the literature. The claim is the combination for
+Hinglish on-device SLU, plus an open benchmark. Results will be reported with ablations, including where
+the ideas don't help.
