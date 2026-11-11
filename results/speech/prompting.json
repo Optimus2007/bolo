@@ -1,0 +1,23 @@
+{
+ "none": {
+  "wer": 0.1326,
+  "phonetic_wer": 0.1213,
+  "e2e_em": 0.825,
+  "ms": 100.7,
+  "prompt_chars": 0
+ },
+ "commands": {
+  "wer": 0.1236,
+  "phonetic_wer": 0.1056,
+  "e2e_em": 0.8625,
+  "ms": 105.4,
+  "prompt_chars": 75
+ },
+ "commands+apps": {
+  "wer": 0.1124,
+  "phonetic_wer": 0.0989,
+  "e2e_em": 0.85,
+  "ms": 122.9,
+  "prompt_chars": 691
+ }
+}

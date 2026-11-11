@@ -81,7 +81,8 @@ def environment(cfg) -> Environment:
 
 # ---------------- ASR ----------------
 class WhisperASR:
-    def __init__(self, path: str, language: str | None, dev: str | None = None):
+    def __init__(self, path: str, language: str | None, dev: str | None = None, prompt: str | None = None):
+        """prompt: optional vocabulary hint (e.g. app/folder names) passed to Whisper as previous-context text."""
         import torch
         from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
@@ -93,15 +94,23 @@ class WhisperASR:
         self.model = WhisperForConditionalGeneration.from_pretrained(path, torch_dtype=self.dtype).to(self.dev).eval()
         self.language = language
         self.torch = torch
+        self.prompt_ids = self.proc.get_prompt_ids(prompt, return_tensors="pt").to(self.dev) if prompt else None
 
     def __call__(self, wav) -> str:
         feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev, self.dtype)
         kw = {"task": "transcribe", "max_new_tokens": 64}
         if self.language:
             kw["language"] = self.language
+        if self.prompt_ids is not None:
+            kw["prompt_ids"] = self.prompt_ids
         with self.torch.inference_mode():
             ids = self.model.generate(input_features=feats, **kw)
-        return self.proc.batch_decode(ids, skip_special_tokens=True)[0].strip()
+        text = self.proc.batch_decode(ids, skip_special_tokens=True)[0].strip()
+        if self.prompt_ids is not None:  # some transformers versions return the prompt text too
+            p = self.proc.decode(self.prompt_ids, skip_special_tokens=True).strip()
+            if p and text.startswith(p):
+                text = text[len(p):].strip()
+        return text
 
 
 def run_asr(asr, rows: list[dict]) -> tuple[list[str], list[float]]:

@@ -65,6 +65,12 @@ boundaries are loose (see `results/speech/openslr104_test.md`).
 Stored in float16 (142 MB instead of 290 MB), Bolo Sun gives exactly the same transcripts on this set and runs in
 100 ms instead of 127 ms (`results/speech/say_fp16.json`).
 
+**Vocabulary prompting** (`results/speech/prompting.json`): giving Bolo Sun a short hint of expected words lowers
+WER on the macOS voices from 13.3% to 12.4% (core command words, 75 characters) or 11.2% (command words plus app
+names), and correct actions from 82.5% to 86.3% / 85.0%. With 80 clips these gains are inside the noise, but both
+point the same way and cost 5 to 20 ms, so the Python API uses the short prompt by default and adds the apps found on
+the machine when grounding is on.
+
 ## What we take from this
 
 1. **Fine tuning on synthetic command speech works, and it carries over to a synthesiser it never heard.** Word errors

@@ -33,3 +33,13 @@ def test_understand_grounds_or_abstains():
     missing = b.understand("kaggle folder mein terminal kholo", env)
     assert missing["abstain"] and "kaggle" in missing["reason"]
     assert b.understand("aaj mausam kaisa hai")["abstain"]
+
+
+
+def test_build_prompt():
+    from bolo.pipeline import COMMAND_WORDS, build_prompt
+
+    assert build_prompt(None) is None and build_prompt("commands") == COMMAND_WORDS
+    env = Environment(folders=[], files=[], apps=["vlc", "spotify"], contacts=[])
+    assert build_prompt("commands+apps", env).endswith("vlc, spotify")
+    assert len(build_prompt("commands+apps", Environment(apps=["x" * 50] * 100))) <= 600

@@ -67,7 +67,8 @@ def _cmd_understand(args: argparse.Namespace) -> None:
     from .pipeline import Bolo, scan_mac
 
     env = scan_mac() if args.ground else None
-    b = Bolo.load(asr=args.asr if args.audio else None, env=env)
+    b = Bolo.load(asr=args.asr if args.audio else None, env=env, prompt=None if args.no_prompt else
+                  ("commands+apps" if env else "commands"))
     out = b.listen(args.input) if args.audio else b.understand(args.input)
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
@@ -121,6 +122,7 @@ def main(argv: list[str] | None = None) -> None:
     u.add_argument("--asr", default=default_asr, help="Whisper model id or local dir")
     u.add_argument("--ground", action="store_true",
                    help="match folders/files/apps against what exists on this Mac (read-only scan of ~ and /Applications)")
+    u.add_argument("--no-prompt", action="store_true", help="do not give the recogniser a vocabulary hint")
     u.set_defaults(func=_cmd_understand)
 
     args = p.parse_args(argv)

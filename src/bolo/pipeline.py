@@ -59,6 +59,20 @@ def scan_mac(home: Path | str | None = None, max_depth: int = 2, max_entries: in
     return Environment(uniq(folders), uniq(files), uniq(apps), [])
 
 
+COMMAND_WORDS = "terminal, claude code, folder, volume, brightness, battery, wifi, bluetooth"
+
+
+def build_prompt(kind: str | None, env: Environment | None = None, max_chars: int = 600) -> str | None:
+    if kind is None:
+        return None
+    if kind == "commands":
+        return COMMAND_WORDS
+    if kind == "commands+apps":
+        apps = ", ".join((env.apps if env else [])[:80])
+        return (COMMAND_WORDS + (", " + apps if apps else ""))[:max_chars]
+    return kind
+
+
 @dataclass
 class Bolo:
     nlu: object
@@ -69,8 +83,11 @@ class Bolo:
 
     @classmethod
     def load(cls, nlu_path: str = "models/bolo-tiny/phono_views_aug-s0", asr: str | None = None,
-             asr_language: str = "en", env: Environment | None = None) -> "Bolo":
-        """asr: a Whisper model id or local dir (e.g. "models/bolo-whisper"); None = text only."""
+             asr_language: str = "en", env: Environment | None = None, prompt: str | None = "commands") -> "Bolo":
+        """asr: a Whisper model id or local dir (e.g. "models/bolo-whisper-fp16"); None = text only.
+        prompt: vocabulary hint for the recogniser. "commands" (default) = core command words; "commands+apps" also
+        adds the app names found in `env` (helps rare names); None = no prompt; any other string is used as is.
+        Measured on the macOS voice set: WER 13.3% -> 12.4% ("commands") / 11.2% ("commands+apps"); see results/."""
         from .models.tiny import BoloTiny
 
         cfg = load_config()
@@ -78,7 +95,7 @@ class Bolo:
         asr_model = None
         if asr:
             from .speech_eval import WhisperASR
-            asr_model = WhisperASR(asr, asr_language)
+            asr_model = WhisperASR(asr, asr_language, prompt=build_prompt(prompt, env))
         return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env)
 
     def understand(self, text: str, env: Environment | None = None) -> dict:
