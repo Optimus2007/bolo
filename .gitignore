@@ -1,0 +1,47 @@
+# Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# Large / private artifacts (regenerate with scripts/)
+data/*
+!data/.gitkeep
+models/*
+!models/.gitkeep
+recordings/
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.webm
+*.opus
+
+# Model weights / checkpoints
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+*.npz
+*.onnx
+checkpoints/
+wandb/
+runs/
+
+# Secrets
+.env
+.env.*
+*.pem
+*token*
+*secret*
+hf_token*
