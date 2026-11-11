@@ -33,3 +33,4 @@ def test_trim_and_plausible():
     assert tts.plausible(y, "terminal kholo")[0]
     assert tts.plausible(np.zeros(sr * 11, np.float32) + 0.1, "hi")[1] == "too_long"
     assert tts.plausible(np.zeros(100, np.float32), "terminal kholo")[1] == "too_short"
+    assert tts.plausible(np.full(int(0.9 * sr), 0.1, np.float32), "vlc")[0]  # short word, natural padding

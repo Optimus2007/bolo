@@ -63,3 +63,9 @@ def test_augment_deterministic_and_bounded():
         y, p = A.augment(x, np.random.default_rng(s), noises=[A.coloured_noise(np.random.default_rng(9), 8000)])
         assert np.isfinite(y).all() and np.max(np.abs(y)) <= 1.0
         assert 0.85 * 16000 < len(y) < 1.15 * 16000
+
+
+def test_resample_tiny_and_empty():
+    for n in (0, 1, 2, 3):
+        y = A.resample(np.ones(n, np.float32), 44100, 16000)
+        assert np.isfinite(y).all() and len(y) <= n

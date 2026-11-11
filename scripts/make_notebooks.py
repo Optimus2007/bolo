@@ -99,7 +99,7 @@ print(len(jobs), "jobs; example:", json.dumps(jobs[0], ensure_ascii=False)[:400]
 import torch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 if SMOKE:
-    smoke = [j for j in jobs if j["split"] == "train"][:20]
+    smoke = sorted(jobs, key=lambda j: len(j["tts_input"]))[:12] + [j for j in jobs if j["split"] == "train"][:8]  # shortest = edge cases
     print(tts.synthesize(smoke, WORK + "/smoke", batch_size=BATCH, device=DEVICE, model_id=MODEL))
     sm = [json.loads(l) for l in open(WORK + "/smoke/manifest.jsonl")] if os.path.exists(WORK + "/smoke/manifest.jsonl") else []
     print("SMOKE kept", len(sm), "durations", [r["duration_s"] for r in sm])

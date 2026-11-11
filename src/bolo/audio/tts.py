@@ -85,7 +85,7 @@ def plausible(x: np.ndarray, text: str, sr: int = SR) -> tuple[bool, str]:
     per_char = dur / max(1, len(text))
     if dur < 0.4:
         return False, "too_short"
-    if per_char > 0.25 or dur > 12:
+    if dur > 1.0 + 0.22 * len(text) or dur > 12:  # fixed allowance so one-word commands are not rejected
         return False, "too_long"
     if per_char < 0.025:
         return False, "too_fast"
@@ -135,14 +135,17 @@ def synthesize(jobs: list[dict], out_dir: Path | str, batch_size: int = 16, devi
         lens = getattr(gen, "audios_length", None)
         with open(man_f, "a") as mf, open(rej_f, "a") as rf:
             for i, j in enumerate(batch):
-                a = seqs[i].float().cpu().numpy().squeeze()
-                if lens is not None:
-                    a = a[: int(lens[i])]
-                a = trim_silence(resample(a, sr_model, SR))
-                peak = float(np.max(np.abs(a))) if len(a) else 0.0
-                if peak > 0:
-                    a = a / peak * 0.9
-                ok, why = plausible(a, j["asr_text"])
+                try:
+                    a = np.atleast_1d(seqs[i].float().cpu().numpy().squeeze())
+                    if lens is not None:
+                        a = a[: int(lens[i])]
+                    a = trim_silence(resample(a, sr_model, SR))
+                    peak = float(np.max(np.abs(a))) if len(a) else 0.0
+                    if peak > 0:
+                        a = a / peak * 0.9
+                    ok, why = plausible(a, j["asr_text"])
+                except Exception as e:  # one bad utterance must never kill a multi-hour run
+                    a, ok, why = np.zeros(0, np.float32), False, f"error: {type(e).__name__}: {e}"[:200]
                 rec = {**j, "audio": f"audio/{j['utt_id']}.wav", "duration_s": round(len(a) / SR, 3),
                        "sample_rate": SR, "tts_model": model_id, "tts_sr": sr_model}
                 if ok:

@@ -51,6 +51,8 @@ def resample(x: np.ndarray, sr_in: int, sr_out: int) -> np.ndarray:
     if sr_in == sr_out or len(x) == 0:
         return x.astype(np.float32)
     n_out = int(round(len(x) * sr_out / sr_in))
+    if n_out < 2:
+        return np.zeros(max(0, n_out), dtype=np.float32)
     X = np.fft.rfft(x)
     n_bins = n_out // 2 + 1
     Y = np.zeros(n_bins, dtype=complex)
