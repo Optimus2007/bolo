@@ -31,17 +31,20 @@ print("bundle:", BUNDLE, "| work dir:", WORK)
 HF_LOGIN = r'''
 # Indic Parler-TTS is gated: accept its terms on huggingface.co first, then add a READ token as a secret
 # named HF_TOKEN (Kaggle: Add-ons -> Secrets; Colab: key icon -> Secrets).
-token = None
+token, errs = None, []
 try:
     from kaggle_secrets import UserSecretsClient
     token = UserSecretsClient().get_secret("HF_TOKEN")
-except Exception:
+except Exception as e:
+    errs.append(f"kaggle: {type(e).__name__}: {e}")
+if not token and not os.path.exists("/kaggle"):
     try:
         from google.colab import userdata
         token = userdata.get("HF_TOKEN")
-    except Exception:
-        token = os.environ.get("HF_TOKEN")
-assert token, "HF_TOKEN secret missing"
+    except Exception as e:
+        errs.append(f"colab: {type(e).__name__}: {e}")
+token = token or os.environ.get("HF_TOKEN")
+assert token, "HF_TOKEN secret missing: " + " | ".join(errs)
 from huggingface_hub import login
 login(token=token)
 '''
@@ -81,7 +84,17 @@ print(len(jobs), "jobs; example:", json.dumps(jobs[0], ensure_ascii=False)[:400]
 '''),
     ("code", r'''
 import torch
-stats = tts.synthesize(jobs, OUT, batch_size=BATCH, device="cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# 1) self-check on a small slice first: stop early (and save GPU quota) if the TTS output looks broken
+probe = [j for j in jobs if j["split"] == "train"][:48] + [j for j in jobs if j["split"] == "test"][:16]
+st = tts.synthesize(probe, OUT, batch_size=BATCH, device=DEVICE)
+man = [json.loads(l) for l in open(OUT + "/manifest.jsonl")] if os.path.exists(OUT + "/manifest.jsonl") else []
+rej = [json.loads(l) for l in open(OUT + "/rejected.jsonl")] if os.path.exists(OUT + "/rejected.jsonl") else []
+rate = len(rej) / max(1, len(man) + len(rej))
+print(f"probe: kept {len(man)}, rejected {len(rej)} ({rate:.0%})", [r["reject"] for r in rej][:10])
+assert rate < 0.3, "too many TTS rejections in the probe: inspect rejected.jsonl before a full run"
+# 2) full run (resumable; the probe utterances are skipped)
+stats = tts.synthesize(jobs, OUT, batch_size=BATCH, device=DEVICE)
 print(stats)
 '''),
     ("code", r'''
