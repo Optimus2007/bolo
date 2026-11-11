@@ -5,8 +5,15 @@ from collections import defaultdict
 from pathlib import Path
 
 rows = defaultdict(list)
+para = json.loads(Path("results/para_test.json").read_text()) if Path("results/para_test.json").exists() else {}
 for p in sorted(Path("results/text").glob("*.json")):
     r = json.loads(p.read_text())
+    key = f"{r['model'].replace('bolo-tiny/', 'bolo-tiny/')}-s{r.get('seed', 0)}" if r["model"].startswith("bolo-tiny") else None
+    if "para_test" not in r:
+        for name in (key, f"{r['model']}-s{r.get('seed', 0)}", r["model"]):
+            if name and name in para:
+                r["para_test"] = para[name]
+                break
     rows[r["model"]].append(r)
 
 
@@ -31,6 +38,7 @@ cols = [
     ("False-action rate ↓", lambda r: r["test"]["false_action_rate"]),
     ("AURC ↓", lambda r: r["test"]["aurc"]),
     ("Script consistency", lambda r: r.get("script_consistency")),
+    ("EM LLM-paraphrased test", lambda r: (r.get("para_test") or {}).get("exact_match")),
 ]
 lines = ["# Text intent+slot results (synthetic test set, v0)", "",
          "Mean ± std over seeds (n = number of seeds). All numbers in %. Test = 1,000 rows with unseen slot",

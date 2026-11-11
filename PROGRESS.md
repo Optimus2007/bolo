@@ -1,6 +1,6 @@
 # PROGRESS
 
-_Last updated: 2026-11-11 (Phase 2)_
+_Last updated: 2026-11-11 (Phase 3)_
 
 ## Done
 - Phase 0: private GitHub repo, .gitignore, folder structure, first commit.
@@ -11,11 +11,18 @@ _Last updated: 2026-11-11 (Phase 2)_
   `bolo generate` / `bolo stats`, 22 tests passing, `docs/DATASHEET.md`, sample at `samples/text_v0_sample.jsonl`.
   v0 = 5000/750/1000 rows, ~14% `none`, 3 scripts, generated in <1 s.
 
+- Phase 3: normalizer (`normalize.py`), eval harness (`evaluate.py`), rule baseline, Bolo-tiny (PhonoHash, from
+  scratch, 0.69M params), MuRIL joint tagger, Qwen2.5-0.5B LoRA (MLX 4-bit), environment grounding
+  (`grounding.py`), Bolo-tiny ONNX int8 export (0.8 MB, no accuracy loss), LLM paraphrases (train + reviewed test).
+  Results in `results/RESULTS.md`. 56 tests passing.
+
 ## In progress
-- Phase 2b: local LLM paraphrasing (awaiting go-ahead; ~1.8 GB model download).
+- Waiting for go-ahead on Phase 4 (recording tool + synthetic speech + ASR notebooks).
 
 ## Next
-- Phase 3: rule/fuzzy baseline, Bolo-tiny (from scratch), MuRIL, Qwen-0.5B LoRA; eval + MLX export.
+- Phase 4: `bolo record`, TTS synthetic audio notebook (Kaggle), Whisper fine-tune notebook.
+- Optional: regenerate paraphrases with an Apache-2.0 model (Qwen2.5-1.5B or 7B) for a releasable dataset.
+- Tune the grounding threshold on real recordings.
 
 ## How to resume
 ```
@@ -48,6 +55,15 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
 - 2026-11-11: Per-intent quotas instead of random intent sampling (random sampling under-filled
   closed-vocab intents because of dedup).
 
+- 2026-11-11: MuRIL's last layer has LayerNorm gain ~0.015 (near-constant output). Use the second-to-last layer + mean pool.
+- 2026-11-11: mlx-lm completion datasets go through the chat template, so inference must apply it too.
+- 2026-11-11: Paraphraser = mlx-community/Qwen2.5-3B-Instruct-4bit (Qwen Research License, research/eval only).
+  Model deleted after use (as the user asked). para_* data and the `*_para*` Bolo-tiny models are research-only.
+  The recommended release model is `phono_views_aug` (no paraphrases) until paraphrases are regenerated with an Apache-2.0 model.
+- 2026-11-11: Paraphrase quality: 56% of test paraphrases kept after review; MuRIL agreed with 74% of train paraphrases.
+- 2026-11-11: Negative results kept: consistency loss (−1.4 EM), MuRIL distillation (−4.0 EM).
+
 ## Open questions
 - OpenSLR-104 license: OpenSLR says CC BY-SA 4.0, Srota card says CC BY 4.0. Treat as BY-SA.
 - HiACC license on Zenodo: not yet confirmed.
+- Qwen Research License: do its terms cover outputs (our paraphrases)? Until resolved, treat them as research-only.

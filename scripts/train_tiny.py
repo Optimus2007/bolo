@@ -27,6 +27,10 @@ VARIANTS = {
     # + LLM paraphrases of train rows (labels preserved), optionally with MuRIL distillation
     "phono_views_aug_para": dict(features="phono", use_views=True, consistency=0.0, augment=True,
                                  train_files=["train", "para_train"]),
+    "phono_views_aug_paraf": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                  train_files=["train", "para_train_f_kd"]),
+    "phono_views_aug_paraf_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                     train_files=["train_kd", "para_train_f_kd"], kd_alpha=0.5),
     "phono_views_aug_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
                                train_files=["train_kd"], kd_alpha=0.5),
     "phono_views_aug_para_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
@@ -45,6 +49,8 @@ torch.set_num_threads(args.threads)
 cfg = load_config()
 dev = load_rows(f"{args.data}/dev.jsonl")
 test = load_rows(f"{args.data}/test.jsonl")
+para_test_path = Path(f"{args.data}/para_test_reviewed.jsonl")
+para_test = load_rows(para_test_path) if para_test_path.exists() else None
 Path("results/text").mkdir(parents=True, exist_ok=True)
 
 for seed in args.seeds:
@@ -59,6 +65,10 @@ for seed in args.seeds:
         out_dir = Path(f"models/bolo-tiny/{name}-s{seed}")
         m.save(out_dir)
         res = run(m, cfg.schema, test, dev_rows=dev)
+        if para_test:
+            from bolo.evaluate import finalize, score
+            pp = [finalize(p, cfg.schema, res["threshold"]) for p in m.predict([r["text"] for r in para_test])]
+            res["para_test"] = {k: v for k, v in score(para_test, pp).items() if k != "breakdown"}
         res.update(model=f"bolo-tiny/{name}", seed=seed, params=m.n_params(), train=info,
                    size_mb_fp32=round(os.path.getsize(out_dir / "model.pt") / 1e6, 2),
                    data=args.data)
@@ -67,4 +77,4 @@ for seed in args.seeds:
         print(f"   EM {t['exact_match']:.3f} | intent {t['intent_acc']:.3f} | slotF1 {t['slot']['f1']:.3f} | "
               f"FAR {t['false_action_rate']:.3f} | consist {res.get('script_consistency')} | "
               f"deva EM {t['breakdown']['script']['deva']['exact_match']:.3f} | thr {res['threshold']} | "
-              f"{info['train_seconds']}s")
+              f"{info['train_seconds']}s | paraEM {res.get('para_test', {}).get('exact_match')}")

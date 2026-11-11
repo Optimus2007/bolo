@@ -1,38 +1,38 @@
 {
- "threshold": 0.0,
+ "threshold": 0.6,
  "test": {
   "n": 1000,
-  "intent_acc": 0.936,
+  "intent_acc": 0.943,
   "slot": {
-   "p": 0.8847,
-   "r": 0.8726,
-   "f1": 0.8786
+   "p": 0.8805,
+   "r": 0.8805,
+   "f1": 0.8805
   },
   "slot_lenient": {
-   "p": 0.8962,
-   "r": 0.884,
-   "f1": 0.89
+   "p": 0.8919,
+   "r": 0.8919,
+   "f1": 0.8919
   },
-  "exact_match": 0.878,
-  "exact_match_lenient": 0.888,
+  "exact_match": 0.883,
+  "exact_match_lenient": 0.893,
   "abstain": {
-   "p": 0.8609,
-   "r": 0.9353,
-   "f1": 0.8966
+   "p": 0.9143,
+   "r": 0.9209,
+   "f1": 0.9176
   },
-  "false_action_rate": 0.0647,
-  "over_abstain_rate": 0.0244,
-  "wrong_action_rate": 0.119,
-  "aurc": 0.0846,
+  "false_action_rate": 0.0791,
+  "over_abstain_rate": 0.0139,
+  "wrong_action_rate": 0.1221,
+  "aurc": 0.0835,
   "breakdown": {
    "script": {
     "deva": {
      "n": 173,
-     "exact_match": 0.8092
+     "exact_match": 0.8266
     },
     "mixed": {
      "n": 139,
-     "exact_match": 0.8201
+     "exact_match": 0.8345
     },
     "roman": {
      "n": 688,
@@ -42,35 +42,35 @@
    "template": {
     "heldout": {
      "n": 182,
-     "exact_match": 0.5824
+     "exact_match": 0.6264
     },
     "seen": {
      "n": 818,
-     "exact_match": 0.9438
+     "exact_match": 0.9401
     }
    },
    "text_seen_in_train": {
     "False": {
      "n": 860,
-     "exact_match": 0.8605
+     "exact_match": 0.8651
     },
     "True": {
      "n": 140,
-     "exact_match": 0.9857
+     "exact_match": 0.9929
     }
    },
    "mixing": {
     "balanced": {
      "n": 233,
-     "exact_match": 0.8884
+     "exact_match": 0.9013
     },
     "en-heavy": {
      "n": 248,
-     "exact_match": 0.9032
+     "exact_match": 0.9153
     },
     "hi-heavy": {
      "n": 515,
-     "exact_match": 0.8602
+     "exact_match": 0.8583
     },
     "n/a": {
      "n": 4,
@@ -95,76 +95,101 @@
     },
     "ood": {
      "n": 22,
-     "exact_match": 0.9091,
-     "abstain_recall": 0.9091
+     "exact_match": 0.9545,
+     "abstain_recall": 0.9545
     },
     "unsupported": {
      "n": 56,
-     "exact_match": 0.9107,
-     "abstain_recall": 0.9107
+     "exact_match": 0.8571,
+     "abstain_recall": 0.8571
     }
    }
   }
  },
  "test_unseen_text": {
   "n": 860,
-  "intent_acc": 0.9279,
+  "intent_acc": 0.9337,
   "slot": {
-   "p": 0.8711,
-   "r": 0.8601,
-   "f1": 0.8656
+   "p": 0.8677,
+   "r": 0.8677,
+   "f1": 0.8677
   },
   "slot_lenient": {
-   "p": 0.884,
-   "r": 0.8728,
-   "f1": 0.8784
+   "p": 0.8804,
+   "r": 0.8804,
+   "f1": 0.8804
   },
-  "exact_match": 0.8605,
-  "exact_match_lenient": 0.8721,
+  "exact_match": 0.8651,
+  "exact_match_lenient": 0.8767,
   "abstain": {
-   "p": 0.8224,
-   "r": 0.9072,
-   "f1": 0.8627
+   "p": 0.8776,
+   "r": 0.8866,
+   "f1": 0.8821
   },
-  "false_action_rate": 0.0928,
-  "over_abstain_rate": 0.0249,
-  "wrong_action_rate": 0.1341,
-  "aurc": 0.0995
+  "false_action_rate": 0.1134,
+  "over_abstain_rate": 0.0157,
+  "wrong_action_rate": 0.1365,
+  "aurc": 0.1
  },
- "script_consistency": 0.88,
- "views_exact_match": 0.8425,
+ "script_consistency": 0.885,
+ "views_exact_match": 0.8545,
  "latency_ms": {
-  "p50": 0.401,
-  "p95": 0.467
+  "p50": 0.4,
+  "p95": 0.446
+ },
+ "para_test": {
+  "n": 144,
+  "intent_acc": 0.8403,
+  "slot": {
+   "p": 0.661,
+   "r": 0.6667,
+   "f1": 0.6638
+  },
+  "slot_lenient": {
+   "p": 0.661,
+   "r": 0.6667,
+   "f1": 0.6638
+  },
+  "exact_match": 0.6667,
+  "exact_match_lenient": 0.6667,
+  "abstain": {
+   "p": 0.8182,
+   "r": 0.871,
+   "f1": 0.8438
+  },
+  "false_action_rate": 0.129,
+  "over_abstain_rate": 0.0531,
+  "wrong_action_rate": 0.3784,
+  "aurc": 0.238
  },
  "model": "bolo-tiny/phono_views_aug",
  "seed": 1,
  "params": 690724,
  "train": {
   "loss": [
-   4.2343,
-   2.3803,
-   0.8512,
-   0.487,
-   0.3702,
-   0.2992,
-   0.2606,
-   0.2224,
-   0.1851,
-   0.1807,
-   0.165,
-   0.151,
-   0.1442,
-   0.1354,
-   0.1279,
-   0.12,
-   0.1148,
-   0.1163,
-   0.1079,
-   0.1118
+   4.2758,
+   2.4444,
+   0.8448,
+   0.503,
+   0.3893,
+   0.3278,
+   0.2859,
+   0.2443,
+   0.2016,
+   0.1945,
+   0.1715,
+   0.159,
+   0.1502,
+   0.144,
+   0.1364,
+   0.1269,
+   0.1225,
+   0.1271,
+   0.1124,
+   0.1131
   ],
-  "train_seconds": 77.0,
-  "temperature": 0.9
+  "train_seconds": 74.9,
+  "temperature": 0.8
  },
  "size_mb_fp32": 2.77,
  "data": "data/text/v0"

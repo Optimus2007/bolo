@@ -1,0 +1,83 @@
+{
+ "rules": {
+  "n": 144,
+  "exact_match": 0.7986,
+  "intent_acc": 0.8819,
+  "slot_f1": 0.817,
+  "false_action_rate": 0.0968,
+  "grounded_exact_match": 0.875,
+  "grounded_false_action_rate": 0.0645
+ },
+ "bolo-tiny/phono_views_aug-s0": {
+  "n": 144,
+  "exact_match": 0.7014,
+  "intent_acc": 0.8056,
+  "slot_f1": 0.7034,
+  "false_action_rate": 0.2581,
+  "grounded_exact_match": 0.8194,
+  "grounded_false_action_rate": 0.0968
+ },
+ "bolo-tiny/phono_views_aug-s1": {
+  "n": 144,
+  "exact_match": 0.6667,
+  "intent_acc": 0.8403,
+  "slot_f1": 0.6638,
+  "false_action_rate": 0.129,
+  "grounded_exact_match": 0.7778,
+  "grounded_false_action_rate": 0.0968
+ },
+ "bolo-tiny/phono_views_aug-s2": {
+  "n": 144,
+  "exact_match": 0.7292,
+  "intent_acc": 0.8611,
+  "slot_f1": 0.7414,
+  "false_action_rate": 0.1935,
+  "grounded_exact_match": 0.8333,
+  "grounded_false_action_rate": 0.0968
+ },
+ "bolo-tiny/phono_views_aug_para-s0": {
+  "n": 144,
+  "exact_match": 0.8264,
+  "intent_acc": 0.9028,
+  "slot_f1": 0.834,
+  "false_action_rate": 0.129,
+  "grounded_exact_match": 0.9097,
+  "grounded_false_action_rate": 0.0645
+ },
+ "bolo-tiny/phono_views_aug_para-s1": {
+  "n": 144,
+  "exact_match": 0.8056,
+  "intent_acc": 0.9167,
+  "slot_f1": 0.8085,
+  "false_action_rate": 0.129,
+  "grounded_exact_match": 0.8889,
+  "grounded_false_action_rate": 0.0645
+ },
+ "bolo-tiny/phono_views_aug_para-s2": {
+  "n": 144,
+  "exact_match": 0.8264,
+  "intent_acc": 0.8958,
+  "slot_f1": 0.8354,
+  "false_action_rate": 0.129,
+  "grounded_exact_match": 0.9236,
+  "grounded_false_action_rate": 0.0645
+ },
+ "muril_aug-s0": {
+  "n": 144,
+  "exact_match": 0.7847,
+  "intent_acc": 0.8125,
+  "slot_f1": 0.8052,
+  "false_action_rate": 0.1613,
+  "grounded_exact_match": 0.8264,
+  "grounded_false_action_rate": 0.1613
+ },
+ "qwen0.5b-lora-4bit": {
+  "n": 144,
+  "exact_match": 0.5694,
+  "intent_acc": 0.7708,
+  "slot_f1": 0.5662,
+  "false_action_rate": 0.1613,
+  "grounded_exact_match": 0.6181,
+  "grounded_false_action_rate": 0.1613
+ }
+}
