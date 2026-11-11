@@ -359,6 +359,10 @@ class BoloTiny:
         tcd = meta["tiny_config"]
         tcd["ngrams"] = tuple(tcd["ngrams"])
         obj = cls(cfg, TinyConfig(**tcd))
-        obj.model.load_state_dict(torch.load(d / "model.pt", weights_only=True))
+        if (d / "model.safetensors").exists():  # release format
+            from safetensors.torch import load_file
+            obj.model.load_state_dict(load_file(str(d / "model.safetensors")))
+        else:
+            obj.model.load_state_dict(torch.load(d / "model.pt", weights_only=True))
         obj.temperature = meta["temperature"]
         return obj

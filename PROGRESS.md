@@ -38,6 +38,9 @@ _Last updated: 2026-11-11 (Phase 5 done on synthetic and public speech; real com
   configs in the wheel, v0.1.0, `speech` extra; the PyPI name `bolo` was free when checked); README rewritten in plain language;
   model cards for Bolo Tiny and Bolo Sun.
 
+- Release prep (not published): `scripts/prepare_release.py` stages bolo-sun (fp16), bolo-tiny (safetensors + int8 ONNX)
+  and the bolocmd-v0 dataset with HF model cards in data/release/ (gitignored); `docs/RELEASE_CHECKLIST.md` lists the owner-only steps.
+
 ## In progress
 - Kaggle TTS run is blocked on an HF token: the user must accept the Indic Parler-TTS terms, create a read token, and add it
   as a Kaggle secret `HF_TOKEN` attached to the `bolo-tts-synth` notebook. Claude then runs: trial → full → fine-tune.
