@@ -39,9 +39,12 @@ class Environment:
     apps: list[str] = field(default_factory=list)
     contacts: list[str] = field(default_factory=list)
 
-    def best(self, value: str, kind: str) -> tuple[str | None, float]:
-        pool = {"folder": self.folders, "path": self.folders + self.files, "app": self.apps,
+    def pool(self, kind: str) -> list[str]:
+        return {"folder": self.folders, "path": self.folders + self.files, "app": self.apps,
                 "name": self.contacts}[kind]
+
+    def best(self, value: str, kind: str) -> tuple[str | None, float]:
+        pool = self.pool(kind)
         best, score = None, 0.0
         for e in pool:
             s = similarity(value, e)
@@ -74,6 +77,9 @@ def ground(pred: dict, env: Environment, threshold: float = 0.72, margin: float 
     for slot, value in list(out["slots"].items()):
         kind = SLOT_KIND.get((out["intent"], slot))
         if kind is None:
+            continue
+        if not env.pool(kind):  # nothing known of this kind (e.g. contacts were not shared): cannot verify, pass through
+            out["grounding"][slot] = {"heard": value, "matched": None, "verified": False}
             continue
         ent, s = env.best(str(value), kind)
         out["grounding"][slot] = {"heard": value, "matched": ent, "score": round(s, 3)}

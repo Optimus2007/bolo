@@ -28,3 +28,15 @@ def test_abstains_when_entity_missing():
 def test_closed_slots_untouched():
     p = {"intent": "set_volume", "slots": {"level": 40}}
     assert ground(p, ENV)["slots"] == {"level": 40}
+
+
+
+def test_unknown_kind_passes_through_unverified():
+    from bolo.grounding import Environment, ground
+
+    env = Environment(folders=["photos"], files=[], apps=["vlc"], contacts=[])  # contacts not shared
+    g = ground({"intent": "call_contact", "slots": {"name": "diya"}, "confidence": 0.9}, env)
+    assert g["intent"] == "call_contact" and g["slots"]["name"] == "diya"
+    assert g["grounding"]["name"]["verified"] is False
+    g2 = ground({"intent": "open_app", "slots": {"app": "bitword done"}, "confidence": 0.9}, env)
+    assert g2["intent"] == "none"  # apps ARE known, and nothing matches: still abstain
