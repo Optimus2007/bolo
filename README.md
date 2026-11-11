@@ -1,7 +1,180 @@
 # Bolo
 
-Open-source toolkit for understanding spoken Hinglish (Hindi-English code-mixed) voice commands:
-command schema, synthetic dataset generator, small on-device intent+slot models, a real-speech
-recording tool, and an evaluation harness.
+Bolo turns spoken Hinglish into an action on your computer, fully offline.
 
-Status: early work in progress. See [PROGRESS.md](PROGRESS.md) and [RESEARCH.md](RESEARCH.md).
+You say *"client folder mein claude code khol do"* and Bolo works out that you want Claude Code started in the folder
+called client, checks that the folder really exists on your machine, and hands that back as a small, clear result.
+If it is not sure, or the folder does not exist, it says so and asks instead of guessing.
+
+Everything runs on your own laptop or phone. No audio leaves the device, nothing needs the internet, and it costs nothing.
+
+```
+"bhai rust learning folder mein terminal kholo"
+        │  speech recogniser (fine tuned Whisper)            about 125 ms on an M2
+        ▼
+"bhai rust learning folder mein terminal kholo"
+        │  Bolo Tiny (0.8 MB, built from scratch)            about 1 ms
+        ▼
+{intent: open_terminal, folder: "rust learning"}
+        │  grounding: does that folder exist here?
+        ▼
+open Terminal in ~/Rust Learning        (or ask, if there is no such folder)
+```
+
+> Status: research preview (v0.1). It works and it is measured, but it has been tested on very few real voices so far.
+> Please read the limits section before relying on it.
+
+## Why this exists
+
+Most people in India do not talk to their devices in pure Hindi or pure English. They mix, and the technical words stay
+in English: *"docker chalu karo"*, *"volume chaalis pe kar do"*, *"terminal kholo"*. Speech tools handle this badly.
+In our tests plain Whisper got more words wrong than right on short Hinglish commands, and even a Hinglish tuned
+Whisper lost about a third of the correct actions compared with a perfect transcript.
+
+We also could not find an open benchmark that checks the full path from speech to the right action for Hinglish desktop
+commands, so Bolo includes one.
+
+Three things we cared about:
+
+1. **Private.** Audio stays on the device.
+2. **Small.** The language model part is under 1 MB, so it fits on cheap phones and old laptops.
+3. **Careful.** It would rather ask than do the wrong thing. We measure how often it acts when it should not.
+
+## What is in the box
+
+| Part | What it does |
+|---|---|
+| Dataset generator | Writes thousands of realistic Hinglish commands in Roman, Devanagari and mixed script from YAML templates, with names held out so tests are fair |
+| Bolo Tiny | The from scratch understanding model, 0.69M parameters. Uses PhonoHash, a spelling tolerant way of reading Hinglish words |
+| Grounding | Matches what you said against the folders, files, apps and contacts that actually exist, and abstains when nothing fits |
+| Speech recogniser | A Whisper model fine tuned on synthetic Hinglish command speech, with Roman script output |
+| `bolo record` | A consent first recording tool, local or over a private link, for building a real voice test set |
+| `bolo eval` | The speech to action benchmark: word error rate, action accuracy, how often it acts wrongly, and speed |
+
+## Results so far
+
+All numbers are our own measurements. Synthetic means generated data; real means recorded from people.
+
+**Understanding text** (exact match: the intent and every detail correct, on names never seen in training)
+
+| Model | Size | Synthetic test | After grounding | Reworded test |
+|---|---|---|---|---|
+| Hand written rules | none | 84.9% | 93.2% | 79.9% |
+| **Bolo Tiny** | **0.8 MB** | 87.7% | **95.8%** | 69.9% |
+| MuRIL (fine tuned) | 950 MB | 91.6% | 96.4% | 78.5% |
+| Qwen2.5 0.5B (LoRA, 4 bit) | 276 MB | 56.5% | | |
+
+Bolo Tiny ends up within a point of a model a thousand times its size once grounding is on.
+
+**From speech to action** (80 clips spoken by the built in macOS voices, so still synthetic)
+
+<!-- SPEECH_TABLE -->
+
+**Real human Hinglish speech** (300 clips from the OpenSLR 104 tutorial recordings, speech recognition only)
+
+<!-- OPENSLR_TABLE -->
+
+The full reports with every metric and caveat live in `results/`.
+
+## Quick start
+
+You need Python 3.10 or newer. We use [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone <this repo> && cd bolo
+uv venv && uv pip install -e ".[dev,train,speech]"
+uv run bolo generate                     # builds the synthetic dataset in data/text/v0
+uv run pytest -q                         # everything should pass
+```
+
+Understand a typed command:
+
+```bash
+uv run bolo understand "zara battery kitni bachi hai"
+uv run bolo understand "documents folder mein terminal kholo" --ground    # checks what exists on this Mac
+```
+
+Understand a recording (a 16 bit WAV file):
+
+```bash
+uv run bolo understand command.wav --audio --asr models/bolo-whisper
+```
+
+From Python:
+
+```python
+from bolo.pipeline import Bolo, scan_mac
+
+bolo = Bolo.load(asr="models/bolo-whisper", env=scan_mac())
+bolo.understand("volume 40 pe kar do")
+# {'intent': 'set_volume', 'slots': {'level': 40}, 'abstain': False, ...}
+bolo.listen("command.wav")
+```
+
+Bolo never runs anything by itself. Your program decides what to do with the result, and anything risky should be
+confirmed by the user first.
+
+## Recording real voices
+
+```bash
+uv run bolo record              # on this laptop
+uv run bolo record --share      # gives you a private link friends can open on their phones
+```
+
+Each person picks a nickname, gives consent, and reads about 40 short commands (around four minutes), with an optional
+bonus round where they say things in their own words. The shared link uses a free Cloudflare tunnel, needs a secret
+invite code, closes by itself after two hours, and the audio is stored only on your laptop.
+
+A few rules we keep, and that the code enforces where it can:
+
+1. Recordings are used only to **test** Bolo, never to train it. The training code refuses them.
+2. Recordings are never committed to git. A pre commit hook blocks audio, recordings and secrets
+   (`cp scripts/pre-commit .git/hooks/`).
+3. Anyone can delete their own recordings at any time from the recording page.
+4. Nothing becomes public unless that person ticked the public box, and they will be asked again before any release.
+
+Details are in [`docs/AUDIO.md`](docs/AUDIO.md).
+
+## Training the speech model
+
+Training happens on the free Kaggle GPUs, not on your laptop. `notebooks/01_tts_synth.ipynb` makes synthetic command
+speech with AI4Bharat's Indic Parler TTS, using different voices for training and testing. `notebooks/02_whisper_finetune.ipynb`
+fine tunes Whisper on it with noise, room echo, speed and phone quality augmentation, and compares against plain Whisper and
+an existing Hinglish Whisper. `scripts/kaggle_push.py` uploads and runs both as private Kaggle notebooks.
+
+## Limits, honestly
+
+1. **Very few real voices so far.** Most numbers come from synthetic speech. We need recordings from more people,
+   with different accents and microphones, before any strong claim.
+2. **Synthetic training audio.** The speech model learned from generated voices. Real rooms and real people may
+   do worse than the synthetic tests suggest.
+3. **Nine kinds of command.** Terminal, Claude Code, calls, apps, status questions, files and folders, volume and
+   brightness. Everything else should be refused, and mostly is.
+4. **Rewording hurts.** Bolo Tiny drops about 18 points on commands phrased in ways it never saw.
+5. **Grounding can still pick a near miss.** When the folder you named does not exist, it sometimes matches a similar one.
+6. **Hinglish only** for now. Other Indian language mixes are not covered yet.
+
+## What comes next
+
+1. More real voices, ideally ten people or more, half female and half male.
+2. Myna, the assistant built on Bolo: a wake word ("Hey Myna"), a small voice of her own, and replies.
+3. Running on Android, with real phone timings.
+
+## Data and models we build on
+
+| Thing | Where it comes from | Licence |
+|---|---|---|
+| Whisper Hindi2Hinglish Swift (starting point for our speech model) | Oriserve | Apache 2.0 |
+| Indic Parler TTS (synthetic training voices) | AI4Bharat | Apache 2.0, gated |
+| MuRIL (comparison only) | Google | Apache 2.0 |
+| Qwen2.5 0.5B Instruct (comparison only) | Alibaba Qwen | Apache 2.0 |
+| Qwen2.5 3B Instruct (made the reworded test, research only) | Alibaba Qwen | Qwen Research Licence |
+| OpenSLR 104 Hindi English test set (evaluation only, not redistributed) | MUCS 2021 challenge, via openslr.org | CC BY SA 4.0 |
+
+Bolo's own code is Apache 2.0. The synthetic text dataset is meant to be released under CC BY 4.0.
+More detail on each model is in `docs/`.
+
+## Contributing
+
+The most useful thing anyone can give right now is four minutes of their voice through `bolo record`.
+New command templates are also welcome: they are plain YAML in `configs/`.
