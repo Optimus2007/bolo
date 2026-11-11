@@ -107,6 +107,9 @@ cd ~/Documents/bolo && uv venv --python 3.12 .venv && uv pip install -e ".[dev]"
   their per-utterance transcripts never go to git. Only aggregate numbers do, and per-group numbers need >=3 speakers.
   After a fresh clone: `cp scripts/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit`.
 
+- 2026-11-11: `bolo record --share` tested end to end by the user on their own phone over the Cloudflare link: the mic worked,
+  audio was saved on the laptop, and "Delete my recordings" removed it from the laptop.
+
 ## Open questions
 - No real noise corpus yet (MUSAN ~11 GB, ESC-50 NC). Augmentation noise is synthetic for now.
 - No LICENSE file yet (pyproject says Apache-2.0). Add it in Phase 7.
