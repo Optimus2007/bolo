@@ -16,6 +16,18 @@ Two very different kinds of audio. They are never mixed in reporting.
 uv run bolo record            # opens http://127.0.0.1:8765/  (local only, not reachable from the network)
 ```
 
+- **Share mode** (friends record from their own phone/laptop): `uv run bolo record --share` prints a private
+  `https://….trycloudflare.com/?invite=…` link (free Cloudflare quick tunnel, no account; installed with
+  `brew install cloudflared`). The server still binds to 127.0.0.1; the tunnel gives it HTTPS, which phones need for
+  microphone access. Audio is sent over the encrypted link and **stored only on this laptop** in `recordings/`. It passes
+  through Cloudflare's network (TLS terminates there) but is not stored by us anywhere else. Protection:
+  - a random **invite code** per session is required on every request (no code → 403),
+  - each speaker gets a **private key** at consent time, kept in their browser; uploads and *withdraw* need it, so nobody can
+    record as, or delete, someone else,
+  - a pseudonym that is already taken gets a new id (no takeover); at most 200 speakers per store,
+  - the link **auto-closes** after `--minutes` (default 120) and dies when the command stops. Keep the laptop awake
+    (`caffeinate -d`) while friends record.
+  Rows recorded this way carry `"via": "link"`. The owner can always delete a speaker from the CLI (`Store.withdraw(owner=True)`).
 - **Consent first.** Before the first recording a speaker picks a *pseudonym* and ticks two required boxes:
   being recorded, and use within the Bolo project (kept private). A third box, inclusion in a future
   **public** dataset (CC BY 4.0), is optional and off by default. Consent is stored per speaker in

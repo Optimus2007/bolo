@@ -10,10 +10,11 @@ from pathlib import Path
 import pytest
 
 from bolo.record.prompts import build_prompts, describe_goal
-from bolo.record.server import Store, make_handler, validate_wav
+from bolo.record.server import TUNNEL_RE, AuthError, Store, make_handler, validate_wav
 
 TEST = Path("data/text/v0/test.jsonl")
 pytestmark = pytest.mark.skipif(not TEST.exists(), reason="run `bolo generate` first")
+CONSENT = {"record": True, "project_use": True}
 
 
 def wav(seconds=1.0, sr=16000, ch=1):
@@ -41,54 +42,100 @@ def test_validate_wav():
             validate_wav(bad)
 
 
-def test_store_consent_save_withdraw(tmp_path):
+def test_store_consent_keys_save_withdraw(tmp_path):
     st = Store(tmp_path, TEST)
     with pytest.raises(ValueError):
         st.add_speaker("x", {"record": True}, {})
-    sid = st.add_speaker("Speaker 07!", {"record": True, "project_use": True}, {"region": "Bihar", "email": "no"})
+    sid, key = st.add_speaker("Speaker 07!", CONSENT, {"region": "Bihar", "voice": "female", "email": "no"})
     assert sid == "speaker-07"
     sp = st.speaker(sid)
-    assert sp["consent"]["public_release"] is False and "email" not in sp["meta"]
+    assert sp["consent"]["public_release"] is False and sp["consent"]["evaluation_only"] is True
+    assert "email" not in sp["meta"] and sp["meta"]["voice"] == "female" and key not in json.dumps(sp)
+    # same pseudonym from someone else -> new id, never a takeover
+    sid2, key2 = st.add_speaker("speaker 07", CONSENT, {})
+    assert sid2 == "speaker-07-2" and key2 != key
     p = st.prompts[0]
     with pytest.raises(ValueError):
-        st.save("ghost", p["prompt_id"], wav())
-    e = st.save(sid, p["prompt_id"], wav(), transcript="Kuch Bhi")
-    assert (tmp_path / e["audio"]).exists() and e["consent"]["project_use"]
-    st.save(sid, p["prompt_id"], wav(2.0))  # re-record replaces
+        st.save("ghost", key, p["prompt_id"], wav())
+    with pytest.raises(AuthError):
+        st.save(sid, key2, p["prompt_id"], wav())  # wrong person's key
+    e = st.save(sid, key, p["prompt_id"], wav(), transcript="Kuch Bhi", mic={"input_rate": 48000, "junk": 1})
+    assert (tmp_path / e["audio"]).exists() and e["consent"]["project_use"] and "junk" not in e["mic"]
+    st.save(sid, key, p["prompt_id"], wav(2.0))  # re-record replaces
     assert len(st.manifest()) == 1 and st.manifest()[0]["duration_s"] == 2.0
-    assert st.withdraw(sid) == 1
+    with pytest.raises(AuthError):
+        st.withdraw(sid, key2)  # cannot delete someone else's recordings
+    assert st.withdraw(sid, key) == 1
     assert st.manifest() == [] and st.speaker(sid) is None and not (tmp_path / "audio" / sid).exists()
+    assert st.withdraw(sid2, owner=True) == 0  # owner (CLI) can always delete
 
 
-def test_http_roundtrip(tmp_path):
-    st = Store(tmp_path, TEST)
-    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(st))
+def _serve(st, invite=None):
+    httpd = ThreadingHTTPServer(("127.0.0.1", 0), make_handler(st, invite))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
-    base = f"http://127.0.0.1:{httpd.server_address[1]}"
+    return httpd, f"http://127.0.0.1:{httpd.server_address[1]}"
 
-    def post(path, data):
-        return json.loads(urllib.request.urlopen(urllib.request.Request(base + path, data=data, method="POST")).read())
 
+def _req(base, path, data=None, headers=None):
+    method = "POST" if data is not None else "GET"
+    r = urllib.request.Request(base + path, data=data, method=method, headers=headers or {})
+    return json.loads(urllib.request.urlopen(r).read())
+
+
+def test_http_roundtrip_local(tmp_path):
+    st = Store(tmp_path, TEST)
+    httpd, base = _serve(st)
     try:
         assert b"Bolo Recorder" in urllib.request.urlopen(base + "/").read()
+        assert _req(base, "/api/session")["shared"] is False
         with pytest.raises(urllib.error.HTTPError):
-            post("/api/speaker", json.dumps({"pseudonym": "a", "consent": {}}).encode())
-        sid = post("/api/speaker", json.dumps({"pseudonym": "a", "consent": {"record": 1, "project_use": 1}}).encode())["speaker_id"]
+            _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": {}}).encode())
+        j = _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": CONSENT}).encode())
+        sid, H = j["speaker_id"], {"X-Speaker-Key": j["speaker_key"]}
         pid = st.prompts[1]["prompt_id"]
-        assert post(f"/api/upload?speaker={sid}&prompt_id={pid}", wav())["ok"]
-        done = json.loads(urllib.request.urlopen(f"{base}/api/prompts?speaker={sid}").read())["done"]
-        assert done == [pid]
-        assert post("/api/withdraw", json.dumps({"speaker_id": sid}).encode())["removed"] == 1
+        assert _req(base, f"/api/upload?speaker={sid}&prompt_id={pid}", wav(), H)["ok"]
+        assert _req(base, f"/api/prompts?speaker={sid}", headers=H)["done"] == [pid]
+        assert _req(base, f"/api/prompts?speaker={sid}")["done"] == []  # no key -> nothing revealed
+        with pytest.raises(urllib.error.HTTPError) as e:
+            _req(base, f"/api/upload?speaker={sid}&prompt_id={pid}", wav(), {"X-Speaker-Key": "wrong"})
+        assert e.value.code == 403
+        assert _req(base, "/api/withdraw", json.dumps({"speaker_id": sid}).encode(), H)["removed"] == 1
     finally:
         httpd.shutdown()
+
+
+def test_share_mode_requires_invite(tmp_path):
+    st = Store(tmp_path, TEST)
+    httpd, base = _serve(st, invite="s3cret")
+    try:
+        for path in ("/", "/api/session", "/?invite=wrong"):
+            with pytest.raises(urllib.error.HTTPError) as e:
+                urllib.request.urlopen(base + path)
+            assert e.value.code == 403
+        with pytest.raises(urllib.error.HTTPError):
+            _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": CONSENT}).encode())
+        assert b"Bolo Recorder" in urllib.request.urlopen(base + "/?invite=s3cret").read()
+        H = {"X-Invite": "s3cret"}
+        assert _req(base, "/api/session", headers=H)["shared"] is True
+        j = _req(base, "/api/speaker", json.dumps({"pseudonym": "a", "consent": CONSENT}).encode(), H)
+        H2 = {**H, "X-Speaker-Key": j["speaker_key"]}
+        assert _req(base, f"/api/upload?speaker={j['speaker_id']}&prompt_id={st.prompts[0]['prompt_id']}", wav(), H2)["ok"]
+        assert st.manifest()[0]["via"] == "link"
+    finally:
+        httpd.shutdown()
+
+
+def test_tunnel_url_regex():
+    line = "2026-11-11 INF |  https://quiet-river-1234.trycloudflare.com                  |"
+    assert TUNNEL_RE.search(line).group(0) == "https://quiet-river-1234.trycloudflare.com"
 
 
 def test_human_recordings_cannot_be_used_for_training(tmp_path):
     from bolo.asr import whisper_ft as W
 
     st = Store(tmp_path / "recordings", TEST)
-    sid = st.add_speaker("friend", {"record": True, "project_use": True}, {})
-    st.save(sid, st.prompts[0]["prompt_id"], wav())
+    sid, key = st.add_speaker("friend", CONSENT, {})
+    st.save(sid, key, st.prompts[0]["prompt_id"], wav())
     man = tmp_path / "recordings" / "manifest.jsonl"
     assert len(W.load_manifest(man)) == 1  # evaluation use is fine
     with pytest.raises(W.HumanAudioError):

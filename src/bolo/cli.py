@@ -37,7 +37,8 @@ def _cmd_stats(args: argparse.Namespace) -> None:
 def _cmd_record(args: argparse.Namespace) -> None:
     from .record.server import serve
 
-    serve(root=args.root, test_path=args.test, port=args.port, open_browser=not args.no_browser)
+    serve(root=args.root, test_path=args.test, port=args.port, open_browser=not args.no_browser,
+          share=args.share, minutes=args.minutes)
 
 
 def _cmd_eval(args: argparse.Namespace) -> None:
@@ -85,6 +86,9 @@ def main(argv: list[str] | None = None) -> None:
     r.add_argument("--test", default="data/text/v0/test.jsonl", help="test split the prompts are drawn from")
     r.add_argument("--port", type=int, default=8765)
     r.add_argument("--no-browser", action="store_true")
+    r.add_argument("--share", action="store_true",
+                   help="share a private HTTPS link (Cloudflare quick tunnel); audio is stored only on this laptop")
+    r.add_argument("--minutes", type=int, default=120, help="auto-close the shared link after this many minutes")
     r.set_defaults(func=_cmd_record)
 
     e = sub.add_parser("eval", help="speech -> text -> action benchmark (ASR + NLU + grounding + latency)")

@@ -27,20 +27,21 @@
   .status { margin-top:10px; font-size:14px; min-height:20px; } .err { color:var(--rec); } .good { color:var(--ok); }
   .level { height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:10px; } .level > div { height:100%; background:var(--accent); width:0; transition:width .05s; }
   .hidden { display:none; }
+  @media (max-width: 600px) { button { padding:14px 18px; font-size:17px; } button.rec { width:100%; } .prompt { font-size:22px; } }
 </style>
 </head>
 <body>
 <main>
   <h1>Bolo Recorder</h1>
-  <div class="muted">Records Hinglish voice commands for evaluating Bolo. Everything stays on this computer.</div>
+  <div class="muted" id="tagline">Records Hinglish voice commands for testing Bolo. Everything stays on this computer.</div>
 
   <section id="consent" class="card">
     <strong>Before you start</strong>
-    <p class="muted">Your recordings are saved only on this laptop, in the project's <code>recordings/</code> folder. They are used to test how well Bolo understands real voices. You can withdraw at any time, which deletes all your recordings.</p>
+    <p class="muted" id="where">Your recordings are saved only on this laptop, in the project's <code>recordings/</code> folder. They are used only to test how well Bolo understands real voices. You can withdraw at any time, which deletes all your recordings.</p>
     <label for="pseudonym">Pseudonym (not your real name)</label>
     <input id="pseudonym" type="text" maxlength="40" placeholder="e.g. speaker-07">
     <div class="check"><input type="checkbox" id="c_record"><label for="c_record">I agree to be recorded reading or saying short voice commands.</label></div>
-    <div class="check"><input type="checkbox" id="c_project"><label for="c_project">My recordings may be used <b>only to test</b> how well Bolo understands real voices. They will <b>not</b> be used to train any model, and they stay private on this computer.</label></div>
+    <div class="check"><input type="checkbox" id="c_project"><label for="c_project">My recordings may be used <b>only to test</b> how well Bolo understands real voices. They will <b>not</b> be used to train any model, and they stay private (<span class="whereShort">on this computer</span>).</label></div>
     <div class="check"><input type="checkbox" id="c_public"><label for="c_public">Optional: my recordings may be included in a future <b>public</b> open dataset (CC BY 4.0). I understand that public data can be used by anyone, which may include training their own models. I will be asked again before any release. Leave unchecked if unsure.</label></div>
     <label for="voice">Optional: voice (self-described, used only for group-level accuracy checks)</label>
     <select id="voice"><option value="">prefer not to say</option><option>female</option><option>male</option><option>other</option></select>
@@ -74,12 +75,12 @@
       <input id="transcript" type="text" maxlength="300">
     </div>
     <div class="status" id="status"></div>
-    <div class="muted" style="margin-top:12px">Tip: press <b>Space</b> to start/stop. Speak naturally, the way you'd talk to your laptop.</div>
+    <div class="muted" style="margin-top:12px" id="tip">Tip: press <b>Space</b> to start/stop. Speak naturally, the way you'd talk to your laptop.</div>
   </section>
 
   <section id="withdrawbox" class="card hidden">
     <strong>Withdraw</strong>
-    <p class="muted">Deletes all recordings saved under this pseudonym from this computer.</p>
+    <p class="muted">Deletes all recordings you made in this session (this browser) from the organiser's laptop.</p>
     <button id="withdraw">Delete my recordings</button>
     <div class="status" id="wstatus"></div>
   </section>
@@ -88,6 +89,12 @@
 const $ = id => document.getElementById(id);
 const TARGET_SR = 16000;
 const MIC = { echoCancellation:false, noiseSuppression:false, autoGainControl:false };
+const INVITE = new URLSearchParams(location.search).get("invite") || "";
+const MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && "ontouchend" in document);
+let speakerKey = "";
+const api = (path, opts = {}) => fetch(path, { ...opts, headers: { ...(opts.headers || {}), "X-Invite": INVITE, "X-Speaker-Key": speakerKey } });
+function store(k, v) { try { v === undefined ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 let speaker = null, prompts = [], todo = [], cur = null, done = new Set();
 let ctx = null, stream = null, proc = null, chunks = [], recording = false, wavBlob = null, inRate = 48000;
 
@@ -100,16 +107,39 @@ $("start").onclick = async () => {
     return setStatus($("cstatus"), "Both required consent boxes must be checked to record.", "err");
   const body = { pseudonym, consent: { record:true, project_use:true, public_release:$("c_public").checked },
                  meta: { voice:$("voice").value, age_range:$("age").value, region:$("region").value, mic:$("mic").value } };
-  const r = await fetch("/api/speaker", { method:"POST", body:JSON.stringify(body) });
+  const r = await api("/api/speaker", { method:"POST", body:JSON.stringify(body) });
   const j = await r.json();
   if (!r.ok) return setStatus($("cstatus"), j.error, "err");
-  speaker = j.speaker_id;
-  const pj = await (await fetch("/api/prompts?speaker=" + encodeURIComponent(speaker))).json();
+  speaker = j.speaker_id; speakerKey = j.speaker_key;
+  store("bolo_speaker", JSON.stringify({ speaker, speakerKey }));   // lets them resume / withdraw from this browser
+  await beginSession();
+};
+
+async function beginSession() {
+  const pj = await (await api("/api/prompts?speaker=" + encodeURIComponent(speaker))).json();
   prompts = pj.prompts; done = new Set(pj.done);
   todo = prompts.filter(p => !done.has(p.prompt_id));
   $("consent").classList.add("hidden"); $("session").classList.remove("hidden"); $("withdrawbox").classList.remove("hidden");
   next();
-};
+}
+
+(async () => {   // mode-aware wording + resume
+  try {
+    const s = await (await api("/api/session")).json();
+    if (s.shared) {
+      $("tagline").textContent = "Records Hinglish voice commands for testing Bolo. Your audio goes straight to the organiser's laptop.";
+      $("where").innerHTML = "Your recordings are sent over an encrypted link directly to the organiser's laptop and stored <b>only there</b>, not in any cloud. (The link passes through Cloudflare's network but nothing is stored on it.) They are used only to test how well Bolo understands real voices. You can withdraw at any time from this browser, which deletes all your recordings.";
+      document.querySelectorAll(".whereShort").forEach(e => e.textContent = "only on the organiser's laptop");
+    }
+  } catch (e) {}
+  if (MOBILE) { $("tip").textContent = "Tap ● Record, speak, tap ■ Stop. Speak naturally, the way you'd talk to your phone or laptop."; }
+  const saved = load("bolo_speaker");
+  if (saved) {
+    try { const o = JSON.parse(saved); speaker = o.speaker; speakerKey = o.speakerKey;
+          $("cstatus").innerHTML = ""; const b = document.createElement("button"); b.textContent = "Continue as " + speaker;
+          b.onclick = beginSession; $("start").parentNode.appendChild(b); } catch (e) {}
+  }
+})();
 
 function next() {
   wavBlob = null; $("play").disabled = true; $("save").disabled = true; $("transcript").value = "";
@@ -193,16 +223,18 @@ $("skip").onclick = () => { if (cur) todo.push(cur); next(); };
 $("save").onclick = async () => {
   if (!wavBlob || !cur) return;
   const q = new URLSearchParams({ speaker, prompt_id: cur.prompt_id, transcript: $("transcript").value,
-                                  mic: JSON.stringify({ ...MIC, input_rate: inRate }) });
-  const r = await fetch("/api/upload?" + q, { method:"POST", body: wavBlob });
+                                  mic: JSON.stringify({ ...MIC, input_rate: inRate, mobile: MOBILE }) });
+  const r = await api("/api/upload?" + q, { method:"POST", body: wavBlob });
   const j = await r.json();
   if (!r.ok) return setStatus($("status"), j.error, "err");
   done.add(cur.prompt_id); next(); setStatus($("status"), "Saved.", "good");
 };
 $("withdraw").onclick = async () => {
   if (!confirm("Delete all recordings for this pseudonym from this computer?")) return;
-  const r = await fetch("/api/withdraw", { method:"POST", body: JSON.stringify({ speaker_id: speaker }) });
+  const r = await api("/api/withdraw", { method:"POST", body: JSON.stringify({ speaker_id: speaker }) });
   const j = await r.json();
+  if (!r.ok) return setStatus($("wstatus"), j.error, "err");
+  store("bolo_speaker");
   setStatus($("wstatus"), `Deleted ${j.removed} recordings. You can close this page.`, "good");
   $("session").classList.add("hidden");
 };
