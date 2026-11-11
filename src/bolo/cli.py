@@ -34,6 +34,12 @@ def _cmd_stats(args: argparse.Namespace) -> None:
     print(json.dumps(manifest["stats"], ensure_ascii=False, indent=2))
 
 
+def _cmd_record(args: argparse.Namespace) -> None:
+    from .record.server import serve
+
+    serve(root=args.root, test_path=args.test, port=args.port, open_browser=not args.no_browser)
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bolo", description="Hinglish voice-command toolkit")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -51,6 +57,13 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("stats", help="print dataset statistics")
     s.add_argument("--data", default="data/text/v0")
     s.set_defaults(func=_cmd_stats)
+
+    r = sub.add_parser("record", help="local web tool to record the human-spoken eval set (consent-first)")
+    r.add_argument("--root", default="recordings", help="where audio + manifest are stored (gitignored)")
+    r.add_argument("--test", default="data/text/v0/test.jsonl", help="test split the prompts are drawn from")
+    r.add_argument("--port", type=int, default=8765)
+    r.add_argument("--no-browser", action="store_true")
+    r.set_defaults(func=_cmd_record)
 
     args = p.parse_args(argv)
     args.func(args)

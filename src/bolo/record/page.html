@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolo Recorder</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1d1d1b; --muted:#6b6b66; --card:#fff; --line:#e4e3dc; --accent:#c2410c; --ok:#15803d; --rec:#dc2626; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161614; --fg:#ecebe6; --muted:#a3a29b; --card:#201f1d; --line:#34332f; --accent:#fb923c; --ok:#4ade80; --rec:#f87171; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } .muted { color:var(--muted); font-size:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-top:16px; }
+  label { display:block; margin:10px 0 4px; font-size:14px; }
+  input[type=text], select { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); font-size:16px; }
+  .check { display:flex; gap:10px; align-items:flex-start; margin:10px 0; font-size:15px; } .check input { margin-top:4px; }
+  button { font:inherit; padding:10px 16px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.rec { background:var(--rec); color:#fff; border-color:var(--rec); min-width:140px; }
+  button:disabled { opacity:.45; cursor:default; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .prompt { font-size:24px; font-weight:600; margin:8px 0; overflow-wrap:anywhere; }
+  .hint { color:var(--muted); font-size:18px; overflow-wrap:anywhere; }
+  .tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); color:var(--muted); }
+  .bar { height:6px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:8px; } .bar > div { height:100%; background:var(--ok); width:0; }
+  .status { margin-top:10px; font-size:14px; min-height:20px; } .err { color:var(--rec); } .good { color:var(--ok); }
+  .level { height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:10px; } .level > div { height:100%; background:var(--accent); width:0; transition:width .05s; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Bolo Recorder</h1>
+  <div class="muted">Records Hinglish voice commands for evaluating Bolo. Everything stays on this computer.</div>
+
+  <section id="consent" class="card">
+    <strong>Before you start</strong>
+    <p class="muted">Your recordings are saved only on this laptop, in the project's <code>recordings/</code> folder. They are used to test how well Bolo understands real voices. You can withdraw at any time, which deletes all your recordings.</p>
+    <label for="pseudonym">Pseudonym (not your real name)</label>
+    <input id="pseudonym" type="text" maxlength="40" placeholder="e.g. speaker-07">
+    <div class="check"><input type="checkbox" id="c_record"><label for="c_record">I agree to be recorded reading or saying short voice commands.</label></div>
+    <div class="check"><input type="checkbox" id="c_project"><label for="c_project">The recordings may be used to evaluate and improve the Bolo project (kept private).</label></div>
+    <div class="check"><input type="checkbox" id="c_public"><label for="c_public">Optional: my recordings may be included in a future <b>public</b> open dataset (CC BY 4.0). Leave unchecked if unsure.</label></div>
+    <label for="age">Optional: age range</label>
+    <select id="age"><option value="">prefer not to say</option><option>18-24</option><option>25-34</option><option>35-49</option><option>50+</option></select>
+    <label for="region">Optional: region you grew up in (state or city)</label>
+    <input id="region" type="text" maxlength="60">
+    <label for="mic">Optional: microphone</label>
+    <select id="mic"><option value="">unknown</option><option>laptop built-in</option><option>earphones</option><option>headset</option><option>phone</option></select>
+    <div class="row"><button class="primary" id="start">Start recording session</button></div>
+    <div class="status" id="cstatus"></div>
+  </section>
+
+  <section id="session" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap">
+      <span class="tag" id="kind"></span><span class="muted" id="progress"></span>
+    </div>
+    <div class="bar"><div id="pbar"></div></div>
+    <div class="prompt" id="show"></div>
+    <div class="hint" id="hint"></div>
+    <div class="muted" id="instr" style="margin-top:8px"></div>
+    <div class="level"><div id="lvl"></div></div>
+    <div class="row">
+      <button class="rec" id="recbtn">● Record</button>
+      <button id="play" disabled>▶ Play</button>
+      <button class="primary" id="save" disabled>Save &amp; next</button>
+      <button id="skip">Skip</button>
+    </div>
+    <div id="tbox" class="hidden">
+      <label for="transcript">Optional: type what you said (Roman script is fine)</label>
+      <input id="transcript" type="text" maxlength="300">
+    </div>
+    <div class="status" id="status"></div>
+    <div class="muted" style="margin-top:12px">Tip: press <b>Space</b> to start/stop. Speak naturally, the way you'd talk to your laptop.</div>
+  </section>
+
+  <section id="withdrawbox" class="card hidden">
+    <strong>Withdraw</strong>
+    <p class="muted">Deletes all recordings saved under this pseudonym from this computer.</p>
+    <button id="withdraw">Delete my recordings</button>
+    <div class="status" id="wstatus"></div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const TARGET_SR = 16000;
+const MIC = { echoCancellation:false, noiseSuppression:false, autoGainControl:false };
+let speaker = null, prompts = [], todo = [], cur = null, done = new Set();
+let ctx = null, stream = null, proc = null, chunks = [], recording = false, wavBlob = null, inRate = 48000;
+
+function setStatus(el, msg, cls) { el.textContent = msg; el.className = "status " + (cls || ""); }
+
+$("start").onclick = async () => {
+  const pseudonym = $("pseudonym").value.trim();
+  if (!pseudonym) return setStatus($("cstatus"), "Please enter a pseudonym.", "err");
+  if (!$("c_record").checked || !$("c_project").checked)
+    return setStatus($("cstatus"), "Both required consent boxes must be checked to record.", "err");
+  const body = { pseudonym, consent: { record:true, project_use:true, public_release:$("c_public").checked },
+                 meta: { age_range:$("age").value, region:$("region").value, mic:$("mic").value } };
+  const r = await fetch("/api/speaker", { method:"POST", body:JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) return setStatus($("cstatus"), j.error, "err");
+  speaker = j.speaker_id;
+  const pj = await (await fetch("/api/prompts?speaker=" + encodeURIComponent(speaker))).json();
+  prompts = pj.prompts; done = new Set(pj.done);
+  todo = prompts.filter(p => !done.has(p.prompt_id));
+  $("consent").classList.add("hidden"); $("session").classList.remove("hidden"); $("withdrawbox").classList.remove("hidden");
+  next();
+};
+
+function next() {
+  wavBlob = null; $("play").disabled = true; $("save").disabled = true; $("transcript").value = "";
+  setStatus($("status"), "");
+  const n = prompts.length, k = done.size;
+  $("progress").textContent = `${k} / ${n} recorded`; $("pbar").style.width = (100 * k / n) + "%";
+  cur = todo.shift();
+  if (!cur) { $("show").textContent = "All done, thank you!"; $("hint").textContent = ""; $("instr").textContent = "";
+              $("recbtn").disabled = true; $("skip").disabled = true; $("kind").textContent = "finished"; return; }
+  const read = cur.kind === "read";
+  $("kind").textContent = read ? "read this" : "say it your way";
+  $("show").textContent = cur.show;
+  $("hint").textContent = read ? cur.hint : "";
+  $("instr").textContent = read ? "Read the sentence above (small changes in wording are fine)."
+                                : "Don't read: say this request in your own words, the way you naturally would (Hinglish, Hindi or English).";
+  $("tbox").classList.toggle("hidden", read);
+}
+
+async function ensureMic() {
+  if (stream) return;
+  stream = await navigator.mediaDevices.getUserMedia({ audio: MIC });
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  inRate = ctx.sampleRate;
+  const src = ctx.createMediaStreamSource(stream);
+  proc = ctx.createScriptProcessor(4096, 1, 1);
+  src.connect(proc); proc.connect(ctx.destination);
+  proc.onaudioprocess = e => {
+    const d = e.inputBuffer.getChannelData(0);
+    let peak = 0; for (let i = 0; i < d.length; i += 16) peak = Math.max(peak, Math.abs(d[i]));
+    $("lvl").style.width = Math.min(100, peak * 140) + "%";
+    if (recording) chunks.push(new Float32Array(d));
+  };
+}
+
+function resample(buf, from, to) {
+  if (from === to) return buf;
+  const ratio = from / to, n = Math.floor(buf.length / ratio), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {               // box-filter average over the source window (cheap anti-alias)
+    const a = Math.floor(i * ratio), b = Math.min(buf.length, Math.floor((i + 1) * ratio));
+    let s = 0; for (let j = a; j < b; j++) s += buf[j];
+    out[i] = s / Math.max(1, b - a);
+  }
+  return out;
+}
+
+function encodeWav(samples, sr) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true);
+  v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data");
+  v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return new Blob([buf], { type:"audio/wav" });
+}
+
+async function toggleRec() {
+  if (!cur) return;
+  try { await ensureMic(); } catch (e) { return setStatus($("status"), "Microphone permission denied: " + e.message, "err"); }
+  if (ctx.state === "suspended") await ctx.resume();
+  if (!recording) {
+    chunks = []; recording = true; $("recbtn").textContent = "■ Stop"; $("save").disabled = true; $("play").disabled = true;
+    setStatus($("status"), "Recording…");
+  } else {
+    recording = false; $("recbtn").textContent = "● Record";
+    let len = chunks.reduce((a, c) => a + c.length, 0), all = new Float32Array(len), o = 0;
+    for (const c of chunks) { all.set(c, o); o += c.length; }
+    const pcm = resample(all, inRate, TARGET_SR), dur = pcm.length / TARGET_SR;
+    if (dur < 0.3) return setStatus($("status"), "Too short, try again.", "err");
+    if (dur > 15) return setStatus($("status"), "Too long (max 15 s), try again.", "err");
+    wavBlob = encodeWav(pcm, TARGET_SR);
+    $("play").disabled = false; $("save").disabled = false;
+    setStatus($("status"), `Captured ${dur.toFixed(1)} s. Play it back, then Save, or Record again.`);
+  }
+}
+
+$("recbtn").onclick = toggleRec;
+document.addEventListener("keydown", e => { if (e.code === "Space" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); toggleRec(); } });
+$("play").onclick = () => { if (wavBlob) new Audio(URL.createObjectURL(wavBlob)).play(); };
+$("skip").onclick = () => { if (cur) todo.push(cur); next(); };
+$("save").onclick = async () => {
+  if (!wavBlob || !cur) return;
+  const q = new URLSearchParams({ speaker, prompt_id: cur.prompt_id, transcript: $("transcript").value,
+                                  mic: JSON.stringify({ ...MIC, input_rate: inRate }) });
+  const r = await fetch("/api/upload?" + q, { method:"POST", body: wavBlob });
+  const j = await r.json();
+  if (!r.ok) return setStatus($("status"), j.error, "err");
+  done.add(cur.prompt_id); next(); setStatus($("status"), "Saved.", "good");
+};
+$("withdraw").onclick = async () => {
+  if (!confirm("Delete all recordings for this pseudonym from this computer?")) return;
+  const r = await fetch("/api/withdraw", { method:"POST", body: JSON.stringify({ speaker_id: speaker }) });
+  const j = await r.json();
+  setStatus($("wstatus"), `Deleted ${j.removed} recordings. You can close this page.`, "good");
+  $("session").classList.add("hidden");
+};
+</script>
+</body>
+</html>
