@@ -44,9 +44,16 @@ if not token and not os.path.exists("/kaggle"):
     except Exception as e:
         errs.append(f"colab: {type(e).__name__}: {e}")
 token = token or os.environ.get("HF_TOKEN")
-assert token, "HF_TOKEN secret missing: " + " | ".join(errs)
-from huggingface_hub import login
-login(token=token)
+if token:
+    from huggingface_hub import login
+    login(token=token)
+    MODEL = "ai4bharat/indic-parler-tts"
+else:
+    # API-started runs cannot read Kaggle secrets: run a pipeline SMOKE TEST with the ungated Parler-TTS mini
+    # (same codebase/architecture) and stop. The real run must be started from the Kaggle UI.
+    print("NO HF_TOKEN:", " | ".join(errs), "-> smoke-test mode with parler-tts/parler-tts-mini-v1")
+    MODEL = "parler-tts/parler-tts-mini-v1"
+SMOKE = MODEL != "ai4bharat/indic-parler-tts"
 '''
 
 TTS = nb([
@@ -69,6 +76,12 @@ below to try a small run first (e.g. 64 per split, a few minutes).
 Output: `/kaggle/working/bolo-tts/` (audio + `manifest.jsonl` + `rejected.jsonl`), roughly 0.5 GB.
 """),
     ("code", "!pip install -q git+https://github.com/huggingface/parler-tts.git soundfile"),
+    ("code", r'''
+# parler-tts pins an old transformers + protobuf 4.x; Kaggle's TensorFlow needs protobuf>=5 and old transformers
+# imports TF if present -> ImportError. We never use TF/JAX, so switch them off before importing transformers.
+import os
+os.environ["USE_TF"] = "0"; os.environ["USE_TORCH"] = "1"; os.environ["USE_JAX"] = "0"; os.environ["USE_FLAX"] = "0"
+'''),
     ("code", FIND_BUNDLE),
     ("code", HF_LOGIN),
     ("code", r'''
@@ -85,16 +98,22 @@ print(len(jobs), "jobs; example:", json.dumps(jobs[0], ensure_ascii=False)[:400]
     ("code", r'''
 import torch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+if SMOKE:
+    smoke = [j for j in jobs if j["split"] == "train"][:20]
+    print(tts.synthesize(smoke, WORK + "/smoke", batch_size=BATCH, device=DEVICE, model_id=MODEL))
+    sm = [json.loads(l) for l in open(WORK + "/smoke/manifest.jsonl")] if os.path.exists(WORK + "/smoke/manifest.jsonl") else []
+    print("SMOKE kept", len(sm), "durations", [r["duration_s"] for r in sm])
+    raise SystemExit("SMOKE TEST DONE (pipeline OK if clips were kept); start the real run from the Kaggle UI")
 # 1) self-check on a small slice first: stop early (and save GPU quota) if the TTS output looks broken
 probe = [j for j in jobs if j["split"] == "train"][:48] + [j for j in jobs if j["split"] == "test"][:16]
-st = tts.synthesize(probe, OUT, batch_size=BATCH, device=DEVICE)
+st = tts.synthesize(probe, OUT, batch_size=BATCH, device=DEVICE, model_id=MODEL)
 man = [json.loads(l) for l in open(OUT + "/manifest.jsonl")] if os.path.exists(OUT + "/manifest.jsonl") else []
 rej = [json.loads(l) for l in open(OUT + "/rejected.jsonl")] if os.path.exists(OUT + "/rejected.jsonl") else []
 rate = len(rej) / max(1, len(man) + len(rej))
 print(f"probe: kept {len(man)}, rejected {len(rej)} ({rate:.0%})", [r["reject"] for r in rej][:10])
 assert rate < 0.3, "too many TTS rejections in the probe: inspect rejected.jsonl before a full run"
 # 2) full run (resumable; the probe utterances are skipped)
-stats = tts.synthesize(jobs, OUT, batch_size=BATCH, device=DEVICE)
+stats = tts.synthesize(jobs, OUT, batch_size=BATCH, device=DEVICE, model_id=MODEL)
 print(stats)
 '''),
     ("code", r'''
