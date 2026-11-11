@@ -1,0 +1,730 @@
+# Bolo lexicon v0.
+# Every literal word used in templates/classes must appear in hindi_words or english_words
+# (tests enforce this), so every utterance can be rendered in Roman, Devanagari, or mixed script.
+# Pool entries use the shorthand "roman|devanagari"; the Devanagari part is optional.
+# Roman keys are the CANONICAL spelling (used as the ASR target); `spelling` lists variants seen in typing.
+
+hindi_words:
+  aadha: आधा
+  aap: आप
+  aaj: आज
+  aage: आगे
+  abhi: अभी
+  accha: अच्छा
+  andar: अंदर
+  aur: और
+  awaaz: आवाज़
+  baar: बार
+  baat: बात
+  bacha: बचा
+  bachi: बची
+  badha: बढ़ा
+  badhao: बढ़ाओ
+  badlo: बदलो
+  baje: बजे
+  bajao: बजाओ
+  banao: बनाओ
+  band: बंद
+  bas: बस
+  bata: बता
+  batao: बताओ
+  bhai: भाई
+  bhejo: भेजो
+  bilkul: बिल्कुल
+  bulao: बुलाओ
+  chahiye: चाहिए
+  chal: चल
+  chala: चला
+  chalao: चलाओ
+  chalo: चलो
+  chalu: चालू
+  cheez: चीज़
+  chhodo: छोड़ो
+  dheere: धीरे
+  dheemi: धीमी
+  de: दे
+  dekho: देखो
+  dijiye: दीजिए
+  dikhao: दिखाओ
+  do: दो
+  ek: एक
+  gaana: गाना
+  gaane: गाने
+  ghatao: घटाओ
+  haal: हाल
+  haan: हाँ
+  hai: है
+  halki: हल्की
+  ho: हो
+  hua: हुआ
+  isko: इसको
+  ka: का
+  kaam: काम
+  kab: कब
+  kaise: कैसे
+  kaisa: कैसा
+  kal: कल
+  kam: कम
+  kar: कर
+  karao: कराओ
+  karke: करके
+  karna: करना
+  karo: करो
+  ke: के
+  khana: खाना
+  khol: खोल
+  kholiye: खोलिए
+  kholna: खोलना
+  kholo: खोलो
+  ki: की
+  koi: कोई
+  kijiye: कीजिए
+  kitna: कितना
+  kitni: कितनी
+  ko: को
+  kripya: कृपया
+  kuch: कुछ
+  kya: क्या
+  laga: लगा
+  lagao: लगाओ
+  le: ले
+  liye: लिए
+  lo: लो
+  mat: मत
+  mausam: मौसम
+  mein: में
+  mera: मेरा
+  meri: मेरी
+  milao: मिलाओ
+  mujhe: मुझे
+  na: ना
+  naam: नाम
+  nahi: नहीं
+  naya: नया
+  pata: पता
+  pe: पे
+  par: पर
+  poora: पूरा
+  poori: पूरी
+  raha: रहा
+  rakho: रखो
+  rakh: रख
+  rehne: रहने
+  saat: सात
+  roshni: रोशनी
+  ruko: रुको
+  sabse: सबसे
+  sakte: सकते
+  se: से
+  subah: सुबह
+  suno: सुनो
+  sunao: सुनाओ
+  thoda: थोड़ा
+  thodi: थोड़ी
+  tez: तेज़
+  tum: तुम
+  tumhara: तुम्हारा
+  theek: ठीक
+  wahi: वही
+  bola: बोला
+  umm: अम्म
+  usko: उसको
+  wala: वाला
+  wali: वाली
+  wale: वाले
+  wapas: वापस
+  woh: वो
+  ya: या
+  yaar: यार
+  zara: ज़रा
+  zyada: ज़्यादा
+  dena: देना
+  hata: हटा
+  hatao: हटाओ
+  kaun: कौन
+  sab: सब
+  galti: ग़लती
+  ruk: रुक
+  jao: जाओ
+
+# English words. Value = Devanagari transliteration used in full-Devanagari mode (null -> stays Latin).
+english_words:
+  a: null
+  ai: एआई
+  alarm: अलार्म
+  app: ऐप
+  assistant: असिस्टेंट
+  bluetooth: ब्लूटूथ
+  brightness: ब्राइटनेस
+  call: कॉल
+  can: null
+  check: चेक
+  claude: क्लॉड
+  close: क्लोज़
+  code: कोड
+  command: कमांड
+  connected: कनेक्टेड
+  could: null
+  decrease: डिक्रीज़
+  delete: डिलीट
+  dial: null
+  directory: डायरेक्टरी
+  down: डाउन
+  file: फ़ाइल
+  finder: फ़ाइंडर
+  folder: फ़ोल्डर
+  full: फ़ुल
+  give: null
+  hello: हेलो
+  hey: हे
+  how: null
+  in: null
+  increase: इंक्रीज़
+  install: इंस्टॉल
+  is: null
+  joke: जोक
+  laptop: लैपटॉप
+  launch: लॉन्च
+  left: null
+  level: लेवल
+  line: लाइन
+  lock: लॉक
+  max: मैक्स
+  me: null
+  meeting: मीटिंग
+  message: मैसेज
+  minimum: मिनिमम
+  much: null
+  mute: म्यूट
+  my: null
+  new: न्यू
+  number: नंबर
+  news: न्यूज़
+  of: null
+  "on": ऑन
+  open: ओपन
+  order: ऑर्डर
+  percent: परसेंट
+  phone: फ़ोन
+  please: प्लीज़
+  project: प्रोजेक्ट
+  rename: रीनेम
+  restart: रीस्टार्ट
+  ring: रिंग
+  screen: स्क्रीन
+  screenshot: स्क्रीनशॉट
+  second: सेकंड
+  set: सेट
+  shell: शेल
+  show: null
+  shutdown: शटडाउन
+  sound: साउंड
+  start: स्टार्ट
+  status: स्टेटस
+  terminal: टर्मिनल
+  the: null
+  thanks: थैंक्स
+  time: टाइम
+  to: null
+  turn: null
+  uninstall: अनइंस्टॉल
+  unmute: अनम्यूट
+  up: अप
+  usage: यूसेज
+  video: वीडियो
+  volume: वॉल्यूम
+  wallpaper: वॉलपेपर
+  what's: null
+  whatsapp: व्हाट्सऐप
+  wifi: वाईफ़ाई
+  window: विंडो
+  with: null
+  you: null
+  weather: वेदर
+  today: null
+  tell: null
+  send: null
+  take: null
+  stop: स्टॉप
+  nothing: null
+  never: null
+  mind: null
+  cancel: कैंसल
+  wait: null
+  music: म्यूज़िक
+  play: null
+  some: null
+  sorry: सॉरी
+  for: null
+  it: null
+  this: null
+  that: null
+
+# Phrase classes used as <name> in templates. Each variant is a space-separated phrase.
+classes:
+  open_v: [kholo, khol do, kholna, khol de, open karo, open kar do, kholiye, khol dijiye, open kijiye,
+           chalu karo, start karo, launch karo, chalao, chala do]
+  karo_v: [karo, kar do, lagao, laga do, kijiye, karna]
+  batao_v: [batao, bata do, dikhao, check karo]
+  set_v: [karo, kar do, rakho, rakh do, set karo, set kar do]
+  loc: [mein, ke andar]
+  open_f: [kholo, khol do, kholna, khol de, open karo, open kar do, kholiye, khol dijiye, open kijiye]
+  folder_w: [folder, directory]
+  term: [terminal, terminal window, shell, command line]
+  claude: [claude, claude code]
+  pe: [pe, par, se]
+  pct: [percent]
+  vol: [volume, awaaz, sound]
+  bright: [brightness, screen brightness, roshni, screen ki roshni]
+  pre: [yaar, zara, please, bhai, ek baar, accha, umm, suno, haan, chalo, yaar zara, please zara]
+  post: [please, yaar, na, bhai, abhi, zara]
+
+# Typing variants of canonical Roman spellings (applied as noise to the `text` field only).
+spelling:
+  mein: [me, mai, mei, main]
+  kholo: [kolo, khollo, kholoo]
+  karo: [kro, karoo]
+  kar: [kr]
+  hai: [he, h, hy]
+  kya: [kia, kyaa, ky]
+  nahi: [nhi, nahin, nai]
+  yaar: [yar, yr]
+  zara: [jara, zra]
+  please: [plz, pls, plis]
+  batao: [btao, bataoo]
+  dikhao: [dikhaao, dkhao]
+  badhao: [badhaao, bdhao, barhao]
+  awaaz: [awaz, aawaz, avaaz]
+  thoda: [thora, thodaa]
+  zyada: [jyada, zada, jada]
+  kam: [km]
+  band: [bandh, bnd]
+  chahiye: [chaiye, chahie, chaahiye]
+  mujhe: [mjhe, muje]
+  wala: [vala, waala]
+  wali: [vali, waali]
+  wale: [vale, waale]
+  folder: [fldr]
+  terminal: [termnl, terminl]
+  call: [cal, kall]
+  kitni: [ktni]
+  kitna: [ktna]
+  check: [chk, chek]
+  volume: [vol, volumn]
+  brightness: [brightnes]
+  abhi: [abi]
+  lagao: [lgao, lagaao]
+  laga: [lga]
+  chalu: [chaalu]
+  andar: [ander]
+  dijiye: [dijie]
+  kijiye: [kijie]
+  kaisa: [kesa]
+  raha: [rha]
+  bacha: [bcha]
+  bachi: [bchi]
+  aur: [or, aor]
+  phone: [fone]
+  accha: [acha, achha]
+  roshni: [roshani]
+  dheere: [dhire, dheere]
+
+# ---------- Slot value pools ----------
+# Open pools are split train/dev/test BY VALUE (see bolo.splits). Keep values lowercase Roman as spoken.
+pools:
+  folders:
+    - bolo|बोलो
+    - projects|प्रोजेक्ट्स
+    - downloads|डाउनलोड्स
+    - desktop|डेस्कटॉप
+    - documents|डॉक्यूमेंट्स
+    - pictures
+    - music|म्यूज़िक
+    - movies
+    - college|कॉलेज
+    - assignments|असाइनमेंट्स
+    - notes|नोट्स
+    - dsa
+    - ml notes
+    - iitm
+    - iitm notes
+    - website|वेबसाइट
+    - portfolio
+    - resume|रिज़्यूमे
+    - internship
+    - hackathon
+    - side projects
+    - scripts|स्क्रिप्ट्स
+    - dotfiles
+    - backend|बैकएंड
+    - frontend|फ़्रंटएंड
+    - api
+    - server
+    - client
+    - mobile app
+    - android
+    - flutter app
+    - react app
+    - blog|ब्लॉग
+    - research
+    - papers
+    - thesis
+    - datasets
+    - kaggle|कैगल
+    - leetcode|लीटकोड
+    - competitive programming
+    - python practice
+    - java
+    - rust learning
+    - go projects
+    - experiments
+    - sandbox
+    - playground
+    - temp|टेम्प
+    - archive|आर्काइव
+    - old projects
+    - work|वर्क
+    - office|ऑफ़िस
+    - freelance
+    - invoices
+    - photos|फ़ोटोज़
+    - screenshots
+    - wallpapers
+    - videos|वीडियोज़
+    - recordings
+    - podcast
+    - startup|स्टार्टअप
+    - pitch deck
+    - marketing
+    - design
+    - figma exports
+    - assets
+    - game
+    - unity project
+    - discord bot
+    - telegram bot
+    - chatbot
+    - voice assistant
+    - whisper
+    - llm
+    - rag demo
+    - agent
+    - scraper
+    - automation
+    - home lab
+    - raspberry pi
+    - arduino
+    - iot
+    - robotics
+    - semester three
+    - semester four
+    - maths|मैथ्स
+    - physics|फ़िज़िक्स
+    - chemistry
+    - statistics
+    - english
+    - hindi notes
+    - exam prep
+    - gate prep
+    - jee notes
+    - books|बुक्स
+    - ebooks
+    - family|फ़ैमिली
+    - travel|ट्रैवल
+    - goa trip
+    - wedding photos
+    - bills|बिल्स
+    - taxes
+    - bank
+    - insurance
+    - medical
+    - gym|जिम
+    - recipes|रेसिपीज़
+    - personal
+    - journal|जर्नल
+    - todo|टूडू
+    - ideas|आइडियाज़
+
+  files:
+    - resume pdf
+    - cover letter
+    - marksheet|मार्कशीट
+    - aadhaar card|आधार कार्ड
+    - pan card|पैन कार्ड
+    - offer letter
+    - budget sheet
+    - expense sheet
+    - project report
+    - final presentation
+    - lecture notes
+    - syllabus
+    - timetable
+    - assignment pdf
+    - todo list
+    - readme
+    - main dot py
+    - config file
+    - requirements file
+    - analysis notebook
+    - invoice
+    - rent agreement|रेंट एग्रीमेंट
+    - bank statement
+    - salary slip
+    - ticket pdf
+    - boarding pass
+    - wedding card
+    - certificate
+    - id card
+    - shopping list
+    - grocery list
+    - meeting notes
+    - research paper
+    - book draft
+    - song lyrics
+
+  contacts:
+    - rahul|राहुल
+    - priya|प्रिया
+    - amit|अमित
+    - neha|नेहा
+    - rohan|रोहन
+    - sneha|स्नेहा
+    - vikram|विक्रम
+    - anjali|अंजलि
+    - arjun|अर्जुन
+    - pooja|पूजा
+    - karan|करण
+    - kavya|काव्या
+    - aditi|अदिति
+    - siddharth|सिद्धार्थ
+    - ishaan|ईशान
+    - meera|मीरा
+    - harsh|हर्ष
+    - tanvi|तन्वी
+    - nikhil|निखिल
+    - riya|रिया
+    - varun|वरुण
+    - shreya|श्रेया
+    - aman|अमन
+    - divya|दिव्या
+    - yash|यश
+    - simran|सिमरन
+    - kunal|कुणाल
+    - nisha|निशा
+    - gaurav|गौरव
+    - sakshi|साक्षी
+    - manish|मनीष
+    - payal|पायल
+    - deepak|दीपक
+    - ritu|रितु
+    - sanjay|संजय
+    - sunita|सुनीता
+    - rajesh|राजेश
+    - anita|अनीता
+    - suresh|सुरेश
+    - kiran|किरण
+    - mohit|मोहित
+    - ankita|अंकिता
+    - abhishek|अभिषेक
+    - swati|स्वाति
+    - rakesh|राकेश
+    - preeti|प्रीति
+    - vivek|विवेक
+    - jyoti|ज्योति
+    - ashish|आशीष
+    - komal|कोमल
+    - pranav|प्रणव
+    - ira|इरा
+    - aarav|आरव
+    - vihaan|विहान
+    - ananya|अनन्या
+    - diya|दिया
+    - krish|कृष
+    - myra|मायरा
+    - kabir|कबीर
+    - zoya|ज़ोया
+    - imran|इमरान
+    - ayesha|आयशा
+    - farhan|फ़रहान
+    - sana|सना
+    - salman|सलमान
+    - fatima|फ़ातिमा
+    - harpreet|हरप्रीत
+    - gurpreet|गुरप्रीत
+    - jaspreet|जसप्रीत
+    - manpreet|मनप्रीत
+    - joseph|जोसेफ़
+    - maria|मारिया
+    - john|जॉन
+    - david|डेविड
+    - lakshmi|लक्ष्मी
+    - venkat|वेंकट
+    - karthik|कार्तिक
+    - divyanshu|दिव्यांशु
+    - ravi|रवि
+    - shalini|शालिनी
+    - mummy|मम्मी
+    - papa|पापा
+    - bhaiya|भैया
+    - didi|दीदी
+    - nani|नानी
+    - dadi|दादी
+    - chacha|चाचा
+    - mama|मामा
+    - bua|बुआ
+    - mausi|मौसी
+    - chotu|छोटू
+    - rahul sharma|राहुल शर्मा
+    - priya verma|प्रिया वर्मा
+    - amit sir|अमित सर
+    - neha mam|नेहा मैम
+    - gupta ji|गुप्ता जी
+    - sharma uncle|शर्मा अंकल
+    - verma aunty|वर्मा आंटी
+    - doctor mehta|डॉक्टर मेहता
+
+  apps:
+    - chrome|क्रोम
+    - safari|सफ़ारी
+    - firefox|फ़ायरफ़ॉक्स
+    - vs code|वीएस कोड
+    - cursor
+    - xcode
+    - android studio
+    - intellij
+    - pycharm
+    - spotify|स्पॉटिफ़ाई
+    - apple music
+    - youtube|यूट्यूब
+    - netflix|नेटफ़्लिक्स
+    - whatsapp|व्हाट्सऐप
+    - telegram|टेलीग्राम
+    - slack|स्लैक
+    - discord|डिस्कॉर्ड
+    - zoom|ज़ूम
+    - microsoft teams
+    - notion|नोशन
+    - obsidian
+    - finder|फ़ाइंडर
+    - system settings|सिस्टम सेटिंग्स
+    - calculator|कैलकुलेटर
+    - calendar|कैलेंडर
+    - apple notes
+    - mail
+    - outlook
+    - gmail|जीमेल
+    - preview
+    - photoshop
+    - figma
+    - canva
+    - postman
+    - docker
+    - chatgpt
+    - perplexity
+    - instagram|इंस्टाग्राम
+    - word
+    - excel|एक्सेल
+    - powerpoint
+    - keynote
+    - app store
+    - activity monitor
+    - podcasts
+    - maps
+    - facetime
+    - vlc
+    - obs
+    - audacity
+    - garageband
+    - imovie
+    - final cut pro
+    - davinci resolve
+    - blender
+    - steam
+    - minecraft
+    - anki
+    - kindle
+    - zotero
+    - raycast
+    - bitwarden
+    - brave
+    - arc browser
+
+  # Closed pools: canonical value -> spoken surfaces. Not split.
+  call_apps:
+    whatsapp: [whatsapp|व्हाट्सऐप]
+    facetime: [facetime]
+    phone: [phone|फ़ोन, normal call]
+    telegram: [telegram|टेलीग्राम]
+    zoom: [zoom|ज़ूम]
+    google meet: [google meet, meet]
+    teams: [teams, microsoft teams]
+    skype: [skype]
+    discord: [discord|डिस्कॉर्ड]
+    signal: [signal]
+
+  status_targets:
+    battery: [battery|बैटरी, charging|चार्जिंग, charge|चार्ज]
+    wifi: [wifi|वाईफ़ाई]
+    internet: [internet|इंटरनेट, net|नेट, network|नेटवर्क]
+    storage: [storage|स्टोरेज, disk space|डिस्क स्पेस, disk|डिस्क]
+    git: [git|गिट, git repo, repo]
+    cpu: [cpu|सीपीयू, processor]
+    ram: [ram|रैम, memory|मेमोरी]
+    bluetooth: [bluetooth|ब्लूटूथ]
+
+  # Direction phrases are built from dictionary words, so they render in any script.
+  volume_dir_hi:
+    up: [badhao, badha do, tez karo, zyada karo, increase karo, up karo, thoda badhao, aur badhao]
+    down: [kam karo, kam kar do, ghatao, dheere karo, decrease karo, down karo, thoda kam karo, halki karo]
+    mute: [mute karo, band karo, bilkul band karo, mute kar do]
+    unmute: [unmute karo, wapas chalu karo]
+    max: [full karo, poora badha do, max karo, full kar do]
+  volume_dir_en:
+    up: [up]
+    down: [down]
+  brightness_dir_hi:
+    up: [badhao, badha do, tez karo, zyada karo, increase karo, up karo, thoda badhao]
+    down: [kam karo, kam kar do, ghatao, dheemi karo, halki karo, decrease karo, down karo]
+    max: [full karo, max karo, poori kar do]
+    min: [sabse kam karo, minimum karo]
+  brightness_dir_en:
+    up: [up]
+    down: [down]
+
+# Number surfaces for the `level` slot (closed). Roman|Devanagari.
+numbers_hi:
+  0: zero|ज़ीरो
+  5: paanch|पाँच
+  10: das|दस
+  15: pandrah|पंद्रह
+  20: bees|बीस
+  25: pachees|पच्चीस
+  30: tees|तीस
+  35: paintees|पैंतीस
+  40: chaalis|चालीस
+  45: paintaalis|पैंतालीस
+  50: pachaas|पचास
+  55: pachpan|पचपन
+  60: saath|साठ
+  65: painsath|पैंसठ
+  70: sattar|सत्तर
+  75: pachattar|पचहत्तर
+  80: assi|अस्सी
+  85: pachaasi|पचासी
+  90: nabbe|नब्बे
+  95: pachaanve|पचानवे
+  100: sau|सौ
+numbers_en:
+  0: zero
+  10: ten
+  20: twenty
+  25: twenty five
+  30: thirty
+  40: forty
+  50: fifty
+  60: sixty
+  70: seventy
+  75: seventy five
+  80: eighty
+  90: ninety
+  100: hundred

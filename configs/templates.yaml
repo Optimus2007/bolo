@@ -1,0 +1,229 @@
+# Bolo templates v0.
+# Token syntax (space separated):
+#   {slot}         labeled slot, filled from the slot type's pool (schema.yaml)
+#   {slot:pool}    labeled slot, filled from an explicit pool
+#   {_:pool}       UNlabeled filler from a pool (used in negatives, e.g. a name in an unsupported request)
+#   <class>        phrase class from lexicon.yaml; <class?> = optional (50%)
+#   word           literal word; must exist in lexicon hindi_words/english_words
+# Entry options: w (weight, default 1), lang: en (English-only phrasing; numbers rendered as digits/English),
+#   kind: folder|file (restricts `path`), only: {slot: [values]} (restricts closed values), reason (negatives).
+
+open_terminal:
+  - "<pre?> {folder} <folder_w?> <loc> <term> <open_v> <post?>"
+  - "<pre?> {folder} wale folder mein <term> <open_v>"
+  - "<pre?> <term> <open_v> {folder} <folder_w?> <loc> <post?>"
+  - {t: "<pre?> <term> <open_v> <post?>", w: 0.6}
+  - "<pre?> {folder} <folder_w?> <loc> ek <term> <open_v>"
+  - "<pre?> {folder} ka <term> <open_v> <post?>"
+  - "<pre?> {folder} <folder_w?> <loc> <term> chahiye"
+  - "<pre?> mujhe {folder} <folder_w?> <loc> <term> chahiye"
+  - {t: "<pre?> naya <term> <open_v> <post?>", w: 0.4}
+  - "<pre?> {folder} <folder_w?> <loc> new <term> <open_v>"
+  - "<pre?> <term> <open_v> aur {folder} <folder_w?> <loc> le chalo"
+  - "kya aap {folder} <folder_w?> <loc> <term> khol sakte ho"
+  - {t: "open <term> in {folder}", lang: en}
+  - {t: "open a <term> in the {folder} <folder_w>", lang: en}
+  - {t: "launch <term> in {folder} please", lang: en}
+  - {t: "open a new <term> window in {folder}", lang: en}
+  - {t: "open <term>", lang: en, w: 0.4}
+
+open_claude_in_folder:
+  - "<pre?> {folder} <folder_w?> <loc> <claude> <open_v> <post?>"
+  - "<pre?> {folder} wale folder mein <claude> <open_v>"
+  - "<pre?> <claude> <open_v> {folder} <folder_w?> <loc> <post?>"
+  - {t: "<pre?> <claude> <open_v> <post?>", w: 0.6}
+  - "<pre?> {folder} <folder_w?> <loc> <claude> chalao"
+  - "<pre?> {folder} project <loc> <claude> start karo"
+  - "<pre?> {folder} <folder_w?> <loc> <claude> se kaam karna hai"
+  - "<pre?> {folder} <loc> <claude> ko bulao"
+  - "<pre?> <claude> {folder} <folder_w?> <loc> <open_v>"
+  - "<pre?> {folder} ke liye <claude> <open_v>"
+  - "kya aap {folder} <folder_w?> <loc> <claude> khol sakte ho"
+  - {t: "open claude in {folder}", lang: en}
+  - {t: "start claude code in the {folder} <folder_w>", lang: en}
+  - {t: "launch claude in {folder} please", lang: en}
+  - {t: "start claude code", lang: en, w: 0.4}
+
+call_contact:
+  - "<pre?> {name} ko call <karo_v> <post?>"
+  - "<pre?> {name} ko {app} <pe> call <karo_v> <post?>"
+  - "<pre?> {app} <pe> {name} ko call <karo_v>"
+  - "<pre?> {name} ko phone <karo_v> <post?>"
+  - "<pre?> {name} ka number milao"
+  - "<pre?> {name} se baat karao"
+  - "<pre?> {name} ko {app} video call <karo_v>"
+  - "<pre?> {name} ko ring <karo_v>"
+  - "<pre?> {name} ko call lagao {app} se"
+  - "kya aap {name} ko call kar sakte ho"
+  - {t: "call {name}", lang: en}
+  - {t: "call {name} on {app}", lang: en}
+  - {t: "please call {name}", lang: en}
+  - {t: "give {name} a call", lang: en}
+  - {t: "dial {name}", lang: en, w: 0.5}
+
+open_app:
+  - "<pre?> {app} <open_v> <post?>"
+  - "<pre?> {app} app <open_v> <post?>"
+  - "<pre?> mujhe {app} chahiye"
+  - "<pre?> mujhe {app} kholna hai"
+  - "<pre?> {app} ko <open_v>"
+  - "<pre?> zara {app} khol ke dikhao"
+  - "kya aap {app} khol sakte ho"
+  - {t: "open {app}", lang: en}
+  - {t: "launch {app}", lang: en}
+  - {t: "start {app} please", lang: en}
+  - {t: "can you open {app}", lang: en}
+
+check_status:
+  - "<pre?> {target} ka status <batao_v> <post?>"
+  - "<pre?> {target} check <karo_v>"
+  - "<pre?> {target} ka kya haal hai"
+  - "<pre?> {target} <batao_v> <post?>"
+  - {t: "<pre?> {target} kitni hai", only: {target: [battery]}}
+  - {t: "<pre?> {target} kitni bachi hai", only: {target: [battery]}}
+  - {t: "<pre?> {target} kitna bacha hai", only: {target: [storage]}}
+  - {t: "<pre?> {target} chal raha hai kya", only: {target: [internet, wifi, bluetooth]}}
+  - {t: "<pre?> {target} connected hai kya", only: {target: [internet, wifi, bluetooth]}}
+  - {t: "<pre?> {target} on hai kya", only: {target: [wifi, bluetooth]}}
+  - {t: "<pre?> {target} usage <batao_v>", only: {target: [cpu, ram]}}
+  - {t: "<pre?> {target} usage kitna hai", only: {target: [cpu, ram]}}
+  - {t: "check {target} status", lang: en}
+  - {t: "what's my {target} status", lang: en}
+  - {t: "how much {target} is left", lang: en, only: {target: [battery, storage]}}
+  - {t: "show me {target} usage", lang: en, only: {target: [cpu, ram]}}
+
+open_file_or_folder:
+  - {t: "<pre?> {path} <folder_w> <open_f> <post?>", kind: folder}
+  - {t: "<pre?> {path} <open_f> <post?>", w: 0.6}
+  - {t: "<pre?> {path} wali file <open_f> <post?>", kind: file}
+  - {t: "<pre?> mera {path} <folder_w> <open_f>", kind: folder}
+  - {t: "<pre?> meri {path} file <open_f>", kind: file}
+  - {t: "<pre?> finder mein {path} <folder_w?> <open_f>", kind: folder}
+  - "<pre?> {path} dikhao <post?>"
+  - {t: "<pre?> {path} <folder_w> ke andar kya hai dikhao", kind: folder}
+  - "kya aap {path} khol sakte ho"
+  - {t: "open {path} <folder_w>", lang: en, kind: folder}
+  - {t: "open my {path} file", lang: en, kind: file}
+  - {t: "show me the {path} <folder_w>", lang: en, kind: folder}
+  - {t: "open {path}", lang: en, w: 0.6}
+
+set_volume:
+  - "<pre?> <vol> {level} <pct?> <set_v> <post?>"
+  - "<pre?> <vol> {level} <pct?> pe <set_v>"
+  - "<pre?> <vol> ko {level} <pct?> pe <set_v>"
+  - "<pre?> <vol> {direction} <post?>"
+  - "<pre?> gaane ki <vol> {direction}"
+  - "<pre?> <vol> level {level} <set_v>"
+  - {t: "set volume to {level} <pct?>", lang: en}
+  - {t: "volume {level} <pct?>", lang: en}
+  - {t: "turn the volume {direction:volume_dir_en}", lang: en}
+  - {t: "volume {direction:volume_dir_en} please", lang: en}
+
+set_brightness:
+  - "<pre?> <bright> {level} <pct?> <set_v> <post?>"
+  - "<pre?> <bright> {level} <pct?> pe <set_v>"
+  - "<pre?> <bright> ko {level} <pct?> pe <set_v>"
+  - "<pre?> <bright> {direction} <post?>"
+  - "<pre?> screen thodi {direction}"
+  - {t: "set brightness to {level} <pct?>", lang: en}
+  - {t: "brightness {level} <pct?>", lang: en}
+  - {t: "turn the brightness {direction:brightness_dir_en}", lang: en}
+  - {t: "brightness {direction:brightness_dir_en} please", lang: en}
+
+# Negatives. Label = none, slots = {}. `reason` is stored in meta for analysis.
+none:
+  # out of domain
+  - {t: "aaj ka mausam kaisa hai", reason: ood}
+  - {t: "<pre?> ek joke sunao", reason: ood}
+  - {t: "kal meeting kab hai", reason: ood}
+  - {t: "<pre?> khana order karo", reason: ood}
+  - {t: "<pre?> koi gaana bajao", reason: ood}
+  - {t: "subah saat baje ka alarm set karo", reason: ood}
+  - {t: "time kya hua hai", reason: ood}
+  - {t: "tumhara naam kya hai", reason: ood}
+  - {t: "hello kaise ho", reason: ood}
+  - {t: "thanks yaar", reason: ood}
+  - {t: "<pre?> news sunao", reason: ood}
+  # unsupported actions (near misses of supported ones)
+  - {t: "<pre?> <term> band karo", reason: unsupported}
+  - {t: "<pre?> {_:apps} band karo", reason: unsupported}
+  - {t: "<pre?> {_:apps} close karo", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko message bhejo", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko whatsapp pe message karo", reason: unsupported}
+  - {t: "<pre?> {_:folders} folder delete karo", reason: unsupported}
+  - {t: "<pre?> screenshot lo", reason: unsupported}
+  - {t: "<pre?> laptop shutdown karo", reason: unsupported}
+  - {t: "<pre?> laptop restart karo", reason: unsupported}
+  - {t: "<pre?> screen lock karo", reason: unsupported}
+  - {t: "<pre?> wifi band karo", reason: unsupported}
+  - {t: "<pre?> bluetooth on karo", reason: unsupported}
+  - {t: "<pre?> {_:apps} uninstall karo", reason: unsupported}
+  - {t: "<pre?> {_:apps} install karo", reason: unsupported}
+  - {t: "<pre?> naya folder banao", reason: unsupported}
+  - {t: "<pre?> {_:files} rename karo", reason: unsupported}
+  - {t: "<pre?> wallpaper badlo", reason: unsupported}
+  # incomplete (required slot missing)
+  - {t: "<pre?> call karo", reason: incomplete}
+  - {t: "<pre?> <open_v>", reason: incomplete}
+  - {t: "<pre?> folder <open_v>", reason: incomplete}
+  - {t: "<pre?> file <open_v>", reason: incomplete}
+  - {t: "<pre?> app <open_v>", reason: incomplete}
+  - {t: "<vol>", reason: incomplete}
+  - {t: "<bright>", reason: incomplete}
+  - {t: "<pre?> usko call karo", reason: incomplete}
+  - {t: "<pre?> woh wala folder <open_v>", reason: incomplete}
+  - {t: "<pre?> status batao", reason: incomplete}
+  # ambiguous
+  - {t: "<pre?> {_:contacts} ko whatsapp karo", reason: ambiguous}
+  - {t: "{_:contacts}", reason: ambiguous}
+  - {t: "{_:folders} ka kya", reason: ambiguous}
+  - {t: "<term> ya <claude> <open_v>", reason: ambiguous}
+  - {t: "<pre?> kuch <open_v>", reason: ambiguous}
+  - {t: "isko <open_v>", reason: ambiguous}
+  # fillers / noise / cancel
+  - {t: "umm haan", reason: filler}
+  - {t: "ek second ruko", reason: filler}
+  - {t: "kuch nahi", reason: filler}
+  - {t: "rehne do", reason: filler}
+  - {t: "chhodo yaar", reason: filler}
+  - {t: "bas", reason: filler}
+  - {t: "mat karo", reason: filler}
+  # more negatives (variety, English)
+  - {t: "<pre?> aaj ka mausam <batao_v> <post?>", reason: ood}
+  - {t: "<pre?> kuch gaane bajao <post?>", reason: ood}
+  - {t: "<pre?> kal ka alarm set karo <post?>", reason: ood}
+  - {t: "<pre?> tum kaun ho", reason: ood}
+  - {t: "<pre?> sab theek hai", reason: ood}
+  - {t: "what's the weather today", lang: en, reason: ood}
+  - {t: "tell me a joke", lang: en, reason: ood}
+  - {t: "play some music", lang: en, reason: ood}
+  - {t: "close the <term>", lang: en, reason: unsupported}
+  - {t: "send a message to {_:contacts}", lang: en, reason: unsupported}
+  - {t: "delete the {_:folders} folder", lang: en, reason: unsupported}
+  - {t: "take a screenshot", lang: en, reason: unsupported}
+  - {t: "uninstall {_:apps}", lang: en, reason: unsupported}
+  - {t: "<pre?> {_:files} delete karo <post?>", reason: unsupported}
+  - {t: "<pre?> {_:apps} hatao <post?>", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ka number <batao_v>", reason: unsupported}
+  - {t: "<pre?> {_:folders} folder ka naam badlo", reason: unsupported}
+  - {t: "<pre?> <term> ka wallpaper badlo", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko call mat karo", reason: unsupported}
+  - {t: "<pre?> <term> mat <open_v>", reason: unsupported}
+  - {t: "<pre?> isko call karo <post?>", reason: incomplete}
+  - {t: "<pre?> wahi wala app <open_v>", reason: incomplete}
+  - {t: "<pre?> <vol> <set_v> <post?>", reason: incomplete}
+  - {t: "<pre?> <bright> <set_v> <post?>", reason: incomplete}
+  - {t: "call", lang: en, reason: incomplete}
+  - {t: "open it", lang: en, reason: incomplete}
+  - {t: "open that folder", lang: en, reason: incomplete}
+  - {t: "<pre?> {_:contacts} ya {_:contacts} ko call karo", reason: ambiguous}
+  - {t: "<pre?> {_:apps} ya {_:apps} <open_v>", reason: ambiguous}
+  - {t: "<pre?> {_:folders} ya {_:folders} folder <open_f>", reason: ambiguous}
+  - {t: "{_:apps}", reason: ambiguous}
+  - {t: "{_:folders} <post?>", reason: ambiguous}
+  - {t: "<pre?> ek second ruko <post?>", reason: filler}
+  - {t: "<pre?> sorry galti se bola", reason: filler}
+  - {t: "<pre?> kuch nahi <post?>", reason: filler}
+  - {t: "never mind", lang: en, reason: filler}
+  - {t: "cancel", lang: en, reason: filler}
+  - {t: "wait", lang: en, reason: filler}

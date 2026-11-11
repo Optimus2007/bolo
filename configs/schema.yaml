@@ -1,0 +1,57 @@
+# Bolo command schema v0.
+# Each intent lists its slots. A slot is either open-vocabulary (values come from a pool that is
+# split train/dev/test by value) or closed (a fixed enum shared by all splits).
+# Model output format: {"intent": str, "slots": {slot: value}, "confidence": float in [0,1]}.
+# Adding an intent: add it here, add value pools to lexicon.yaml if needed, add templates to templates.yaml.
+
+version: 0
+
+slot_types:
+  folder:      {open: true,  pool: folders,  description: "Spoken folder name, lowercase Roman (e.g. 'ml notes')."}
+  path:        {open: true,  pool: paths,    description: "Spoken folder or file name, lowercase Roman (e.g. 'resume pdf')."}
+  contact:     {open: true,  pool: contacts, description: "Contact name as spoken, lowercase Roman (e.g. 'rahul', 'mummy')."}
+  app:         {open: true,  pool: apps,     description: "Desktop app name, lowercase Roman (e.g. 'vs code')."}
+  call_app:    {open: false, values: [whatsapp, facetime, phone, telegram, zoom, google meet, teams, skype, discord, signal]}
+  status_target: {open: false, values: [battery, wifi, internet, storage, git, cpu, ram, bluetooth]}
+  level:       {open: false, description: "Integer 0-100 (percent)."}
+  volume_direction:     {open: false, values: [up, down, mute, unmute, max]}
+  brightness_direction: {open: false, values: [up, down, max, min]}
+
+intents:
+  open_terminal:
+    description: "Open a terminal, optionally in a folder."
+    slots: {folder: {type: folder, required: false}}
+  open_claude_in_folder:
+    description: "Start Claude Code, optionally in a folder."
+    slots: {folder: {type: folder, required: false}}
+  call_contact:
+    description: "Call a contact, optionally via a specific app."
+    slots:
+      name: {type: contact, required: true}
+      app:  {type: call_app, required: false}
+  open_app:
+    description: "Open a desktop application."
+    slots: {app: {type: app, required: true}}
+  check_status:
+    description: "Report status of a system resource."
+    slots: {target: {type: status_target, required: true}}
+  open_file_or_folder:
+    description: "Open a file or folder (in Finder / default app)."
+    slots: {path: {type: path, required: true}}
+  set_volume:
+    description: "Set volume to a level, or move it in a direction. Exactly one of level/direction."
+    slots:
+      level:     {type: level, required: false}
+      direction: {type: volume_direction, required: false}
+    one_of: [level, direction]
+  set_brightness:
+    description: "Set screen brightness to a level, or move it in a direction. Exactly one of level/direction."
+    slots:
+      level:     {type: level, required: false}
+      direction: {type: brightness_direction, required: false}
+    one_of: [level, direction]
+  none:
+    description: >
+      Unclear, incomplete, ambiguous, unsupported or out-of-domain. The assistant should ask
+      or do nothing. Never carries slots.
+    slots: {}
