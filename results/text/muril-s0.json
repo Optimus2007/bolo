@@ -1,0 +1,153 @@
+{
+ "threshold": 0.12,
+ "test": {
+  "n": 1000,
+  "intent_acc": 0.139,
+  "slot": {
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 0.0
+  },
+  "slot_lenient": {
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 0.0
+  },
+  "exact_match": 0.139,
+  "exact_match_lenient": 0.139,
+  "abstain": {
+   "p": 0.139,
+   "r": 1.0,
+   "f1": 0.2441
+  },
+  "false_action_rate": 0.0,
+  "over_abstain_rate": 1.0,
+  "wrong_action_rate": null,
+  "aurc": 0.9056,
+  "breakdown": {
+   "script": {
+    "deva": {
+     "n": 173,
+     "exact_match": 0.1329
+    },
+    "mixed": {
+     "n": 139,
+     "exact_match": 0.1511
+    },
+    "roman": {
+     "n": 688,
+     "exact_match": 0.1381
+    }
+   },
+   "template": {
+    "heldout": {
+     "n": 182,
+     "exact_match": 0.1593
+    },
+    "seen": {
+     "n": 818,
+     "exact_match": 0.1345
+    }
+   },
+   "text_seen_in_train": {
+    "False": {
+     "n": 860,
+     "exact_match": 0.1128
+    },
+    "True": {
+     "n": 140,
+     "exact_match": 0.3
+    }
+   },
+   "mixing": {
+    "balanced": {
+     "n": 233,
+     "exact_match": 0.1974
+    },
+    "en-heavy": {
+     "n": 248,
+     "exact_match": 0.1008
+    },
+    "hi-heavy": {
+     "n": 515,
+     "exact_match": 0.1243
+    },
+    "n/a": {
+     "n": 4,
+     "exact_match": 1.0
+    }
+   },
+   "none_reason": {
+    "ambiguous": {
+     "n": 24,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "filler": {
+     "n": 12,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "incomplete": {
+     "n": 25,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "ood": {
+     "n": 22,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    },
+    "unsupported": {
+     "n": 56,
+     "exact_match": 1.0,
+     "abstain_recall": 1.0
+    }
+   }
+  }
+ },
+ "test_unseen_text": {
+  "n": 860,
+  "intent_acc": 0.1128,
+  "slot": {
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 0.0
+  },
+  "slot_lenient": {
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 0.0
+  },
+  "exact_match": 0.1128,
+  "exact_match_lenient": 0.1128,
+  "abstain": {
+   "p": 0.1128,
+   "r": 1.0,
+   "f1": 0.2027
+  },
+  "false_action_rate": 0.0,
+  "over_abstain_rate": 1.0,
+  "wrong_action_rate": null,
+  "aurc": 0.9216
+ },
+ "script_consistency": 1.0,
+ "views_exact_match": 0.139,
+ "latency_ms": {
+  "p50": 19.676,
+  "p95": 31.488
+ },
+ "model": "muril",
+ "base": "google/muril-base-cased",
+ "seed": 0,
+ "params": 237608516,
+ "train": {
+  "loss": [
+   6.1382
+  ],
+  "train_seconds": 26.2,
+  "temperature": 3.5
+ },
+ "size_mb_fp32": 950.5,
+ "data": "data/text/v0"
+}

@@ -1,0 +1,17 @@
+{
+ "source": "models/bolo-tiny/phono_views_aug-s0",
+ "onnx_fp32_mb": 2.82,
+ "onnx_int8_mb": 0.8,
+ "bolo_tiny.onnx": {
+  "exact_match": 0.881,
+  "intent_acc": 0.942,
+  "latency_ms_p50_1thread": 1.047,
+  "latency_ms_p95_1thread": 1.347
+ },
+ "bolo_tiny.int8.onnx": {
+  "exact_match": 0.883,
+  "intent_acc": 0.942,
+  "latency_ms_p50_1thread": 1.068,
+  "latency_ms_p95_1thread": 1.384
+ }
+}
