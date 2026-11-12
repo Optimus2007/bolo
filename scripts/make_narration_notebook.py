@@ -20,7 +20,7 @@ STORY = "--story" in sys.argv  # the cartoon: launch/story.json, one expressive 
 if STORY:
     sys.argv.remove("--story")
     st = json.loads((ROOT / "launch/story.json").read_text(encoding="utf-8"))
-    spec = {"voices": {}, "lines": [{"id": b["id"], "voice": b["voice"], "text": b["text"],
+    spec = {"voices": {}, "lines": [{"id": b["id"], "voice": b["voice"], "text": b["text"], "say": b.get("say") or [b["text"]],
              "desc": f"{st['voices'][b['voice']]} speaks in {b['style']}, with very clear audio and no background noise."}
             for b in st["beats"] if b["voice"] != "none"]}
 else:
@@ -46,9 +46,10 @@ fill = {**({"N_WORDS": words_big(ln["n"]), "E2E_WORDS": words(round(ln["e2e"]))}
 ONLY = sys.argv[1].split(",") if len(sys.argv) > 1 else None  # e.g. 08_numbers: regenerate just these lines
 lines = []
 for x in spec["lines"]:
-    t = re.sub(r"\{([A-Z_]+)\}", lambda m: fill.get(m.group(1), m.group(0)), x["text"])
+    sub = lambda u: re.sub(r"\{([A-Z_]+)\}", lambda m: fill.get(m.group(1), m.group(0)), u)
+    t = sub(x["text"])
     if t.strip() and not re.search(r"\{[A-Z_]+\}", t) and (ONLY is None or x["id"] in ONLY):
-        lines.append(x | {"text": t})
+        lines.append(x | {"text": t, "say": [sub(u) for u in x.get("say") or [t]]})
 book = nb([
     ("markdown", ("# Bolo 04: cartoon voices" if STORY else "# Bolo 04: launch video narration") + " (Indic Parler TTS)\n\n" "Needs the `HF_TOKEN` secret. GPU T4. "
                  "Output: `/kaggle/working/narration/<id>.wav` (best take) and `takes/`, plus `scores.json`."),
@@ -77,26 +78,35 @@ def pitch_var(a):  # spread of log pitch over voiced frames: higher = livelier, 
     return float(np.std(np.log(f0))) if len(f0) > 10 else 0.0
 for line in SPEC["lines"]:
     d = desc_tok(line.get("desc") or SPEC["voices"][line["voice"]], return_tensors="pt").to(dev)
-    p = tok(line["text"], return_tensors="pt").to(dev)
     takes = []
-    for seed in range(4):
+    says = line.get("say") or [line["text"]]
+    per = 3 if len(says) > 1 else 4  # 3 takes per spelling when the name is in the line
+    for seed, say in [(sd, sy) for sy in says for sd in range(per)]:
+        p = tok(say, return_tensors="pt").to(dev)
         torch.manual_seed(seed)
         with torch.no_grad():
             a = model.generate(input_ids=d.input_ids, attention_mask=d.attention_mask,
                                prompt_input_ids=p.input_ids, prompt_attention_mask=p.attention_mask, do_sample=True)
         a = a.cpu().float().numpy().squeeze()
-        f = f"{OUT}/takes/{line['id']}_s{seed}.wav"
+        vi = says.index(say)
+        f = f"{OUT}/takes/{line['id']}_v{vi}s{seed}.wav"
         sf.write(f, a, SR)
         lang = "hi" if line["voice"] in ("hinglish", "aarav") else "en"
         hyp = asr(f, generate_kwargs={"language": lang, "task": "transcribe"})["text"]
-        w = jiwer.wer(" ".join(norm(line["text"])) or "x", " ".join(norm(hyp)) or "x") if lang == "en" else None
+        NAME = re.compile(r"^(my|mai|mi|mee|mae|may)[a-z]*n[a-z]*$")  # any spelling of the name, ignored in WER
+        strip = lambda ws: [w for w in ws if not NAME.match(w)]
+        w = jiwer.wer(" ".join(strip(norm(line["text"]))) or "x", " ".join(strip(norm(hyp))) or "x") if lang == "en" else None
+        name_ok = None
+        if "Myna" in line["text"]:  # did it say MY-na (not Mina / Meena / Miner)?
+            name_ok = bool(re.search(r"\b(myna|mynah|maina|mainah|mayna|my na|my nah|mai na|maena)\b", hyp.lower()))
         pv = pitch_var(a)
-        takes.append({"seed": seed, "wer": w, "pitch_var": round(pv, 3), "dur": round(len(a) / SR, 2), "heard": hyp})
-        print(line["id"], seed, w, round(pv, 3), round(len(a) / SR, 2), hyp[:90], flush=True)
+        takes.append({"seed": seed, "variant": vi, "file": f, "name_ok": name_ok, "wer": w, "pitch_var": round(pv, 3), "dur": round(len(a) / SR, 2), "heard": hyp})
+        print(line["id"], vi, seed, name_ok, w, round(pv, 3), round(len(a) / SR, 2), hyp[:90], flush=True)
     wer = lambda t: t["wer"] if t["wer"] is not None else 0
-    ok = [t for t in takes if wer(t) <= min(map(wer, takes)) + 0.1 and t["dur"] < 2.5 * len(line["text"]) / 14 + 1]
+    pool = [t for t in takes if t["name_ok"] is not False] or takes  # the name must sound right, if any take manages it
+    ok = [t for t in pool if wer(t) <= min(map(wer, pool)) + 0.1 and t["dur"] < 2.5 * len(line["text"]) / 14 + 1]
     best = max(ok or takes, key=lambda t: t["pitch_var"])  # most expressive among the intelligible takes
-    os.replace(f"{OUT}/takes/{line['id']}_s{best['seed']}.wav", f"{OUT}/{line['id']}.wav")
+    import shutil; shutil.copy(best["file"], f"{OUT}/{line['id']}.wav")
     scores[line["id"]] = {"best": best, "takes": takes}
 json.dump({"sr": SR, "scores": scores}, open(OUT + "/scores.json", "w"), indent=1, ensure_ascii=False)
 '''),
