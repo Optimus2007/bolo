@@ -149,3 +149,12 @@ def test_app_http_refuses_other_sites():
             urllib.request.urlopen(f"http://127.0.0.1:{port[0]}/s/wrong/")
     finally:
         srv.shutdown()
+
+
+def test_help_question():
+    from bolo.persona import is_help
+
+    for t in ("kya kar sakte ho", "tum kya kya kar sakte ho?", "help", "Myna kya kar sakti ho", "madad"):
+        assert is_help(t), t
+    for t in ("chrome kholo", "battery kitni hai", "helpline number search karo"):
+        assert not is_help(t), t

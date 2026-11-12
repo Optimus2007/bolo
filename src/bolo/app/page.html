@@ -45,6 +45,7 @@ button.no { background: transparent; color: var(--ink); border: 1px solid var(--
 .timer:first-of-type { border-top: 0; }
 .timer b { font-variant-numeric: tabular-nums; }
 .hidden { display: none !important; }
+#helplist div { margin: 3px 0; } .flash { outline: 2px solid var(--teal); }
 .tips { font-size: 14px; color: var(--muted); }
 /* chips */
 .tips code { display: inline-block; margin: 2px 0; background: var(--soft); padding: 1px 6px; border-radius: 6px; color: var(--ink); }
@@ -131,8 +132,9 @@ footer { margin-top: 22px; font-size: 12px; color: var(--muted); text-align: cen
 
     <div id="timerbox" class="panel hidden"><h2>Timers</h2><div id="timers"></div></div>
 
-    <div class="panel tips">
-      <h2>Try saying</h2>
+    <div id="tipsbox" class="panel tips">
+      <h2>Try saying <span style="text-transform:none;letter-spacing:0">(or ask “kya kar sakte ho?”)</span></h2>
+      <div id="helplist"></div>
       <code>battery kitni hai</code> · <code>volume chaalis pe kar do</code> · <code>youtube pe lofi chalao</code> ·
       <code>5 minute ka timer lagao</code> · <code>downloads folder kholo</code> · <code>dark mode on karo</code>
       <div class="row"><label><input id="voice" type="checkbox" checked> Myna bole (offline voice)</label></div>
@@ -163,6 +165,9 @@ function show(r) {
   $("heard").textContent = r.heard ? `suna: “${r.heard}”` + (r.routine ? `  → routine ${r.routine}` : "") : "";
   say(r.reply, r.mood);
   planId = r.plan_id || null; needConfirm = !!r.confirm;
+  if (r.help) { $("helplist").innerHTML = ""; r.help.forEach(([k, v]) => { const d = document.createElement("div");
+    d.innerHTML = "<b></b> <span></span>"; d.firstChild.textContent = k + ": "; d.lastChild.textContent = v; $("helplist").appendChild(d); });
+    $("tipsbox").classList.add("flash"); }
   const box = $("planbox");
   if (planId && r.steps && r.steps.length) {
     $("steps").innerHTML = ""; r.steps.forEach(s => { const li = document.createElement("li"); li.textContent = s; $("steps").appendChild(li); });

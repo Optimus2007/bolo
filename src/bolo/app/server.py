@@ -67,6 +67,10 @@ class Myna:
                                f", par is computer pe {sum(1 for p in plans if p.get('ok', True))} hi ho sakte hain."),
                            "steps": [describe(s) for p in plans for s in p["steps"]],
                            "notes": [p["say"] for p in plans if not p.get("ok", True)]}
+        from ..persona import HELP, is_help
+
+        if out["intent"] == "none" and is_help(self.bolo._strip(out.get("transcript", ""))[0]):
+            return base | {"mood": "happy", "reply": "Bahut kuch! Ye try karo:", "help": HELP, "steps": []}
         if out["intent"] == "none":
             mood, text = reply(None, heard=out)
             return base | {"mood": mood, "reply": text, "steps": [], "reason": out.get("reason")}

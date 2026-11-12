@@ -133,6 +133,12 @@ def _cmd_do(args: argparse.Namespace) -> None:
 
     sched = (lambda sec, text: _countdown(sec, text, b.name, talk, os_name)) if args.run else None
     confirm = (lambda q: True) if args.yes else None
+    from .persona import help_text, is_help
+
+    if out["intent"] == "none" and is_help(b._strip(out["transcript"])[0]):
+        show("happy", "Bahut kuch! Ye try karo:")
+        print(help_text().split("\n", 1)[1])
+        return
     routine = match(b._strip(out["transcript"])[0]) if out["transcript"] else None
     if routine:
         steps = get_routines()[routine]

@@ -120,6 +120,27 @@ def outcome(p: dict, said: list[str], rng: random.Random | None = None) -> tuple
     return reply(p, done=True, rng=rng)
 
 
+HELP_RE = r"^(myna |hey |ok )?(tum |aap |tu )?(kya kya|kya) (kar sakte|kar sakti|kar sakta|karte|kar sakta) ?(ho|hai|hain|hu)?\b|^(help|madad|help karo|commands?|kya bol sakte)\b"
+HELP = [("Apps", "chrome kholo · spotify band karo"), ("Folders", "downloads folder kholo · projects mein terminal kholo"),
+        ("Awaaz, roshni", "volume chaalis pe kar do · brightness kam karo · agla gaana"),
+        ("Settings", "dark mode on karo · wifi band karo · screen lock karo · screenshot lo"),
+        ("Sawaal", "battery kitni hai · storage kitna bacha hai · internet chal raha hai kya"),
+        ("Internet", "youtube pe lofi chalao · github kholo · python list sort search karo"),
+        ("Time", "5 minute ka timer lagao · 2 ghante baad chai yaad dilana"),
+        ("Log", "mummy ko whatsapp pe message bhejo ki main late hoon · rahul ko call karo"),
+        ("Routines", 'bolo sikhao "coding mode" "vs code kholo" "dnd on karo"')]
+
+
+def is_help(text: str) -> bool:
+    import re
+
+    return bool(re.search(HELP_RE, " ".join(text.lower().replace("?", " ").split())))
+
+
+def help_text() -> str:
+    return "Ye sab bol sakte ho:\n" + "\n".join(f"   {k:<14} {v}" for k, v in HELP)
+
+
 # ---- the terminal mascot (same bird as the launch cartoon: teal body, crest, big eyes, yellow beak)
 EYES = {"happy": "^ ^", "unsure": "o ?", "sleepy": "- -", "thinking": "o o", "oops": "x x", "listening": "O O"}
 TOP = {"happy": "  ,/|\\,  ", "unsure": "  ,/|\\, ?", "sleepy": "  ,/|\\, z", "thinking": "  ,/|\\, .",
