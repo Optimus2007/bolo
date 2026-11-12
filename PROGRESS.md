@@ -47,7 +47,14 @@ _Last updated: 2026-11-11 (Phase 5 done on synthetic and public speech; real com
   lose command accuracy (macOS voices 16.2% / 16.4% vs 13.3% WER, 76.3% vs 82.5% actions). Full fine tune stays default.
   The variant weights and the OpenSLR download were deleted afterwards.
 
+- Decoding (2026-11-12): beam 5 + N-best rerank by NLU and grounding is the default in Bolo.listen. Held-out macOS
+  set (240): correct action 73.8% -> 82.1%, WER 16.0% -> 12.5%, median 107 -> 177 ms. Hotword boosting did not help.
+  bolo.adapt.Memory (aliases, usage prior, bandit weights) is opt in; simulation showed no gain beyond noise.
+
 ## Next
+- Measure decoding + Memory on real recordings; tune rerank weights on public real speech, not on friends' audio.
+- Training side from the research report: replay of pseudo-labelled general Hinglish + KL to base, real RIR/MUSAN noise,
+  more varied Parler voices (Kaggle).
 - Real command recordings from friends (10 people, 40 prompts each), then `bolo eval` on them: the headline numbers.
 - Phase 6 (needs approval): Myna's voice (Bolo-Awaaz) and wake word. Phase 7: owner publishes per docs/RELEASE_CHECKLIST.md.
 - Optional: regenerate paraphrases with an Apache-2.0 model (Qwen2.5-1.5B or 7B) for a releasable dataset.
