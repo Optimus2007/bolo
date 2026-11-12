@@ -148,7 +148,11 @@ def local(b, t):
 
 # ------------------------------------------------------------------ drawing helpers
 def rr(d, box, r, fill, outline=None, width=0):
-    d.rounded_rectangle([int(v) for v in box], int(r), fill=fill, outline=outline, width=width)
+    box = [int(v) for v in box]
+    if box[2] - box[0] < 2 or box[3] - box[1] < 2:  # pop-in animations start from (almost) nothing
+        return
+    r = max(0, min(int(r), (box[2] - box[0]) // 2, (box[3] - box[1]) // 2))
+    d.rounded_rectangle(box, r, fill=fill, outline=outline, width=width)
 
 
 def ell(d, cx, cy, rx, ry, fill, outline=None, width=0):
@@ -608,7 +612,7 @@ def scene_montage(img, t, b):
     k = ease((p - 0.2 - 6 * 0.55) / 0.4)
     if k > 0:
         d = ImageDraw.Draw(img)
-        d.text((W / 2, 1000 - 0 * k), "+ 14 more kinds of commands", font=font(40, weight=700), fill=(255, 255, 255), anchor="mm")
+        d.text((W / 2, 925), "+ 14 more kinds of commands", font=font(40, weight=700), fill=(255, 255, 255), anchor="mm")
 
 
 def scene_board(img, t, b):
