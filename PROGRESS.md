@@ -171,3 +171,11 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
 - 2026-11-12: Speech v1 retrain prepared: real RIRs (OpenSLR 28, downloaded on Kaggle), ~3% noise-only clips with empty
   targets, 4413 TTS clips (20 commands) as private Kaggle dataset bolo-tts-v1 (`scripts/make_tts_dataset.py`,
   `kaggle_push.py ttsdata`).
+- 2026-11-12: Websites are snapped to the known site list using the words around them (`grounding.snap_site`, both
+  listen paths): "money control" / a partial "control" -> moneycontrol; unknown sites pass through. Human (seed 0):
+  70.9% -> 76.4% (3 clips fixed, 0 broken); macOS voices unchanged (83.75%). Caveat: this fix was found by looking at
+  errors on the human set, so 76.4% is optimistic; the next recording session is the clean check.
+- 2026-11-12: Remaining human errors (seed 0, after snapping): mishearings (quit arc -> "width arduino", dhundho ->
+  "hoga", google -> "go well", ananya -> "peyna"): for the speech v1 retrain. Unseen phrasings ("brightness zyada
+  karo", "thoda aur badha", "jo previous chal raha"): not patched from the test set; cover in new templates only if
+  a fresh session confirms. 2-3 free-speech labels look wrong (spoken text differs from the prompt): ask the user.

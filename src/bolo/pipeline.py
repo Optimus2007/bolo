@@ -22,7 +22,7 @@ from pathlib import Path
 
 from .config import load_config
 from .evaluate import finalize
-from .grounding import Environment, ground
+from .grounding import Environment, ground, snap_site
 
 
 def scan_mac(home: Path | str | None = None, max_depth: int = 2, max_entries: int = 5000) -> Environment:
@@ -162,6 +162,7 @@ class Bolo:
             if alt["intent"] != "none" and not any(self._strip(v + " x")[1] for v in vals):  # name must not become a slot
                 raw, named = alt, False
         pred = finalize(raw, self.cfg.schema, self.threshold)
+        pred = self._snap_site(pred, clean(bare))
         env = env or self.env
         if env is not None and pred["intent"] != "none":
             g = ground(pred, env)
@@ -214,12 +215,20 @@ class Bolo:
 
             c = choose(hyps, self.nlu, self.cfg, env, self.rerank, self.threshold)
             pred, text = c.pred, c.text
+        pred = self._snap_site(pred, " ".join(str(text).lower().split()))
         abstain = pred["intent"] == "none"
         reason = pred.get("abstain_reason") or (pred.get("grounding") or {}).get("abstain")
         return {"intent": pred["intent"], "slots": pred["slots"], "confidence": round(float(pred.get("confidence", 1.0)), 4),
                 "abstain": abstain, "reason": (reason or "not a supported command") if abstain else None,
                 "transcript": text, "alternatives": [h for h, _ in heard], "grounding": pred.get("grounding"),
                 "ms": {"asr": round(asr_ms, 1), "nlu": round((time.perf_counter() - t1) * 1000, 2)}}
+
+    def _snap_site(self, pred: dict, text: str) -> dict:
+        """Websites are an open slot with a known list: rejoin split names ("money control" -> moneycontrol)."""
+        if pred.get("intent") == "open_website" and (pred.get("slots") or {}).get("site"):
+            sites = [e.value for e in self.cfg.open_pools.get("sites", [])]
+            pred = {**pred, "slots": {**pred["slots"], "site": snap_site(pred["slots"]["site"], text.split(), sites)}}
+        return pred
 
     def _didnt_catch(self, text: str, why: str = "could not hear that clearly") -> dict:
         return {"intent": "none", "slots": {}, "confidence": 0.0, "abstain": True,

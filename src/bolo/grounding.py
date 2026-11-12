@@ -53,6 +53,28 @@ class Environment:
         return best, score
 
 
+def snap_site(value: str, words: list[str], sites: list[str], min_sim: float = 0.85) -> str:
+    """Snap a website to a known one, using the words around it: speech models often split one-word names
+    ("money control", "you tube", "linked in") and the tagger may then keep only part ("money").
+    Tries every 1-3 word window of the command that overlaps the predicted value, joined without spaces.
+    Unknown sites pass through unchanged."""
+    vw = set(str(value).lower().split())
+    cands = {str(value).lower()}
+    for n in (1, 2, 3):
+        for i in range(len(words) - n + 1):
+            win = words[i:i + n]
+            if vw & set(win):
+                cands.add(" ".join(win))
+    best, score = value, 0.0
+    for c in cands:
+        cj = c.replace(" ", "")
+        for site in sites:
+            sc = similarity(cj, site.replace(" ", ""))
+            if sc > score:
+                best, score = site, sc
+    return best if score >= min_sim else value
+
+
 SLOT_KIND = {("open_terminal", "folder"): "folder", ("open_claude_in_folder", "folder"): "folder",
              ("open_file_or_folder", "path"): "path", ("open_app", "app"): "app", ("call_contact", "name"): "name",
              ("close_app", "app"): "app", ("find_file", "path"): "path", ("send_message", "name"): "name"}
