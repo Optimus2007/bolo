@@ -110,12 +110,15 @@ specialised in commands. A 50/50 weight blend of the two (`scripts/wise_ft.py`) 
 
 | Bolo Tiny trained on | Correct action (mean of 3 seeds) | Wrong action | Asks instead of acting |
 |---|---|---|---|
-| Clean text only | 60.6% | 19.4% | 21.1% |
-| **Clean text + what Bolo Sun actually heard (now the default)** | **72.1%** | **13.9%** | **14.7%** |
+| Clean text only | 64.8% | 15.2% | 21.6% |
+| **Clean text + what Bolo Sun actually heard (now the default)** | **80.6%** | **7.3%** | **13.1%** |
 
 The second model is also trained on Bolo Sun's own transcripts of synthetic clips, mistakes included, so it learns
-that "premium" can mean "previous". Across the 3 seeds it fixed 21 commands and broke 2. It is one speaker and 55 clips,
-so the 95% interval on 72% is roughly 59 to 82%: a clear direction, not a precise number. On 240 computer-voice
+that "premium" can mean "previous". Across the 3 seeds it fixed 28 commands and broke 2 (each seed significant,
+p 0.002 to 0.03). It is one speaker and 55 clips, so the 95% interval on 80% is roughly 68 to 88%. Two things
+were found by looking at this set, so these numbers are a bit optimistic: website names are now snapped to the known
+list ("money control" -> moneycontrol, both rows use it), and two labels were corrected by the speaker (one clip was
+chat, not a command; one did name WhatsApp). The next recording session is the clean check. On 240 computer-voice
 commands it is unchanged (83.8% vs 83.6%), and on typed text it is no worse (exact match 87.4% vs 86.2%, false
 actions 5.2% vs 6.1%). Details: `results/speech/nlu_asr_noised.json`.
 

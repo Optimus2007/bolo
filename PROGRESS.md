@@ -179,3 +179,6 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   "hoga", google -> "go well", ananya -> "peyna"): for the speech v1 retrain. Unseen phrasings ("brightness zyada
   karo", "thoda aur badha", "jo previous chal raha"): not patched from the test set; cover in new templates only if
   a fresh session confirms. 2-3 free-speech labels look wrong (spoken text differs from the prompt): ask the user.
+- 2026-11-12: Speaker corrected 2 human labels (free-003 was chat -> none; free-033 did name WhatsApp). Backup:
+  recordings/manifest.before_relabel.jsonl (local). Re-scored all 6 models with site snapping: human 64.8% -> 80.6%
+  (3-seed means), fixed/broken 6/0, 12/2, 10/0, p 0.03 / 0.013 / 0.002. Optimistic (fix + labels came from this set).
