@@ -1,11 +1,11 @@
-"""Bolo launch cartoon: a short 2D story, drawn and animated in code (Pillow + ffmpeg).
+"""Myna launch cartoon (Myna = the assistant, Bolo = the models under it): a short 2D story, drawn and animated in code (Pillow + ffmpeg).
 
   .venv/bin/python launch/cartoon.py --preview 3 12 30     # still frames -> launch/out/cartoon_<t>.png
   .venv/bin/python launch/cartoon.py                       # full video -> launch/out/bolo_cartoon.mp4
 
 Story and voice lines: launch/story.json. Voice audio: launch/audio/story/<id>.wav (from Kaggle; missing lines are
 timed from their length and stay silent). Numbers on the report card come from results/ (never typed by hand).
-Bolo has no voice yet, so it only speaks in text bubbles.
+Myna has no voice of its own yet, so it only speaks in text bubbles.
 """
 from __future__ import annotations
 
@@ -360,6 +360,8 @@ def bolo(img, t, x, y, scale=1.0, mood="happy", listen=0.0, squash=0.0, wave=0.0
     d.polygon([(x - 30 * s, y + ry * 0.7), (x - 60 * s, y + ry + 26 * s), (x + 4 * s, y + ry * 0.85)], fill=TEAL)
     ell(d, x, y, rx, ry, fill=TEAL)
     ell(d, x - 24 * s, y - 26 * s, 22 * s, 14 * s, fill=mix(TEAL, (255, 255, 255), 0.35))
+    for i, (ox, h) in enumerate(((-16, 30), (0, 40), (16, 28))):  # crest tuft
+        d.polygon([(x + ox * s - 9 * s, y - ry + 8 * s), (x + (ox + 4) * s, y - ry - h * s), (x + ox * s + 9 * s, y - ry + 8 * s)], fill=TEAL_D)
     blink = (t * 0.9 + 1.3) % 3.3 < 0.12
     for side in (-1, 1):
         ex, ey = x + side * 26 * s, y - 6 * s
@@ -369,7 +371,8 @@ def bolo(img, t, x, y, scale=1.0, mood="happy", listen=0.0, squash=0.0, wave=0.0
         ell(d, ex, ey, 17 * s, 21 * s, fill=(255, 255, 255))
         ell(d, ex + 3 * s, ey + 3 * s, 9 * s, 11 * s, fill=INK)
         ell(d, ex + 6 * s, ey - 2 * s, 3 * s, 3 * s, fill=(255, 255, 255))
-    my = y + 30 * s
+    d.polygon([(x - 13 * s, y + 10 * s), (x + 13 * s, y + 10 * s), (x, y + 26 * s)], fill=AMBER)  # myna's yellow beak
+    my = y + 36 * s
     if mood == "happy":
         d.chord([x - 20 * s, my - 14 * s, x + 20 * s, my + 12 * s], 10, 170, fill=INK)
     elif mood == "unsure":
@@ -412,7 +415,7 @@ def screen(img, k, content, t, extra=0.0):
             d.text((x0 + 50, y0 + 170), "~/client $", font=font(48, mono=True), fill=TEAL)
             if (t * 2) % 2 < 1.2:
                 d.rectangle([x0 + 340, y0 + 150, x0 + 366, y0 + 196], fill=(240, 240, 240))
-            d.text((x0 + 50, y0 + 270), "opened by Bolo, offline", font=font(32), fill=(160, 166, 186))
+            d.text((x0 + 50, y0 + 270), "opened by Myna, offline", font=font(32), fill=(160, 166, 186))
     img.alpha_composite(layer)
 
 
@@ -646,9 +649,9 @@ def scene_logo(img, t):
     img.alpha_composite(layer)
     d = ImageDraw.Draw(img)
     bolo(img, t, W / 2 - 260, 430, 1.5 * back_out(k), "happy", wave=1.0)
-    text_c(d, (W / 2 + 120, 430), "Bolo", 180, mix((255, 250, 242), INK, k), weight=800)
+    text_c(d, (W / 2 + 130, 430), "Myna", 180, mix((255, 250, 242), INK, k), weight=800)
     text_c(d, (W / 2, 620), "Hinglish voice commands, on your own laptop", 46, mix((255, 250, 242), (90, 96, 112), k))
-    text_c(d, (W / 2, 710), "open source  ·  free  ·  offline", 42, mix((255, 250, 242), TEAL_D, k), weight=700)
+    text_c(d, (W / 2, 710), "built on Bolo  ·  open source  ·  free  ·  offline", 42, mix((255, 250, 242), TEAL_D, k), weight=700)
     return True
 
 

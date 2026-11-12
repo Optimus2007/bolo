@@ -1,5 +1,5 @@
 {
- "note": "Cartoon launch video. Beats play in order. voice: narrator (female), aarav (male, Hinglish), or none (text only). Bolo speaks only in text bubbles: it has no voice yet. Numbers in {BRACES} are filled from results/ before the narration is generated; spoken numbers are written as words. Each beat has a style: the TTS description is '<speaker> speaks in <style>, with very clear audio and no background noise.' Pitch and pace vary beat to beat so the narration never sounds flat.",
+ "note": "Cartoon launch video. Beats play in order. voice: narrator (female), aarav (male, Hinglish), or none (text only). Myna (the assistant, built on the Bolo models) speaks only in text bubbles: it has no voice yet. Numbers in {BRACES} are filled from results/ before the narration is generated; spoken numbers are written as words. Each beat has a style: the TTS description is '<speaker> speaks in <style>, with very clear audio and no background noise.' Pitch and pace vary beat to beat so the narration never sounds flat.",
  "voices": {
   "narrator": "Mary",
   "aarav": "Rohit"
@@ -53,7 +53,7 @@
    "id": "n03",
    "scene": "popup",
    "voice": "narrator",
-   "text": "This is Bolo. It is small enough to live on his laptop, and it understands Hinglish.",
+   "text": "This is Myna, a voice assistant built on Bolo. It is small enough to live on his laptop, and it understands Hinglish.",
    "style": "a bright, excited, highly expressive voice, slightly high pitched and a bit fast, like revealing a surprise"
   },
   {
@@ -68,7 +68,7 @@
    "id": "n04",
    "scene": "pipeline",
    "voice": "narrator",
-   "text": "Bolo writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens.",
+   "text": "Myna writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens.",
    "style": "a lively, animated, highly expressive voice, slightly fast, with rising energy"
   },
   {
@@ -104,14 +104,14 @@
    "id": "n08",
    "scene": "board",
    "voice": "narrator",
-   "text": "On {N_WORDS} test commands, spoken in computer voices it never trained on, Bolo picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now.",
+   "text": "On {N_WORDS} test commands, spoken in computer voices it never trained on, Myna picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now.",
    "style": "a clear, honest, matter of fact voice at a moderate pace"
   },
   {
    "id": "n09",
    "scene": "sunrise",
    "voice": "narrator",
-   "text": "Bolo. Open source, and free. Try it, and tell us where it fails.",
+   "text": "Myna, built on Bolo. Open source, and free. Try it, and tell us where it fails.",
    "style": "an upbeat, inviting, highly expressive voice, slightly high pitched"
   }
  ]
