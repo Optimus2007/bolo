@@ -88,6 +88,24 @@ def _cmd_understand(args: argparse.Namespace) -> None:
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 
+def _cmd_do(args: argparse.Namespace) -> None:
+    from .actions import current_os, perform, plan, scan_system
+    from .pipeline import Bolo
+
+    here = current_os()
+    os_name = args.os or here
+    if args.run and os_name != here:
+        raise SystemExit(f"--run only works for this computer ({here}); drop --os to run, or drop --run to preview")
+    env = scan_system() if os_name == here else None  # another OS's files are not on this machine
+    b = Bolo.load(asr=args.asr if args.audio else None, env=env, prompt="commands+apps" if env else "commands")
+    out = b.listen(args.input) if args.audio else b.understand(args.input)
+    print(f"heard: {out['transcript']!r} -> {out['intent']} {json.dumps(out['slots'], ensure_ascii=False)}")
+    if out["intent"] == "none":
+        print(f"not doing anything ({out.get('reason')})")
+        return
+    perform(plan(out, env, os_name), execute=args.run, confirm=(lambda q: True) if args.yes else None)
+
+
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="bolo", description="Hinglish voice-command toolkit")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -136,10 +154,19 @@ def main(argv: list[str] | None = None) -> None:
                        "Oriserve/Whisper-Hindi2Hinglish-Swift")
     u.add_argument("--asr", default=default_asr, help="Whisper model id or local dir")
     u.add_argument("--ground", action="store_true",
-                   help="match folders/files/apps against what exists on this Mac (read-only scan of ~ and /Applications)")
+                   help="match folders/files/apps against what exists on this computer (read-only scan of home and installed apps)")
     u.add_argument("--no-prompt", action="store_true", help="do not give the recogniser a vocabulary hint")
     u.add_argument("--beams", type=int, default=0, help="1 = greedy; >1 = beam search + rerank by meaning (default: built in)")
     u.set_defaults(func=_cmd_understand)
+
+    d = sub.add_parser("do", help="understand a command and do it on this computer (preview only unless --run)")
+    d.add_argument("input", help="a Hinglish command, or a path to a 16-bit WAV with --audio")
+    d.add_argument("--audio", action="store_true")
+    d.add_argument("--asr", default=default_asr, help="Whisper model id or local dir")
+    d.add_argument("--run", action="store_true", help="actually do it (default: only show what would happen)")
+    d.add_argument("--yes", action="store_true", help="do not ask before closing apps or sleeping")
+    d.add_argument("--os", choices=["windows", "linux", "mac"], help="preview the plan for another OS")
+    d.set_defaults(func=_cmd_do)
 
     nm = sub.add_parser("name", help="show or change what you call the assistant (default: Myna)")
     nm.add_argument("new", nargs="*", help="new name, e.g. Jarvis")

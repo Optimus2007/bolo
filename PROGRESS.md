@@ -194,3 +194,15 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   false actions): rejected, default unchanged. Likely reason: v1 trained on these clips, so even noised copies give
   fewer, less realistic errors than v0 did on unseen clips. Better source of realistic errors: new TTS clips v1 never saw.
   Current default stack: Bolo Sun v1 + phono_views_aug_asr-s0 = human 80.0% (3-seed mean 81.2%), macOS voices 85.0%.
+- 2026-11-12: Bolo Sun v1 with 10 epochs (Kaggle, 21.5 min, best dev at step 750): synthetic test WER 14.9% (vs 16.2%),
+  but on real speech worse: human 76.4% vs 80.0% correct, wrong actions 16.4% vs 10.9%, acted on chat 1/4; macOS
+  voices 82.9% vs 85.0%. Rejected; notebook back to 5 epochs. Lesson: synthetic WER is not a reliable guide to real use.
+- 2026-11-12: Action step (`src/bolo/actions/`, `bolo do`), Windows first, plus Linux and macOS. scan_system reads the
+  Start menu (.lnk + built-in URIs) / .desktop files / .app bundles and keeps real paths. plan() -> argv steps, never a
+  shell; slot values only as argv items, cwd, stdin or env vars read by fixed PowerShell/AppleScript; unknown sites ->
+  search; close_app/sleep ask first; Windows never ShellExecutes an app name the scan did not find. Dry run by
+  default. Tests: tests/test_actions.py (every command x 3 OSes, injection checks). Live-tested only read-only commands
+  on macOS (battery, storage). Windows/Linux not yet run on real machines.
+  Next for Windows: Windows app names in lexicon + templates (file explorer, task manager, control panel, notepad,
+  edge, settings), new TTS clips, retrain both models; a real Windows test (a friend's laptop, or a free VM image).
+  Seen while testing: "chrome kholo" -> open_website without a site (abstains), "moneycontrol kholo" -> a file.

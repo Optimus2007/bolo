@@ -127,6 +127,24 @@ default speech model. On the same 55 clips it makes fewer word errors (18.3% vs 
 226 ms), with the same 80.0% correct action (2 fixed, 2 broken); on the 240 computer-voice commands 85.0% vs 83.8%.
 Details: `results/speech/speech_v1.json`.
 
+## Doing the command (Windows, Linux, macOS)
+
+`bolo do` understands a command and shows what it would do on this computer. Nothing happens unless you add `--run`:
+
+```bash
+uv run bolo do "downloads folder mein terminal kholo"          # preview
+uv run bolo do "battery kitni hai" --run                        # do it
+uv run bolo do command.wav --audio --run                        # from a recording
+uv run bolo do "volume 40 kar do" --os windows                  # preview the Windows plan from any computer
+```
+
+Every command has a plan on all three systems (`src/bolo/actions/`). Words heard from speech are never turned into
+shell code, websites Myna does not know are searched instead of guessed, closing an app or sleeping asks first, and
+when an OS cannot do something without admin rights (Wi-Fi or Bluetooth on Windows) Myna opens the right settings page
+and says so. Calls and messages open the app (or its web version) and copy the message; picking the contact is still
+manual. Timers and reminders need the background app, which is not built yet. Tested on macOS; the Windows and Linux
+plans are unit tested but not yet tried on real machines.
+
 The full reports with every metric and caveat live in `results/`.
 
 ## Quick start

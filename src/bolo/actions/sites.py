@@ -1,0 +1,60 @@
+"""Known websites -> their real address.
+
+A site Myna does not know is never turned into a guessed address ("example" -> example.com could be a lookalike
+or scam domain). It becomes a web search instead, and the user picks the result.
+"""
+
+SITES = {
+    "github": "https://github.com",
+    "stack overflow": "https://stackoverflow.com",
+    "wikipedia": "https://www.wikipedia.org",
+    "amazon": "https://www.amazon.in",
+    "flipkart": "https://www.flipkart.com",
+    "irctc": "https://www.irctc.co.in",
+    "linkedin": "https://www.linkedin.com",
+    "reddit": "https://www.reddit.com",
+    "freecodecamp": "https://www.freecodecamp.org",
+    "hacker news": "https://news.ycombinator.com",
+    "google drive": "https://drive.google.com",
+    "google docs": "https://docs.google.com",
+    "coursera": "https://www.coursera.org",
+    "hackerrank": "https://www.hackerrank.com",
+    "hugging face": "https://huggingface.co",
+    "myntra": "https://www.myntra.com",
+    "swiggy": "https://www.swiggy.com",
+    "zomato": "https://www.zomato.com",
+    "hotstar": "https://www.hotstar.com",
+    "quora": "https://www.quora.com",
+    "medium": "https://medium.com",
+    "w3schools": "https://www.w3schools.com",
+    "geeks for geeks": "https://www.geeksforgeeks.org",
+    "codeforces": "https://codeforces.com",
+    "udemy": "https://www.udemy.com",
+    "nptel": "https://nptel.ac.in",
+    "paytm": "https://paytm.com",
+    "makemytrip": "https://www.makemytrip.com",
+    "bookmyshow": "https://in.bookmyshow.com",
+    "cricbuzz": "https://www.cricbuzz.com",
+    "moneycontrol": "https://www.moneycontrol.com",
+    "times of india": "https://timesofindia.indiatimes.com",
+    "twitter": "https://x.com",
+    "stack exchange": "https://stackexchange.com",
+    "arxiv": "https://arxiv.org",
+    "digilocker": "https://www.digilocker.gov.in",
+    "naukri": "https://www.naukri.com",
+    "unstop": "https://unstop.com",
+    "devfolio": "https://devfolio.co",
+    "vercel": "https://vercel.com",
+    # also common as "open X" even though they are apps in the lexicon
+    "youtube": "https://www.youtube.com",
+    "gmail": "https://mail.google.com",
+    "netflix": "https://www.netflix.com",
+    "instagram": "https://www.instagram.com",
+    "chatgpt": "https://chatgpt.com",
+    "perplexity": "https://www.perplexity.ai",
+    "canva": "https://www.canva.com",
+    "figma": "https://www.figma.com",
+    "notion": "https://www.notion.so",
+}
+
+SEARCH = {"google": "https://www.google.com/search?q={}", "youtube": "https://www.youtube.com/results?search_query={}"}

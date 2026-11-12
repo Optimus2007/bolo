@@ -38,6 +38,10 @@ class Environment:
     files: list[str] = field(default_factory=list)
     apps: list[str] = field(default_factory=list)
     contacts: list[str] = field(default_factory=list)
+    # filled by bolo.actions.scan_system: spoken name -> real paths, app name -> what to start, and which OS
+    where: dict[str, list[str]] = field(default_factory=dict)
+    launch: dict[str, str] = field(default_factory=dict)
+    os: str | None = None
 
     def pool(self, kind: str) -> list[str]:
         return {"folder": self.folders, "path": self.folders + self.files, "app": self.apps,

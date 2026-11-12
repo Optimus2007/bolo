@@ -26,38 +26,10 @@ from .grounding import Environment, ground, snap_site
 
 
 def scan_mac(home: Path | str | None = None, max_depth: int = 2, max_entries: int = 5000) -> Environment:
-    """Read-only scan of what exists on this Mac: folders/files under the home dir (shallow), and apps.
-    Hidden folders and Library are skipped. Nothing is modified. Contacts are not read (pass them yourself)."""
-    home = Path(home or Path.home())
-    folders, files = [], []
-    skip = {"Library", "Applications", "node_modules", ".Trash"}
+    """Read-only scan of this computer (any OS; the old name is kept): see bolo.actions.scan_system."""
+    from .actions.scan import scan_system
 
-    def walk(d: Path, depth: int):
-        if depth > max_depth or len(folders) + len(files) > max_entries:
-            return
-        try:
-            entries = sorted(d.iterdir())
-        except (PermissionError, OSError):
-            return
-        for e in entries:
-            if e.name.startswith(".") or e.name in skip:
-                continue
-            try:
-                if e.is_dir() and not e.is_symlink():
-                    folders.append(e.name.lower().replace("_", " ").replace("-", " "))
-                    walk(e, depth + 1)
-                elif e.is_file():
-                    files.append(e.stem.lower().replace("_", " ").replace("-", " "))
-            except OSError:
-                continue
-
-    walk(home, 0)
-    apps = []
-    for root in (Path("/Applications"), home / "Applications", Path("/System/Applications")):
-        if root.exists():
-            apps += [a.stem.lower() for a in root.glob("*.app")]
-    uniq = lambda xs: sorted(set(x for x in xs if x))  # noqa: E731
-    return Environment(uniq(folders), uniq(files), uniq(apps), [])
+    return scan_system(home, max_depth=max_depth, max_entries=max_entries)
 
 
 BEAMS = 5  # beam search + rerank: +8.3 points correct actions on held-out macOS voices (results/speech/decoding_test.json)
