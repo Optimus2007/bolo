@@ -132,7 +132,7 @@ def main(argv: list[str] | None = None) -> None:
     u = sub.add_parser("understand", help="text (or a .wav with --audio) -> intent + slots (never executes anything)")
     u.add_argument("input", help="a Hinglish command, or a path to a 16-bit WAV with --audio")
     u.add_argument("--audio", action="store_true")
-    default_asr = next((m for m in ("models/bolo-whisper-fp16", "models/bolo-whisper") if Path(m).exists()),
+    default_asr = next((m for m in ("models/bolo-whisper-v1-fp16", "models/bolo-whisper-fp16", "models/bolo-whisper") if Path(m).exists()),
                        "Oriserve/Whisper-Hindi2Hinglish-Swift")
     u.add_argument("--asr", default=default_asr, help="Whisper model id or local dir")
     u.add_argument("--ground", action="store_true",

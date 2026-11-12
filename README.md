@@ -122,6 +122,11 @@ chat, not a command; one did name WhatsApp). The next recording session is the c
 commands it is unchanged (83.8% vs 83.6%), and on typed text it is no worse (exact match 87.4% vs 86.2%, false
 actions 5.2% vs 6.1%). Details: `results/speech/nlu_asr_noised.json`.
 
+**Bolo Sun v1** (retrained on all 20 commands, with real room echo from OpenSLR 28 and noise-only clips) is now the
+default speech model. On the same 55 clips it makes fewer word errors (18.3% vs 23.7%) and is slightly faster (213 vs
+226 ms), with the same 80.0% correct action (2 fixed, 2 broken); on the 240 computer-voice commands 85.0% vs 83.8%.
+Details: `results/speech/speech_v1.json`.
+
 The full reports with every metric and caveat live in `results/`.
 
 ## Quick start
@@ -145,7 +150,7 @@ uv run bolo understand "documents folder mein terminal kholo" --ground    # chec
 Understand a recording (a 16 bit WAV file):
 
 ```bash
-uv run bolo understand command.wav --audio            # uses models/bolo-whisper-fp16 if present
+uv run bolo understand command.wav --audio            # uses models/bolo-whisper-v1-fp16 if present
 ```
 
 From Python:
@@ -153,7 +158,7 @@ From Python:
 ```python
 from bolo.pipeline import Bolo, scan_mac
 
-bolo = Bolo.load(asr="models/bolo-whisper-fp16", env=scan_mac())
+bolo = Bolo.load(asr="models/bolo-whisper-v1-fp16", env=scan_mac())
 bolo.understand("volume 40 pe kar do")
 # {'intent': 'set_volume', 'slots': {'level': 40}, 'abstain': False, ...}
 bolo.listen("command.wav")

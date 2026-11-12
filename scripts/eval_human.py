@@ -27,7 +27,7 @@ ap.add_argument("--test", default="data/text/v1/test.jsonl")
 ap.add_argument("--out", default="results/speech/human_v1.json")
 ap.add_argument("--configs", default="bolo_sun_beam5,bolo_sun_greedy,swift_greedy")
 ap.add_argument("--nlu", default="models/bolo-tiny/phono_views_aug_asr-s0", help="Bolo Tiny model dir")
-ap.add_argument("--asr", default="models/bolo-whisper-fp16", help="Bolo Sun model dir for the bolo_sun_* configs")
+ap.add_argument("--asr", default="models/bolo-whisper-v1-fp16", help="Bolo Sun model dir for the bolo_sun_* configs")
 ap.add_argument("--detail", default="data/eval/human", help="where per-utterance output goes (gitignored)")
 a = ap.parse_args()
 

@@ -182,3 +182,9 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
 - 2026-11-12: Speaker corrected 2 human labels (free-003 was chat -> none; free-033 did name WhatsApp). Backup:
   recordings/manifest.before_relabel.jsonl (local). Re-scored all 6 models with site snapping: human 64.8% -> 80.6%
   (3-seed means), fixed/broken 6/0, 12/2, 10/0, p 0.03 / 0.013 / 0.002. Optimistic (fix + labels came from this set).
+- 2026-11-12: Bolo Sun v1 trained on Kaggle (Swift base, 3287 rows incl. 95 noise-only, 218 real RIRs + 400 noises from
+  OpenSLR 28, 5 epochs, 11.6 min; best dev at the last step, so maybe under-trained). Synthetic test (916) WER 16.2% vs
+  Swift 32.1%. Local, with default Bolo Tiny: human WER 23.7 -> 18.3%, correct action 80.0 -> 80.0% (2 fixed / 2 broken);
+  macOS voices 83.75 -> 85.0% (16/13, n.s.). Now the default (models/bolo-whisper-v1-fp16); v0 kept on disk.
+  Next: Bolo Tiny was trained on v0's mistakes. Re-make train_asr with v1, but v1 was trained on those very clips, so
+  transcribe noised/reverbed copies (or new TTS clips) or the errors will be unrealistically few. Also try more epochs.

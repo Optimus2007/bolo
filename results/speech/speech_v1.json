@@ -1,0 +1,90 @@
+{
+ "note": "Bolo Sun v0 (9 commands) vs v1 (20 commands, real RIRs OpenSLR 28, noise-only clips), both beam 5 + Bolo Tiny seed 0. human = 1 speaker, 55 clips (2 labels corrected by the speaker).",
+ "kaggle_synthetic_test": {
+  "n": 916,
+  "bolo_sun_v1_wer": 0.1622,
+  "swift_base_wer": 0.3207,
+  "train": {
+   "config": {
+    "epochs": 5,
+    "batch_size": 32,
+    "lr": 1e-05,
+    "warmup": 50,
+    "eval_every": 150,
+    "seed": 0,
+    "freeze_encoder": false
+   },
+   "real_rirs": 218,
+   "noises": 400,
+   "nonspeech_rows": 95,
+   "minutes": 11.6
+  },
+  "best_dev_step": 510
+ },
+ "runs": {
+  "bolo-whisper-fp16|phono_views_aug-s0|human": {
+   "e2e": 0.6909,
+   "wrong_action": 0.1273,
+   "over_abstain": 0.1961,
+   "acted_on_none": "2/4",
+   "ms_mean": 242.4,
+   "wer_read": 0.2455
+  },
+  "bolo-whisper-fp16|phono_views_aug-s0|say": {
+   "e2e": 0.8375,
+   "wrong_action": 0.0958,
+   "over_abstain": 0.0731,
+   "acted_on_none": "1/21",
+   "ms_mean": 210.4,
+   "wer_read": 0.1245
+  },
+  "bolo-whisper-fp16|phono_views_aug_asr-s0|human": {
+   "e2e": 0.8,
+   "wrong_action": 0.0727,
+   "over_abstain": 0.1373,
+   "acted_on_none": "0/4",
+   "ms_mean": 225.7,
+   "wer_read": 0.2366
+  },
+  "bolo-whisper-fp16|phono_views_aug_asr-s0|say": {
+   "e2e": 0.8375,
+   "wrong_action": 0.0958,
+   "over_abstain": 0.0731,
+   "acted_on_none": "2/21",
+   "ms_mean": 200.6,
+   "wer_read": 0.1379
+  },
+  "bolo-whisper-v1-fp16|phono_views_aug-s0|human": {
+   "e2e": 0.7455,
+   "wrong_action": 0.1273,
+   "over_abstain": 0.1373,
+   "acted_on_none": "2/4",
+   "ms_mean": 213.9,
+   "wer_read": 0.192
+  },
+  "bolo-whisper-v1-fp16|phono_views_aug-s0|say": {
+   "e2e": 0.8333,
+   "wrong_action": 0.0875,
+   "over_abstain": 0.0868,
+   "acted_on_none": "2/21",
+   "ms_mean": 191.8,
+   "wer_read": 0.1221
+  },
+  "bolo-whisper-v1-fp16|phono_views_aug_asr-s0|human": {
+   "e2e": 0.8,
+   "wrong_action": 0.1091,
+   "over_abstain": 0.098,
+   "acted_on_none": "0/4",
+   "ms_mean": 212.8,
+   "wer_read": 0.183
+  },
+  "bolo-whisper-v1-fp16|phono_views_aug_asr-s0|say": {
+   "e2e": 0.85,
+   "wrong_action": 0.0917,
+   "over_abstain": 0.0639,
+   "acted_on_none": "1/21",
+   "ms_mean": 193.5,
+   "wer_read": 0.1316
+  }
+ }
+}

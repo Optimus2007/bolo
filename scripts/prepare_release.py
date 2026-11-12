@@ -34,9 +34,9 @@ def card(meta: dict, body_path: Path) -> str:
 
 
 def bolo_sun():
-    src = ROOT / "models/bolo-whisper-fp16"
+    src = ROOT / "models/bolo-whisper-v1-fp16"
     if not src.exists():
-        print("skip bolo-sun (models/bolo-whisper-fp16 missing)")
+        print("skip bolo-sun (models/bolo-whisper-v1-fp16 missing)")
         return
     d = OUT / "bolo-sun"
     shutil.rmtree(d, ignore_errors=True)
