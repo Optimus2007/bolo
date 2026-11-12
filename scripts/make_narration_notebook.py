@@ -16,11 +16,21 @@ from make_notebooks import HF_LOGIN, nb  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 spec = json.loads((ROOT / "launch/narration.json").read_text(encoding="utf-8"))
 sw = json.loads((ROOT / "results/speech/swift_heldout.json").read_text())
-fill = {"SWIFT": f"{sw['greedy']['e2e'] * 100:.0f}", "SWIFTR": f"{sw['beam5_rerank']['e2e'] * 100:.0f}"}
+ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split()
+TENS = "_ _ twenty thirty forty fifty sixty seventy eighty ninety".split()
+
+
+def words(n: int) -> str:
+    """TTS reads digits badly ("59" came out garbled), so numbers are spelled out."""
+    return ONES[n] if n < 20 else TENS[n // 10] + ("" if n % 10 == 0 else " " + ONES[n % 10])
+
+
+fill = {"SWIFT": words(round(sw["greedy"]["e2e"] * 100)), "SWIFTR": words(round(sw["beam5_rerank"]["e2e"] * 100))}
+ONLY = sys.argv[1].split(",") if len(sys.argv) > 1 else None  # e.g. 08_numbers: regenerate just these lines
 lines = []
 for x in spec["lines"]:
     t = re.sub(r"\{([A-Z]+)\}", lambda m: fill.get(m.group(1), m.group(0)), x["text"])
-    if t.strip() and not re.search(r"\{[A-Z]+\}", t):
+    if t.strip() and not re.search(r"\{[A-Z]+\}", t) and (ONLY is None or x["id"] in ONLY):
         lines.append(x | {"text": t})
 book = nb([
     ("markdown", "# Bolo 04: launch video narration (Indic Parler TTS)\n\nNeeds the `HF_TOKEN` secret. GPU T4. "

@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 L = ROOT / "launch"
 OUT = L / "out"
 W, H, FPS, SR = 1920, 1080, 30, 48000
+DEMO_PER = 3.6  # seconds per demo command
 
 BG, BG2 = (11, 15, 28), (20, 27, 48)
 INK, MUTED, DIM = (241, 243, 248), (138, 147, 166), (70, 78, 100)
@@ -105,7 +106,7 @@ for ln in spec["lines"]:
         continue
     a = L / "audio" / f"{ln['id']}.wav"
     d = wav_dur(a) if a.exists() else max(2.0, len(text) / 14.5)
-    hold = {"07_demo": 9.0, "08_numbers": 1.5, "11_close": 2.5}.get(ln["id"], 0.6)
+    hold = {"07_demo": 3 * DEMO_PER + 1.0, "08_numbers": 1.5, "11_close": 2.5}.get(ln["id"], 0.6)
     lines.append({"id": ln["id"], "text": text, "start": t, "dur": d, "end": t + d + hold, "audio": a if a.exists() else None})
     t += d + hold
 TOTAL = t + 0.8
@@ -296,14 +297,14 @@ def s_pipeline(img, t, x):
 
 def terminal(img, t, x):
     d = ImageDraw.Draw(img)
-    p = t - x["start"]
+    p = t - x["start"] - x["dur"] - 0.3  # the demo starts after the narrator's line
     box = (180, 150, W - 180, H - 170)
     rounded(d, box, 22, fill=(8, 11, 20), outline=(48, 56, 80), width=2)
     for i, c in enumerate((CORAL, AMBER, TEAL)):
         d.ellipse((box[0] + 28 + i * 34, box[1] + 22, box[0] + 48 + i * 34, box[1] + 42), fill=c)
     text(d, (W / 2, box[1] + 32), "Terminal  ·  MacBook Air M2  ·  offline", 24, MUTED, anchor="mm")
     yy = box[1] + 90
-    per = 3.0
+    per = DEMO_PER
     for i, ex in enumerate(demo[:3]):
         t0 = i * per
         if p < t0:
@@ -396,11 +397,10 @@ def frame(t):
 
 # ------------------------------------------------------------------ audio
 def load_wav(p: Path) -> np.ndarray:
-    import soundfile as sf
+    from bolo.audio.augment import read_wav
 
-    a, sr = sf.read(str(p), dtype="float32", always_2d=False)
-    if a.ndim > 1:
-        a = a.mean(1)
+    a, sr = read_wav(str(p))
+    a = np.asarray(a, dtype="float32")
     if sr != SR:
         idx = np.arange(0, len(a), sr / SR)
         a = np.interp(idx, np.arange(len(a)), a).astype("float32")
@@ -428,7 +428,7 @@ def soundtrack() -> np.ndarray:
             p = ROOT / ex["clip"]
             if p.exists():
                 a = load_wav(p) * 0.8
-                s = int((SC["07_demo"]["start"] + i * 3.0 + 0.1) * SR)
+                s = int((SC["07_demo"]["start"] + SC["07_demo"]["dur"] + 0.3 + i * DEMO_PER + 0.1) * SR)
                 out[s:s + len(a)] += a[: max(0, n - s)]
     return np.clip(out, -1, 1)
 

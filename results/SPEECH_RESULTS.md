@@ -107,6 +107,10 @@ command vocabulary prompt.
 | beam 5, top guess | 15.0% | 13.7% | 75.0% | 3.7% | 16.0% | 88.3% | 177 | 221 |
 | **beam 5, reranked** | **12.5%** | **11.0%** | **82.1%** | **3.7%** | **7.0%** | 88.3% | 177 | 221 |
 
+For comparison, Swift (the model Bolo Sun was fine tuned from) on the same 240 clips gets 58.8% correct actions with
+greedy decoding (31.3% WER) and 69.2% with the same five guess reranking (26.9% WER), so the fine tune and the decoding
+each add about 10 points (`results/speech/swift_heldout.json`).
+
 Paired against greedy on the same clips: 23 commands fixed, 3 broken, gain 8.3 points, bootstrap 95% interval 4.2 to
 12.5 points. Most of the gain is fewer needless abstentions: the right reading was often the second or third guess, and
 only grounding could tell. On the tuning set the same settings gave 86.3% to 91.3%.
