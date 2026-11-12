@@ -161,9 +161,39 @@ Download both into `models/bolo-whisper/` and `results/asr/` locally (models/ is
 """),
     ("code", FIND_BUNDLE + r'''
 tm = glob.glob("/kaggle/input/**/bolo-tts/manifest.jsonl", recursive=True) + glob.glob(WORK + "/bolo-tts/manifest.jsonl")
-assert tm, "add notebook 01's output (bolo-tts) as an input"
+assert tm, "add the bolo-tts-v1 dataset (or notebook 01's output) as an input"
 TTS_MAN = tm[0]
 print("tts manifest:", TTS_MAN)
+'''),
+    ("markdown", """
+### Real rooms and real noise (OpenSLR 28, Apache-2.0)
+Measured room impulse responses + point-source noises (Ko et al., 2017). Downloaded here on Kaggle, never
+committed. Used by `augment(..., rirs=...)` for 70% of reverberated clips, and as noise for SNR mixing and for
+noise-only clips with an empty transcript (teaches the model that "nothing said" means no words).
+"""),
+    ("code", r'''
+import os, glob, subprocess, numpy as np
+from bolo.audio.augment import resample
+RIR_DIR = WORK + "/rirs"
+if not os.path.exists(RIR_DIR + "/RIRS_NOISES"):
+    os.makedirs(RIR_DIR, exist_ok=True)
+    subprocess.run(["wget", "-q", "-O", RIR_DIR + "/rirs.zip", "https://www.openslr.org/resources/28/rirs_noises.zip"], check=True)
+    subprocess.run(["unzip", "-q", RIR_DIR + "/rirs.zip", "-d", RIR_DIR], check=True)
+    os.remove(RIR_DIR + "/rirs.zip")
+
+import soundfile as sf
+def _load(p, max_s):
+    x, sr = sf.read(p, dtype="float32", always_2d=True)
+    x = x[:, 0]  # one microphone of the array
+    x = resample(x.astype("float32"), sr, 16000)[: int(16000 * max_s)]
+    return x / (np.abs(x).max() + 1e-6)
+
+rng0 = np.random.default_rng(0)
+rir_files = sorted(glob.glob(RIR_DIR + "/RIRS_NOISES/real_rirs_isotropic_noises/*rir*.wav"))
+noise_files = sorted(glob.glob(RIR_DIR + "/RIRS_NOISES/pointsource_noises/*.wav"))
+RIRS = [_load(p, 1.0) for p in rir_files]
+NOISES = [_load(p, 8.0) for p in rng0.choice(noise_files, size=min(400, len(noise_files)), replace=False)]
+print(len(RIRS), "real RIRs,", len(NOISES), "noises")
 '''),
     ("code", r'''
 import torch, time
@@ -174,6 +204,7 @@ from bolo.normalize import Normalizer
 nz = Normalizer.from_config(load_config())
 rows = W.load_manifest(TTS_MAN, for_training=True)
 split = {s: [r for r in rows if r["split"] == s] for s in ("train", "dev", "test")}
+split["train"] = split["train"] + W.nonspeech_rows(max(1, len(split["train"]) * 3 // 100))  # ~3% noise-only
 print({k: len(v) for k, v in split.items()})
 DEV = "cuda"
 RESULTS = {"data": {k: len(v) for k, v in split.items()}, "baselines": {}, "finetuned": {}}
@@ -199,8 +230,9 @@ proc = WhisperProcessor.from_pretrained(W.BASE)
 model = WhisperForConditionalGeneration.from_pretrained(W.BASE)
 OUTDIR = WORK + "/bolo-whisper"
 t0 = time.time()
-res = W.train(model, proc, split["train"], split["dev"], OUTDIR, device=DEV, normalizer=nz, **CFG)
-RESULTS["train"] = {"config": CFG, "base": W.BASE, "minutes": round((time.time() - t0) / 60, 1), **res}
+res = W.train(model, proc, split["train"], split["dev"], OUTDIR, device=DEV, normalizer=nz, noises=NOISES, rirs=RIRS, **CFG)
+RESULTS["train"] = {"config": CFG, "base": W.BASE, "real_rirs": len(RIRS), "noises": len(NOISES),
+                    "nonspeech_rows": sum(bool(r.get("nonspeech")) for r in split["train"]), "minutes": round((time.time() - t0) / 60, 1), **res}
 '''),
     ("code", r'''
 best = WhisperForConditionalGeneration.from_pretrained(OUTDIR, torch_dtype=torch.float16).to(DEV)
@@ -224,7 +256,8 @@ for u in bad[:25]:
 ])
 
 # --- ablation: can we keep the command gain and forget less? (frozen encoder, shorter training) ---
-_ft_setup = [c for c in FT["cells"] if c["cell_type"] == "code"][:2]
+_ft_code = [c for c in FT["cells"] if c["cell_type"] == "code"]
+_ft_setup = [_ft_code[0], _ft_code[2]]  # find inputs, load rows (skips the RIR download cell)
 ABL = nb([
     ("markdown", """
 # Bolo 03: Whisper fine-tune ablation

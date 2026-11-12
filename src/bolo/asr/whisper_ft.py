@@ -58,12 +58,32 @@ def target(r: dict) -> str:
     return r.get("asr_text") or r.get("transcript") or ""
 
 
+def nonspeech_clip(rng: np.random.Generator, noises: list[np.ndarray] | None, sr: int = SR) -> np.ndarray:
+    """1-4 s of room noise / fan / keyboard (a real noise clip if given, else coloured noise), quiet to moderate."""
+    from ..audio.augment import coloured_noise, gain
+
+    n = int(sr * rng.uniform(1.0, 4.0))
+    if noises and rng.random() < 0.8:
+        nz = noises[int(rng.integers(len(noises)))]
+        off = int(rng.integers(max(1, len(nz) - n)))
+        x = np.resize(nz[off:off + n], n).astype("float32")
+    else:
+        x = coloured_noise(rng, n, str(rng.choice(["white", "pink", "brown"])))
+    x = x / (np.abs(x).max() + 1e-6)
+    return gain(x, float(rng.uniform(-45, -15)))
+
+
+def nonspeech_rows(n: int) -> list[dict]:
+    return [{"utt_id": f"nonspeech-{i}", "nonspeech": True, "asr_text": "", "split": "train",
+             "tts_model": "noise"} for i in range(n)]
+
+
 class Collator:
     def __init__(self, processor, language: str = "en", train: bool = False, seed: int = 0,
-                 noises: list[np.ndarray] | None = None, aug_p: float = 0.8):
+                 noises: list[np.ndarray] | None = None, aug_p: float = 0.8, rirs: list[np.ndarray] | None = None):
         self.fe, self.tok = processor.feature_extractor, processor.tokenizer
         self.tok.set_prefix_tokens(language=language, task="transcribe", predict_timestamps=False)
-        self.train, self.noises, self.aug_p = train, noises, aug_p
+        self.train, self.noises, self.aug_p, self.rirs = train, noises, aug_p, rirs
         self.seed, self._worker, self.rng = seed, None, np.random.default_rng(seed)
 
     def _worker_rng(self):
@@ -82,9 +102,12 @@ class Collator:
             self._worker_rng()
         wavs = []
         for r in rows:
-            x = load_audio(r["_wav"])
-            if self.train and self.rng.random() < self.aug_p:
-                x, _ = augment(x, self.rng, self.noises)
+            if r.get("nonspeech"):  # noise-only clip with an empty transcript: teaches "nothing said" -> no words
+                x = nonspeech_clip(self.rng, self.noises)
+            else:
+                x = load_audio(r["_wav"])
+                if self.train and self.rng.random() < self.aug_p:
+                    x, _ = augment(x, self.rng, self.noises, rirs=self.rirs)
             wavs.append(x)
         feats = self.fe(wavs, sampling_rate=SR, return_tensors="pt").input_features
         batch = {"input_features": feats}
@@ -131,7 +154,7 @@ def evaluate(model, processor, rows: list[dict], normalizer=None, **kw) -> tuple
 def train(model, processor, train_rows: list[dict], dev_rows: list[dict], out_dir: Path | str,
           epochs: int = 4, batch_size: int = 32, lr: float = 1e-5, warmup: int = 50, device: str = "cuda",
           fp16: bool = True, seed: int = 0, noises=None, eval_every: int = 200, normalizer=None,
-          freeze_encoder: bool = False, max_steps: int | None = None, num_workers: int = 2) -> dict:
+          freeze_encoder: bool = False, max_steps: int | None = None, num_workers: int = 2, rirs=None) -> dict:
     import torch
     from torch.utils.data import DataLoader
 
@@ -150,7 +173,7 @@ def train(model, processor, train_rows: list[dict], dev_rows: list[dict], out_di
         for p in model.model.encoder.parameters():
             p.requires_grad = False
     dl = DataLoader(train_rows, batch_size=batch_size, shuffle=True, num_workers=num_workers,
-                    collate_fn=Collator(processor, train=True, seed=seed, noises=noises), drop_last=True,
+                    collate_fn=Collator(processor, train=True, seed=seed, noises=noises, rirs=rirs), drop_last=True,
                     persistent_workers=num_workers > 0)
     total = max_steps or epochs * len(dl)
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.01)

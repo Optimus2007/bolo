@@ -149,15 +149,23 @@ DEFAULT = {
 
 
 def augment(x: np.ndarray, rng: np.random.Generator, noises: list[np.ndarray] | None = None,
-            cfg: dict | None = None) -> tuple[np.ndarray, dict]:
+            cfg: dict | None = None, rirs: list[np.ndarray] | None = None) -> tuple[np.ndarray, dict]:
+    """rirs: measured room impulse responses (e.g. OpenSLR 28). When given, 70% of reverberated clips use a real
+    room instead of the synthetic tail (real RIRs are the best-supported fix for TTS-trained ASR, see
+    docs/research/REAL_VOICE_ACCURACY.md)."""
     c = {**DEFAULT, **(cfg or {})}
     p: dict = {}
     if rng.random() < c["p_speed"]:
         p["speed"] = float(rng.choice(c["speeds"]))
         x = speed(x, p["speed"])
     if rng.random() < c["p_reverb"]:
-        p["rt60"] = round(float(rng.uniform(*c["rt60"])), 3)
-        x = reverb(x, room_ir(rng, p["rt60"]))
+        if rirs and rng.random() < 0.7:
+            i = int(rng.integers(len(rirs)))
+            p["rir"] = f"real{i}"
+            x = reverb(x, rirs[i])
+        else:
+            p["rt60"] = round(float(rng.uniform(*c["rt60"])), 3)
+            x = reverb(x, room_ir(rng, p["rt60"]))
     if rng.random() < c["p_noise"]:
         p["snr_db"] = round(float(rng.uniform(*c["snr"])), 1)
         if noises and rng.random() < 0.7:

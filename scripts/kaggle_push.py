@@ -2,6 +2,7 @@
 
   python scripts/kaggle_push.py dataset            # create/update private dataset <user>/bolo-bundle
   python scripts/kaggle_push.py tts [--trial] [--no-gpu]
+  python scripts/kaggle_push.py ttsdata          # private dataset bolo-tts-v1 from data/kaggle/tts_v1
   python scripts/kaggle_push.py ft  [--trial]
   python scripts/kaggle_push.py status
   python scripts/kaggle_push.py fetch tts|ft       # download outputs into data/kaggle/out/<kernel>/
@@ -62,6 +63,19 @@ def dataset():
         print(kg("datasets", "create", "-p", str(d), "-r", "zip"))
 
 
+def tts_dataset(src: Path = ROOT / "data/kaggle/tts_v1"):
+    """Upload the synthetic clips (computer voices only, never recordings/) as a private dataset."""
+    assert (src / "bolo-tts" / "manifest.jsonl").exists(), "run scripts/make_tts_dataset.py first"
+    assert "recordings" not in str(src.resolve())
+    u = user()
+    (src / "dataset-metadata.json").write_text(json.dumps(
+        {"title": "bolo-tts-v1", "id": f"{u}/bolo-tts-v1", "licenses": [{"name": "apache-2.0"}]}))
+    if "bolo-tts-v1" in kg("datasets", "list", "--mine"):
+        print(kg("datasets", "version", "-p", str(src), "-m", "update", "-r", "zip"))
+    else:  # private is the default; never pass --public
+        print(kg("datasets", "create", "-p", str(src), "-r", "zip"))
+
+
 def kernel(which: str, trial: bool, gpu: bool):
     subprocess.run([sys.executable, str(ROOT / "scripts/make_notebooks.py")], check=True)
     if which == "narr":
@@ -85,7 +99,7 @@ def kernel(which: str, trial: bool, gpu: bool):
             "kernel_type": "notebook", "is_private": True, "enable_gpu": gpu, "enable_internet": True,
             "dataset_sources": [f"{u}/bolo-bundle"], "kernel_sources": [], "competition_sources": []}
     if which in ("ft", "abl"):
-        meta["kernel_sources"] = [f"{u}/{KERNELS['tts'][0]}"]
+        meta["dataset_sources"].append(f"{u}/bolo-tts-v1")
     (d / "kernel-metadata.json").write_text(json.dumps(meta, indent=1))
     print(kg("kernels", "push", "-p", str(d)))
 
@@ -105,7 +119,7 @@ def fetch(which: str):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["dataset", "tts", "ft", "abl", "narr", "status", "fetch"])
+    ap.add_argument("cmd", choices=["dataset", "ttsdata", "tts", "ft", "abl", "narr", "status", "fetch"])
     ap.add_argument("which", nargs="?")
     ap.add_argument("--trial", action="store_true")
     ap.add_argument("--no-gpu", action="store_true")
@@ -115,6 +129,8 @@ if __name__ == "__main__":
     ONLY, STORY = a.only, a.story
     if a.cmd == "dataset":
         dataset()
+    elif a.cmd == "ttsdata":
+        tts_dataset()
     elif a.cmd in ("tts", "ft", "abl", "narr"):
         kernel(a.cmd, a.trial, not a.no_gpu)
     elif a.cmd == "status":
