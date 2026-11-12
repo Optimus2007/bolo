@@ -27,7 +27,7 @@ JOIN_HEADS = {"kar", "khol", "laga", "badha", "rakh", "chala"}
 JOIN_TAILS = {"do", "de", "lo"}
 MIN_TEMPLATES_FOR_HOLDOUT = 8
 
-DEFAULT_SIZES = {"train": 5000, "dev": 750, "test": 1000}
+DEFAULT_SIZES = {"train": 9000, "dev": 1200, "test": 2000}  # v1: 20 commands (v0 had 8 and 5000/750/1000)
 INTENT_WEIGHTS = {
     "open_terminal": 1.0,
     "open_claude_in_folder": 1.0,
@@ -37,7 +37,19 @@ INTENT_WEIGHTS = {
     "open_file_or_folder": 1.0,
     "set_volume": 0.8,
     "set_brightness": 0.7,
-    "none": 1.2,
+    "media_control": 0.8,
+    "lock_screen": 0.35,
+    "sleep_mac": 0.35,
+    "take_screenshot": 0.35,
+    "toggle_setting": 0.8,
+    "set_timer": 0.8,
+    "set_reminder": 0.9,
+    "web_search": 0.9,
+    "open_website": 0.8,
+    "close_app": 0.9,
+    "find_file": 0.9,
+    "send_message": 1.0,
+    "none": 1.6,
 }
 
 SLOT_RE = re.compile(r"^\{([^}:]+)(?::([^}]+))?\}$")
@@ -52,7 +64,18 @@ TYPE_POOL = {
     "status_target": "status_targets",
     "volume_direction": "volume_dir_hi",
     "brightness_direction": "brightness_dir_hi",
+    "task": "tasks",
+    "query": "queries",
+    "site": "sites",
+    "message": "messages",
+    "media_action": "media_actions_hi",
+    "setting": "settings",
+    "toggle_state": "toggle_states_hi",
+    "time_unit": "time_units",
+    "search_engine": "engines",
 }
+NUMBER_TYPES = ("level", "amount")
+FREE_TEXT_POOLS = ("tasks", "tasks_en", "queries", "messages", "messages_en")
 
 
 @dataclass
@@ -84,7 +107,14 @@ class Generator:
                 self.heldout[t.id] = enough and template_heldout(t.text)
 
     # ---------- rendering ----------
-    def _level(self, tpl: Template) -> tuple[int, Tok]:
+    def _level(self, tpl: Template, lo: int = 0, hi: int = 100) -> tuple[int, Tok]:
+        if (lo, hi) != (0, 100):  # amounts (timers): small numbers, same surfaces
+            for _ in range(50):
+                v, tok = self._level(tpl)
+                if lo <= v <= hi:
+                    return v, tok
+            v = self.rng.randint(lo, hi)
+            return v, Tok(str(v), str(v), "num")
         r = self.rng.random()
         english = tpl.lang == "en"
         p_digit, p_hi = (0.6, 0.0) if english else (0.45, 0.4)
@@ -101,8 +131,8 @@ class Generator:
     def _fill_slot(self, tpl: Template, slot: str, pool: str | None, split: str, labeled: bool):
         if labeled:
             stype_name = self.cfg.schema["intents"][tpl.intent]["slots"][slot]["type"]
-            if stype_name == "level":
-                value, tok = self._level(tpl)
+            if stype_name in NUMBER_TYPES:
+                value, tok = self._level(tpl) if stype_name == "level" else self._level(tpl, 1, 60)
                 return value, [Tok(tok.roman, tok.dev, tok.lang, slot)]
             pool = pool or TYPE_POOL[stype_name]
         if pool in self.split_values:
@@ -110,6 +140,15 @@ class Generator:
             if tpl.kind:
                 cands = [e for e in cands if e.kind == tpl.kind]
             e = self.rng.choice(cands)
+            if pool in FREE_TEXT_POOLS:  # word by word, so known Hindi words render in Devanagari too
+                toks = []
+                for w in e.roman.split():
+                    try:
+                        t = self.cfg.word(w)
+                    except KeyError:
+                        t = Tok(w, None, "en")
+                    toks.append(Tok(t.roman, t.dev, t.lang, slot if labeled else None))
+                return e.value, toks
             lang = "ne" if pool == "contacts" else "en"
             return e.value, [Tok(e.roman, e.dev, lang, slot if labeled else None)]
         closed = self.cfg.closed_pools[pool]

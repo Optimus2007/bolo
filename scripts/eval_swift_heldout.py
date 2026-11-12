@@ -17,7 +17,7 @@ from bolo.speech_eval import WhisperASR, environment, load_set
 cfg = load_config()
 env, nz = environment(cfg), Normalizer.from_config(cfg)
 nlu = BoloTiny.load(cfg, "models/bolo-tiny/phono_views_aug-s0")
-rows = load_set("data/say_test/manifest.jsonl", "data/text/v0/test.jsonl", "say_test")
+rows = load_set("data/say_test/manifest.jsonl", "data/text/v1/test.jsonl", "say_test")
 asr = WhisperASR("Oriserve/Whisper-Hindi2Hinglish-Swift", "en", prompt=COMMAND_WORDS)
 greedy, chosen, gt, ct = [], [], [], []
 for r in rows:

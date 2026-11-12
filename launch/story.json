@@ -1,0 +1,24 @@
+{
+ "note": "Cartoon launch video. Beats play in order. voice: narrator (female), aarav (male, Hinglish), or none (text only). Bolo speaks only in text bubbles: it has no voice yet. Numbers in {BRACES} are filled from results/ before the narration is generated; spoken numbers are written as words.",
+ "voices": {
+  "narrator": "Mary speaks in a warm, clear, friendly voice at a moderate pace, with very clear audio and no background noise.",
+  "aarav": "Rohit speaks in a tired but friendly voice at a moderate pace, with very clear audio and no background noise."
+ },
+ "beats": [
+  {"id": "n01", "scene": "night", "voice": "narrator", "text": "Meet Aarav. It is two in the morning, and his project is due tomorrow."},
+  {"id": "a01", "scene": "fail1", "voice": "aarav", "text": "docker चालू करो।", "caption": "docker chalu karo!"},
+  {"id": "x01", "scene": "fail1b", "voice": "none", "text": "", "hold": 2.2},
+  {"id": "a02", "scene": "fail2", "voice": "aarav", "text": "volume थोड़ा कम करो।", "caption": "volume thoda kam karo"},
+  {"id": "x02", "scene": "fail2b", "voice": "none", "text": "", "hold": 2.4},
+  {"id": "n02", "scene": "facepalm", "voice": "narrator", "text": "Like millions of people in India, Aarav speaks Hinglish. Most voice assistants do not."},
+  {"id": "n03", "scene": "popup", "voice": "narrator", "text": "This is Bolo. It is small enough to live on his laptop, and it understands Hinglish."},
+  {"id": "a03", "scene": "listen", "voice": "aarav", "text": "client folder में terminal खोलो।", "caption": "client folder mein terminal kholo"},
+  {"id": "n04", "scene": "pipeline", "voice": "narrator", "text": "Bolo writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens."},
+  {"id": "n05", "scene": "montage", "voice": "narrator", "text": "It knows twenty kinds of commands. Music, timers, reminders, messages, settings, and more."},
+  {"id": "a04", "scene": "unsure", "voice": "aarav", "text": "वो वाला folder खोलो।", "caption": "woh wala folder kholo"},
+  {"id": "n06", "scene": "unsure2", "voice": "narrator", "text": "And when it is not sure, it asks, instead of guessing."},
+  {"id": "n07", "scene": "offline", "voice": "narrator", "text": "Everything runs on the laptop itself. No internet, no cloud. His voice never leaves his machine."},
+  {"id": "n08", "scene": "board", "voice": "narrator", "text": "On {N_WORDS} test commands, spoken in computer voices it never trained on, Bolo picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now."},
+  {"id": "n09", "scene": "sunrise", "voice": "narrator", "text": "Bolo. Open source, and free. Try it, and tell us where it fails."}
+ ]
+}

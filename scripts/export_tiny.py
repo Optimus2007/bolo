@@ -19,7 +19,7 @@ cfg = load_config()
 tiny = BoloTiny.load(cfg, src)
 out = Path("models/export/bolo-tiny")
 info = export_onnx(tiny, out)
-test = load_rows("data/text/v0/test.jsonl")
+test = load_rows("data/text/v1/test.jsonl")
 res = {"source": src, **info}
 for name in ("bolo_tiny.onnx", "bolo_tiny.int8.onnx"):
     so = ort.SessionOptions()

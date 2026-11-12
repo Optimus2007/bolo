@@ -16,6 +16,13 @@ DEFAULT_CONFIG_DIR = (REPO_ROOT / "configs") if (REPO_ROOT / "configs" / "schema
 TOKEN_RE = re.compile(r"^(\{[^}]+\}|<[^>]+>|[^\s{}<>]+)$")
 
 
+# Value pools in lexicon.yaml, by how they are used.
+OPEN_POOLS = ("folders", "files", "contacts", "apps", "tasks", "tasks_en", "queries", "sites", "messages", "messages_en")
+SURFACE_POOLS = ("call_apps", "status_targets", "settings", "time_units", "time_units_en", "engines")
+PHRASE_POOLS = ("volume_dir_hi", "volume_dir_en", "brightness_dir_hi", "brightness_dir_en", "media_actions_hi",
+                "media_actions_en", "toggle_states_hi", "toggle_states_en")
+
+
 @dataclass(frozen=True)
 class Tok:
     """A rendered unit: one word, or a whole multi-word slot surface."""
@@ -105,7 +112,9 @@ def load_config(config_dir: Path | str = DEFAULT_CONFIG_DIR) -> Config:
 
     pools = lex["pools"]
     open_pools: dict[str, list[PoolEntry]] = {}
-    for name in ("folders", "files", "contacts", "apps"):
+    for name in OPEN_POOLS:
+        if name not in pools:
+            continue
         entries = []
         for raw in pools[name]:
             roman, dev = _split_entry(str(raw))
@@ -116,7 +125,9 @@ def load_config(config_dir: Path | str = DEFAULT_CONFIG_DIR) -> Config:
     lang_for = {"contacts": "ne"}
     closed_pools: dict[str, dict[str, list[list[Tok]]]] = {}
     # Surface pools: each surface is one whole-phrase token.
-    for name in ("call_apps", "status_targets"):
+    for name in SURFACE_POOLS:
+        if name not in pools:
+            continue
         closed_pools[name] = {}
         for canon, surfaces in pools[name].items():
             toks = []
@@ -126,7 +137,9 @@ def load_config(config_dir: Path | str = DEFAULT_CONFIG_DIR) -> Config:
             closed_pools[name][str(canon)] = toks
     # Phrase pools: rendered word by word through the dictionary.
     cfg_partial = Config(schema, hindi, english, classes, spelling, open_pools, {}, {}, {}, {})
-    for name in ("volume_dir_hi", "volume_dir_en", "brightness_dir_hi", "brightness_dir_en"):
+    for name in PHRASE_POOLS:
+        if name not in pools:
+            continue
         closed_pools[name] = {
             str(canon): [[cfg_partial.word(w) for w in str(p).split()] for p in phrases]
             for canon, phrases in pools[name].items()

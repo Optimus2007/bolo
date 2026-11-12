@@ -72,7 +72,7 @@ def bolo_tiny():
 
 
 def dataset():
-    src = ROOT / "data/text/v0"
+    src = ROOT / "data/text/v1"
     d = OUT / "bolocmd-v0"
     shutil.rmtree(d, ignore_errors=True)
     d.mkdir(parents=True)

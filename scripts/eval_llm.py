@@ -13,8 +13,8 @@ from bolo.models.llm import LLMPredictor
 
 path, tag = sys.argv[1], sys.argv[2]
 cfg = load_config()
-test = load_rows("data/text/v0/test.jsonl")
-dev = load_rows("data/text/v0/dev.jsonl")[:300]
+test = load_rows("data/text/v1/test.jsonl")
+dev = load_rows("data/text/v1/dev.jsonl")[:300]
 m = LLMPredictor(path, name=tag)
 t0 = time.time()
 thr = choose_threshold(dev, m.predict([r["text"] for r in dev]), cfg.schema)
@@ -39,7 +39,7 @@ times.sort()
 res["latency_ms"] = {"p50": round(times[25], 1), "p95": round(times[47], 1), "note": "MLX GPU, batch 1, 50 utts"}
 res["parse_failures"] = sum(1 for p in raw if "raw" in p)
 size = sum(f.stat().st_size for f in Path(path).glob("*.safetensors"))
-res.update(model=tag, seed=0, params=494_033_000, size_mb=round(size / 1e6, 1), data="data/text/v0")
+res.update(model=tag, seed=0, params=494_033_000, size_mb=round(size / 1e6, 1), data="data/text/v1")
 Path(f"results/text/{tag}.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
 t = res["test"]
 print(f"EM {t['exact_match']:.3f} | heldout {t['breakdown']['template']['heldout']['exact_match']:.3f} | intent "

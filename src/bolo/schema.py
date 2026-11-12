@@ -18,9 +18,10 @@ def validate_label(schema: dict, intent: str, slots: dict) -> None:
         if name not in allowed:
             raise LabelError(f"slot {name!r} not allowed for {intent}")
         stype = schema["slot_types"][allowed[name]["type"]]
-        if allowed[name]["type"] == "level":
-            if not isinstance(value, int) or not 0 <= value <= 100:
-                raise LabelError(f"level must be int 0-100, got {value!r}")
+        if allowed[name]["type"] in ("level", "amount"):
+            lo = 0 if allowed[name]["type"] == "level" else 1
+            if not isinstance(value, int) or not lo <= value <= 100:
+                raise LabelError(f"{name} must be int {lo}-100, got {value!r}")
         elif "values" in stype and value not in stype["values"]:
             raise LabelError(f"{value!r} not a valid {allowed[name]['type']}")
         elif not isinstance(value, (str, int)) or value == "":

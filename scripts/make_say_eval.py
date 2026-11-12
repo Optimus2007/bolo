@@ -19,7 +19,7 @@ from pathlib import Path
 from bolo.record.prompts import build_prompts
 
 VOICES_HI, VOICES_EN = ["Lekha"], ["Aman", "Tara", "Rishi"]
-TEST = "data/text/v0/test.jsonl"
+TEST = "data/text/v1/test.jsonl"
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--heldout", type=int, default=0, help="make N clips from test rows not used as recording prompts")

@@ -7,7 +7,7 @@ from bolo.config import load_config
 from bolo.speech_eval import WhisperASR, load_set, run
 
 cfg = load_config()
-rows = load_set("data/say/manifest.jsonl", "data/text/v0/test.jsonl", "say")
+rows = load_set("data/say/manifest.jsonl", "data/text/v1/test.jsonl", "say")
 P = cfg.open_pools
 apps = ", ".join(e.value for e in P["apps"])
 words = "terminal, claude code, folder, volume, brightness, battery, wifi, bluetooth"

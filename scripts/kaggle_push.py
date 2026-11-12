@@ -22,7 +22,7 @@ KAGGLE = ["uvx", "--with", "six", "kaggle"]
 ONLY = None  # narr: comma separated line ids to regenerate (--only)
 KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb"),
            "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb"), "narr": ("bolo-narration", "04_narration.ipynb")}
-TRIAL_N = {"tts": ('N = {"train": 5000, "dev": 300, "test": 1000}', 'N = {"train": 64, "dev": 16, "test": 32}'),
+TRIAL_N = {"tts": ('N = {"train": 7000, "dev": 400, "test": 1200}', 'N = {"train": 64, "dev": 16, "test": 32}'),
            "ft": ('CFG = dict(epochs=5,', 'CFG = dict(max_steps=20, epochs=1,')}
 
 

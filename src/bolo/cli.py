@@ -78,22 +78,22 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     g = sub.add_parser("generate", help="generate the synthetic text dataset")
-    g.add_argument("--out", default="data/text/v0")
+    g.add_argument("--out", default="data/text/v1")
     g.add_argument("--seed", type=int, default=13)
-    g.add_argument("--train", type=int, default=5000)
-    g.add_argument("--dev", type=int, default=750)
-    g.add_argument("--test", type=int, default=1000)
+    g.add_argument("--train", type=int, default=9000)
+    g.add_argument("--dev", type=int, default=1200)
+    g.add_argument("--test", type=int, default=2000)
     g.add_argument("--sample-out", default=None, help="also write a small sample JSONL (safe to commit)")
     g.add_argument("--sample-n", type=int, default=40, help="rows per split in the sample")
     g.set_defaults(func=_cmd_generate)
 
     s = sub.add_parser("stats", help="print dataset statistics")
-    s.add_argument("--data", default="data/text/v0")
+    s.add_argument("--data", default="data/text/v1")
     s.set_defaults(func=_cmd_stats)
 
     r = sub.add_parser("record", help="local web tool to record the human-spoken eval set (consent-first)")
     r.add_argument("--root", default="recordings", help="where audio + manifest are stored (gitignored)")
-    r.add_argument("--test", default="data/text/v0/test.jsonl", help="test split the prompts are drawn from")
+    r.add_argument("--test", default="data/text/v1/test.jsonl", help="test split the prompts are drawn from")
     r.add_argument("--port", type=int, default=8765)
     r.add_argument("--no-browser", action="store_true")
     r.add_argument("--share", action="store_true",
@@ -106,7 +106,7 @@ def main(argv: list[str] | None = None) -> None:
     e = sub.add_parser("eval", help="speech -> text -> action benchmark (ASR + NLU + grounding + latency)")
     e.add_argument("--manifest", nargs="+", default=["recordings/manifest.jsonl"],
                    help="manifest paths, optionally NAME=path (e.g. say=data/say/manifest.jsonl)")
-    e.add_argument("--test", default="data/text/v0/test.jsonl")
+    e.add_argument("--test", default="data/text/v1/test.jsonl")
     e.add_argument("--asr", default="whisper-base,swift,bolo-whisper",
                    help="comma list from: whisper-base, whisper-small, swift, bolo-whisper")
     e.add_argument("--nlu", default="rules,tiny", help="comma list from: rules, tiny, muril")

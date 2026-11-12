@@ -1,10 +1,10 @@
-# Bolo command schema v0.
+# Bolo command schema v1 (v0 had 8 commands + none; v1 adds 11: media, system, productivity, apps and messages).
 # Each intent lists its slots. A slot is either open-vocabulary (values come from a pool that is
 # split train/dev/test by value) or closed (a fixed enum shared by all splits).
 # Model output format: {"intent": str, "slots": {slot: value}, "confidence": float in [0,1]}.
 # Adding an intent: add it here, add value pools to lexicon.yaml if needed, add templates to templates.yaml.
 
-version: 0
+version: 1
 
 slot_types:
   folder:      {open: true,  pool: folders,  description: "Spoken folder name, lowercase Roman (e.g. 'ml notes')."}
@@ -16,6 +16,16 @@ slot_types:
   level:       {open: false, description: "Integer 0-100 (percent)."}
   volume_direction:     {open: false, values: [up, down, mute, unmute, max]}
   brightness_direction: {open: false, values: [up, down, max, min]}
+  amount:      {open: false, description: "Integer 1-100 (a timer or reminder length, with a unit)."}
+  time_unit:   {open: false, values: [seconds, minutes, hours]}
+  media_action: {open: false, values: [play, pause, next, previous]}
+  setting:     {open: false, values: [wifi, bluetooth, do_not_disturb, dark_mode]}
+  toggle_state: {open: false, values: ["on", "off"]}
+  search_engine: {open: false, values: [google, youtube]}
+  task:        {open: true,  pool: tasks,    description: "What to be reminded about, lowercase Roman (e.g. 'chai peeni hai')."}
+  query:       {open: true,  pool: queries,  description: "What to search for, lowercase Roman (e.g. 'python list sort')."}
+  site:        {open: true,  pool: sites,    description: "A website, lowercase Roman (e.g. 'github')."}
+  message:     {open: true,  pool: messages, description: "Message text, lowercase Roman (e.g. 'main late hoon')."}
 
 intents:
   open_terminal:
@@ -50,6 +60,54 @@ intents:
       level:     {type: level, required: false}
       direction: {type: brightness_direction, required: false}
     one_of: [level, direction]
+  media_control:
+    description: "Play, pause, next or previous track in the media player."
+    slots: {action: {type: media_action, required: true}}
+  lock_screen:
+    description: "Lock the screen."
+    slots: {}
+  sleep_mac:
+    description: "Put the computer to sleep."
+    slots: {}
+  take_screenshot:
+    description: "Take a screenshot."
+    slots: {}
+  toggle_setting:
+    description: "Turn Wi-Fi, Bluetooth, Do Not Disturb or dark mode on or off."
+    slots:
+      setting: {type: setting, required: true}
+      state:   {type: toggle_state, required: true}
+  set_timer:
+    description: "Start a timer for an amount of time."
+    slots:
+      amount: {type: amount, required: true}
+      unit:   {type: time_unit, required: true}
+  set_reminder:
+    description: "Remind the user about something, optionally after an amount of time."
+    slots:
+      task:   {type: task, required: true}
+      amount: {type: amount, required: false}
+      unit:   {type: time_unit, required: false}
+  web_search:
+    description: "Search the web (or YouTube) for something."
+    slots:
+      query:  {type: query, required: true}
+      engine: {type: search_engine, required: false}
+  open_website:
+    description: "Open a website in the browser."
+    slots: {site: {type: site, required: true}}
+  close_app:
+    description: "Quit a desktop application."
+    slots: {app: {type: app, required: true}}
+  find_file:
+    description: "Search for a file or folder by name."
+    slots: {path: {type: path, required: true}}
+  send_message:
+    description: "Send a text message to a contact, optionally via a specific app."
+    slots:
+      name:    {type: contact, required: true}
+      message: {type: message, required: true}
+      app:     {type: call_app, required: false}
   none:
     description: >
       Unclear, incomplete, ambiguous, unsupported or out-of-domain. The assistant should ask

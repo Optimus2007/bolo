@@ -54,7 +54,8 @@ class Environment:
 
 
 SLOT_KIND = {("open_terminal", "folder"): "folder", ("open_claude_in_folder", "folder"): "folder",
-             ("open_file_or_folder", "path"): "path", ("open_app", "app"): "app", ("call_contact", "name"): "name"}
+             ("open_file_or_folder", "path"): "path", ("open_app", "app"): "app", ("call_contact", "name"): "name",
+             ("close_app", "app"): "app", ("find_file", "path"): "path", ("send_message", "name"): "name"}
 
 
 def ground(pred: dict, env: Environment, threshold: float = 0.72, margin: float = 0.05) -> dict:

@@ -16,7 +16,7 @@ from bolo.evaluate import finalize, load_rows, score
 from bolo.grounding import SLOT_KIND, Environment, ground
 
 cfg = load_config()
-test = load_rows("data/text/v0/test.jsonl")
+test = load_rows("data/text/v1/test.jsonl")
 P = cfg.open_pools
 env = Environment([e.value for e in P["folders"]], [e.value for e in P["files"]],
                   [e.value for e in P["apps"]], [e.value for e in P["contacts"]])

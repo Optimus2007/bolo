@@ -5,6 +5,41 @@
 # Roman keys are the CANONICAL spelling (used as the ASR target); `spelling` lists variants seen in typing.
 
 hindi_words:
+  agla: अगला
+  baad: बाद
+  baare: बारे
+  bahar: बाहर
+  bandh: बंद
+  bhej: भेज
+  bolo: बोलो
+  daal: डाल
+  daalo: डालो
+  dhoondh: ढूँढ
+  dhoondo: ढूँढो
+  dhundho: ढूंढो
+  dila: दिला
+  dilana: दिलाना
+  dilao: दिलाओ
+  hoon: हूँ
+  iska: इसका
+  ja: जा
+  kahan: कहाँ
+  khicho: खींचो
+  khojo: खोजो
+  lena: लेना
+  lijiye: लीजिए
+  likho: लिखो
+  main: मैं
+  niklo: निकलो
+  pichla: पिछला
+  rakha: रखा
+  rok: रोक
+  roko: रोको
+  shuru: शुरू
+  so: सो
+  sula: सुला
+  yaad: याद
+  yeh: यह
   aadha: आधा
   aap: आप
   aaj: आज
@@ -149,6 +184,49 @@ hindi_words:
 
 # English words. Value = Devanagari transliteration used in full-Devanagari mode (null -> stays Latin).
 english_words:
+  back: बैक
+  browser: ब्राउज़र
+  capture: कैप्चर
+  chrome: क्रोम
+  com: कॉम
+  computer: कंप्यूटर
+  disable: डिसेबल
+  dot: डॉट
+  email: ईमेल
+  enable: इनेबल
+  find: फ़ाइंड
+  go: गो
+  google: गूगल
+  internet: इंटरनेट
+  look: लुक
+  mac: मैक
+  mode: मोड
+  msg: null
+  next: नेक्स्ट
+  "off": ऑफ़
+  password: पासवर्ड
+  pause: पॉज़
+  previous: प्रीवियस
+  put: पुट
+  quit: क्विट
+  remind: रिमाइंड
+  reminder: रिमाइंडर
+  resume: रिज़्यूम
+  saying: null
+  search: सर्च
+  site: साइट
+  skip: स्किप
+  sleep: स्लीप
+  song: सॉन्ग
+  spotify: स्पॉटिफ़ाई
+  switch: स्विच
+  system: सिस्टम
+  text: टेक्स्ट
+  timer: टाइमर
+  track: ट्रैक
+  update: अपडेट
+  website: वेबसाइट
+  where: null
   a: null
   ai: एआई
   alarm: अलार्म
@@ -276,6 +354,15 @@ classes:
   pct: [percent]
   vol: [volume, awaaz, sound]
   bright: [brightness, screen brightness, roshni, screen ki roshni]
+  song: [gaana, song, music, gaane]
+  lo_v: [lo, le lo, lena, le lijiye, le do, khicho]
+  lagao_v: [lagao, laga do, set karo, set kar do, chalu karo, start karo]
+  remind_v: [yaad dilana, yaad dila dena, remind karna, remind kar dena, yaad dilao]
+  search_v: [search karo, search kar do, dhoondo, dhundho, dhoondh do, khojo]
+  close_v: [band karo, band kar do, close karo, close kar do, quit karo, bandh karo]
+  find_v: [dhoondo, dhundho, dhoondh do, search karo, find karo, dhoondh ke do]
+  msg_w: [message, msg, text]
+  bhejo_v: [bhejo, bhej do, send karo, send kar do]
   pre: [yaar, zara, please, bhai, ek baar, accha, umm, suno, haan, chalo, yaar zara, please zara]
   post: [please, yaar, na, bhai, abhi, zara]
 
@@ -690,6 +777,299 @@ pools:
   brightness_dir_en:
     up: [up]
     down: [down]
+
+  # ---- v1 pools ----
+  # Open pools (split train/dev/test by value). Free text slots: what to remember, search, or send.
+  tasks:
+    - geyser band karna hai
+    - bank call karna hai
+    - parcel uthana hai
+    - resume update karna hai
+    - slides banani hain
+    - quiz ki taiyari karni hai
+    - bijli ka bill bharna hai
+    - darwaza lock karna hai
+    - webinar join karna hai
+    - chashma saaf karna hai
+    - chai peeni hai
+    - mummy ko call karna hai
+    - assignment submit karna hai
+    - dawai leni hai
+    - meeting join karni hai
+    - paani peena hai
+    - kapde utaarne hain
+    - doodh lana hai
+    - gym jaana hai
+    - class join karni hai
+    - bill pay karna hai
+    - recharge karna hai
+    - laptop charge karna hai
+    - project push karna hai
+    - notes padhne hain
+    - khana garam karna hai
+    - papa ko message karna hai
+    - stretch karna hai
+    - aankhon ko rest dena hai
+    - form bharna hai
+    - code review karna hai
+    - pizza order karna hai
+    - plant ko paani dena hai
+    - standup meeting hai
+    - backup lena hai
+    - email reply karna hai
+    - interview ki taiyari karni hai
+    - bike service karani hai
+    - library ki book wapas karni hai
+    - exam form bharna hai
+    - dost ka birthday hai
+    - so jaana hai
+    - break lena hai
+    - deploy check karna hai
+    - groceries order karni hain
+    - rent transfer karna hai
+  tasks_en:
+    - switch off the geyser
+    - call the bank
+    - renew the subscription
+    - attend the webinar
+    - walk the dog
+    - update the resume
+    - send the invoice
+    - lock the door
+    - pick up the parcel
+    - finish the slides
+    - drink coffee
+    - prepare for the quiz
+    - drink water
+    - call mom
+    - submit the assignment
+    - take my medicine
+    - join the meeting
+    - stand up and stretch
+    - charge my phone
+    - push the code
+    - reply to the email
+    - pay the electricity bill
+    - water the plants
+    - check the deployment
+    - take a break
+    - buy milk
+    - go to the gym
+    - book the tickets
+    - send the report
+    - backup my files
+    - read the notes
+    - start the standup
+    - order groceries
+    - wish rahul happy birthday
+    - recharge my phone
+    - review the pull request
+  queries:
+    - python list sort
+    - docker compose tutorial
+    - best laptop under fifty thousand
+    - delhi metro timing
+    - chai kaise banate hain
+    - react hooks
+    - iphone price
+    - ipl score
+    - neural network kya hai
+    - rust ownership
+    - git rebase kaise karte hain
+    - aaj ka gold rate
+    - bangalore weather
+    - kubernetes basics
+    - dsa roadmap
+    - pandas groupby
+    - linux commands list
+    - hindi songs playlist
+    - jee mains result
+    - nearest petrol pump
+    - transformers paper
+    - mumbai to pune train
+    - paneer butter masala recipe
+    - sql joins
+    - typescript generics
+    - flask vs django
+    - upsc syllabus
+    - cricket live score
+    - whisper model fine tuning
+    - mac keyboard shortcuts
+    - next js routing
+    - excel vlookup
+    - resume template
+    - stock market news
+    - lofi music
+    - interview questions java
+    - postgres index
+    - c plus plus pointers
+    - android studio setup
+    - airpods offer
+  sites:
+    - github
+    - stack overflow
+    - wikipedia
+    - amazon
+    - flipkart
+    - irctc
+    - linkedin
+    - reddit
+    - freecodecamp
+    - hacker news
+    - google drive
+    - google docs
+    - coursera
+    - hackerrank
+    - hugging face
+    - myntra
+    - swiggy
+    - zomato
+    - hotstar
+    - quora
+    - medium
+    - w3schools
+    - geeks for geeks
+    - codeforces
+    - udemy
+    - nptel
+    - paytm
+    - makemytrip
+    - bookmyshow
+    - cricbuzz
+    - moneycontrol
+    - times of india
+    - twitter
+    - stack exchange
+    - arxiv
+    - digilocker
+    - naukri
+    - unstop
+    - devfolio
+    - vercel
+  messages:
+    - main thoda late aaunga
+    - kal subah call karna
+    - khana bana ke rakhna
+    - main metro mein hoon
+    - meeting baad mein karte hain
+    - ghar pahunch ke batata hoon
+    - aaj office nahi aa raha
+    - chabi bhool gaya hoon
+    - raat ko baat karte hain
+    - exam kaisa gaya
+    - presentation bhej di hai
+    - train late hai
+    - paani le aana
+    - bas pahunch hi raha hoon
+    - aaj party hai
+    - main late hoon
+    - das minute mein pahunch raha hoon
+    - khana kha liya
+    - call back karna
+    - kal milte hain
+    - happy birthday bhai
+    - notes bhej do
+    - meeting cancel ho gayi
+    - main ghar aa raha hoon
+    - aaj nahi aa paunga
+    - traffic mein fasa hoon
+    - paise bhej diye
+    - abhi busy hoon
+    - thodi der mein call karta hoon
+    - assignment kab tak submit karna hai
+    - lunch pe chalein
+    - link bhej do
+    - main neeche hoon
+    - gate pe aa jao
+    - photos bhej do
+    - kal ki class cancel hai
+    - mummy ne bulaya hai
+    - pizza order kar diya
+    - code push kar diya
+    - meeting shuru ho gayi
+    - mujhe pick kar lena
+    - charger le aana
+    - movie ke tickets book kar liye
+    - thank you yaar
+    - sorry kal nahi aa paya
+    - match dekh rahe ho kya
+    - doodh le aana
+    - office pahunch gaya
+    - plan cancel karte hain
+    - shaam ko free ho kya
+  messages_en:
+    - running late for class
+    - i forgot my keys
+    - dinner is ready
+    - the meeting moved to four
+    - bring the charger
+    - i sent the money
+    - call me when free
+    - landing in an hour
+    - check your email
+    - traffic is bad
+    - i will join online
+    - see you at lunch
+    - happy new year
+    - the server is down
+    - keep the door open
+    - i am stuck in traffic
+    - i will be late
+    - call me back
+    - running ten minutes late
+    - happy birthday
+    - on my way
+    - see you tomorrow
+    - meeting is postponed
+    - i reached home
+    - send me the notes
+    - can we talk later
+    - i am in a meeting
+    - lunch at one
+    - the build is green
+    - thanks a lot
+    - i am outside
+    - please share the link
+    - good night
+    - congratulations
+    - pick me up at six
+    - the call got dropped
+    - order placed
+    - see you at the gate
+  # Closed surface pools (whole phrase tokens).
+  settings:
+    wifi: [wifi|वाईफ़ाई, wi fi]
+    bluetooth: [bluetooth|ब्लूटूथ]
+    do_not_disturb: [do not disturb, dnd, focus mode]
+    dark_mode: [dark mode|डार्क मोड, dark theme]
+  time_units:
+    seconds: [second|सेकंड, seconds, sec]
+    minutes: [minute|मिनट, minat|मिनट, min]
+    hours: [ghante|घंटे, ghanta|घंटा, hour|आवर]
+  time_units_en:
+    seconds: [seconds]
+    minutes: [minutes]
+    hours: [hours]
+  engines:
+    google: [google|गूगल]
+    youtube: [youtube|यूट्यूब]
+  # Closed phrase pools (rendered word by word).
+  media_actions_hi:
+    play: [chalao, bajao, play karo, chalu karo, shuru karo, laga do]
+    pause: [pause karo, roko, rok do, thoda roko, pause kar do]
+    next: [agla lagao, next karo, skip karo, badlo, agla chalao]
+    previous: [pichla lagao, previous karo, wapas lagao, pichla chalao]
+  media_actions_en:
+    play: [play the music, resume the music, play some music]
+    pause: [pause the music, stop the music, pause the song]
+    next: [next song, skip this song, play the next track]
+    previous: [previous song, go back a song, play the previous track]
+  toggle_states_hi:
+    "on": [on karo, on kar do, chalu karo, chalu kar do, enable karo, start karo]
+    "off": [off karo, off kar do, band karo, band kar do, disable karo, bandh karo]
+  toggle_states_en:
+    "on": ["on"]
+    "off": ["off"]
 
 # Number surfaces for the `level` slot (closed). Roman|Devanagari.
 numbers_hi:

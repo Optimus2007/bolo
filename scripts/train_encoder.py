@@ -19,7 +19,7 @@ ap.add_argument("--epochs", type=int, default=4)
 ap.add_argument("--seed", type=int, default=0)
 ap.add_argument("--max-train", type=int, default=None)
 ap.add_argument("--views", action="store_true")
-ap.add_argument("--data", default="data/text/v0")
+ap.add_argument("--data", default="data/text/v1")
 args = ap.parse_args()
 
 cfg = load_config()

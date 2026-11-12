@@ -6,7 +6,7 @@ import pytest
 
 from bolo.audio import tts
 
-TEST = Path("data/text/v0/test.jsonl")
+TEST = Path("data/text/v1/test.jsonl")
 
 
 @pytest.mark.skipif(not TEST.exists(), reason="run `bolo generate` first")

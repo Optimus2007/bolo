@@ -92,7 +92,7 @@ GRID = [Rerank(w_nlu=a, w_ground=b, w_none=c) for a, b, c in itertools.product((
 
 
 def tune():
-    rows = load_set("data/say/manifest.jsonl", "data/text/v0/test.jsonl", "say")
+    rows = load_set("data/say/manifest.jsonl", "data/text/v1/test.jsonl", "say")
     wavs = audio(rows)
     out = {}
     for beams, bonus in [(1, 0), (3, 0), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4)]:
@@ -109,7 +109,7 @@ def tune():
 
 def test():
     t = json.loads(Path("results/speech/decoding_tune.json").read_text())
-    rows = load_set("data/say_test/manifest.jsonl", "data/text/v0/test.jsonl", "say_test")
+    rows = load_set("data/say_test/manifest.jsonl", "data/text/v1/test.jsonl", "say_test")
     wavs = audio(rows)
     cands = {k: v for k, v in t.items() if "rerank" in k}
     best = max(cands, key=lambda k: (cands[k]["e2e"], -cands[k]["wrong_action"]))

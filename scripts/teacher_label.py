@@ -12,7 +12,7 @@ from bolo.models.encoder import EncoderTagger
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--teacher", default="models/muril_aug-s0")
-ap.add_argument("--data", default="data/text/v0")
+ap.add_argument("--data", default="data/text/v1")
 ap.add_argument("names", nargs="+")
 args = ap.parse_args()
 cfg = load_config()

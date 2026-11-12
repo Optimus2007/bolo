@@ -86,12 +86,12 @@ os.environ["USE_TF"] = "0"; os.environ["USE_TORCH"] = "1"; os.environ["USE_JAX"]
     ("code", HF_LOGIN),
     ("code", r'''
 from bolo.audio import tts
-N = {"train": 5000, "dev": 300, "test": 1000}   # max utterances per split; lower for a trial run
+N = {"train": 7000, "dev": 400, "test": 1200}   # max utterances per split; lower for a trial run
 BATCH = 16                                     # lower to 8 if CUDA OOM
 OUT = WORK + "/bolo-tts"
 jobs = []
 for split, n in N.items():
-    rows = [json.loads(l) for l in open(f"{BUNDLE}/data/text/v0/{split}.jsonl", encoding="utf-8")][:n]
+    rows = [json.loads(l) for l in open(f"{BUNDLE}/data/text/v1/{split}.jsonl", encoding="utf-8")][:n]
     jobs += tts.plan(rows, split, seed=0)
 print(len(jobs), "jobs; example:", json.dumps(jobs[0], ensure_ascii=False)[:400])
 '''),

@@ -14,7 +14,7 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
-PROMPT_VERSION = "v0"
+PROMPT_VERSION = "v1"  # v1: prompts drawn from the 20 command dataset
 
 
 def describe_goal(intent: str, slots: dict) -> str:
@@ -41,7 +41,36 @@ def describe_goal(intent: str, slots: dict) -> str:
         return {"up": f"Turn the {what} up", "down": f"Turn the {what} down", "mute": "Mute the sound",
                 "unmute": "Unmute the sound", "max": f"Put the {what} to maximum",
                 "min": f"Put the {what} to minimum"}[s["direction"]]
-    return "Say something the assistant can't do (e.g. ask about the weather, or ask it to send a message)"
+    if intent == "media_control":
+        return {"play": "Ask it to play the music", "pause": "Ask it to pause the music",
+                "next": "Ask for the next song", "previous": "Ask for the previous song"}[s["action"]]
+    if intent == "lock_screen":
+        return "Ask it to lock the screen"
+    if intent == "sleep_mac":
+        return "Ask it to put the laptop to sleep"
+    if intent == "take_screenshot":
+        return "Ask it to take a screenshot"
+    if intent == "toggle_setting":
+        name = {"wifi": "Wi-Fi", "bluetooth": "Bluetooth", "do_not_disturb": "Do Not Disturb",
+                "dark_mode": "dark mode"}[s["setting"]]
+        return f"Turn {name} {s['state']}"
+    if intent == "set_timer":
+        return f"Set a timer for {s['amount']} {s['unit']}"
+    if intent == "set_reminder":
+        when = f" in {s['amount']} {s['unit']}" if "amount" in s else ""
+        return f"Ask it to remind you{when}: “{s['task']}”"
+    if intent == "web_search":
+        return f"Search {'YouTube' if s.get('engine') == 'youtube' else 'the web'} for “{s['query']}”"
+    if intent == "open_website":
+        return f"Open the website {s['site']}"
+    if intent == "close_app":
+        return f"Close the app {s['app']}"
+    if intent == "find_file":
+        return f"Ask where “{s['path']}” is on the laptop"
+    if intent == "send_message":
+        via = f" on {s['app']}" if "app" in s else ""
+        return f"Message {s['name']}{via}: “{s['message']}”"
+    return "Say something the assistant can't do (e.g. ask about the weather, or ask it to delete a file)"
 
 
 def build_prompts(test_path: Path | str, n_read: int = 80, n_free: int = 40, seed: int = 7) -> list[dict]:

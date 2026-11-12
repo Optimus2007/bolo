@@ -8,7 +8,7 @@ from bolo.schema import LabelError, validate_label
 from bolo.splits import value_split
 
 DEVANAGARI = re.compile(r"[ऀ-ॿ]")
-OPEN_SLOTS = {"folder", "path", "name", "app"}  # `app` is open only for open_app (call_contact uses closed)
+OPEN_SLOTS = {"folder", "path", "name", "app", "task", "query", "site", "message"}
 SIZES = {"train": 900, "dev": 150, "test": 250}
 
 
@@ -65,7 +65,7 @@ def test_open_pools_disjoint_and_unique(cfg):
 
 
 def test_each_open_pool_has_values_in_every_split(cfg):
-    for name in ("folders", "files", "contacts", "apps"):
+    for name in ("folders", "files", "contacts", "apps", "tasks", "queries", "sites", "messages"):
         splits = {value_split(e.value) for e in cfg.open_pools[name]}
         assert splits == {"train", "dev", "test"}, name
 
@@ -116,7 +116,7 @@ def test_open_slot_values_unseen_across_splits(data, cfg):
         out = set()
         for r in data[split]:
             for k, v in r["slots"].items():
-                if k in OPEN_SLOTS and not (r["intent"] == "call_contact" and k == "app"):
+                if k in OPEN_SLOTS and not (r["intent"] in ("call_contact", "send_message") and k == "app"):
                     out.add(v)
         return out
 

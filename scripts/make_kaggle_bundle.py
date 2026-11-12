@@ -8,8 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/kaggle/bolo-bundle.zip"
-INCLUDE = ["src/bolo", "configs", "data/text/v0/train.jsonl", "data/text/v0/dev.jsonl",
-           "data/text/v0/test.jsonl", "data/text/v0/manifest.json", "pyproject.toml", "LICENSE"]
+INCLUDE = ["src/bolo", "configs", "data/text/v1/train.jsonl", "data/text/v1/dev.jsonl",
+           "data/text/v1/test.jsonl", "data/text/v1/manifest.json", "pyproject.toml", "LICENSE"]
 BLOCK = (".wav", ".mp3", ".flac", ".ogg", ".m4a", ".webm", ".opus", ".pyc")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -25,7 +25,7 @@ ap.add_argument("--n", type=int, default=1200, help="number of source rows")
 ap.add_argument("--k", type=int, default=3, help="paraphrases requested per source")
 ap.add_argument("--batch", type=int, default=16)
 ap.add_argument("--seed", type=int, default=0)
-ap.add_argument("--data", default="data/text/v0")
+ap.add_argument("--data", default="data/text/v1")
 args = ap.parse_args()
 
 SYSTEM = ("You rewrite short voice commands that young people in India say to a laptop assistant, in "

@@ -8,7 +8,7 @@ from bolo.audio.augment import write_wav
 from bolo.config import load_config
 from bolo.speech_eval import load_set, run, to_markdown
 
-TEST = Path("data/text/v0/test.jsonl")
+TEST = Path("data/text/v1/test.jsonl")
 pytestmark = pytest.mark.skipif(not TEST.exists(), reason="run `bolo generate` first")
 
 

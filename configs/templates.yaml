@@ -1,4 +1,4 @@
-# Bolo templates v0.
+# Bolo templates v1.
 # Token syntax (space separated):
 #   {slot}         labeled slot, filled from the slot type's pool (schema.yaml)
 #   {slot:pool}    labeled slot, filled from an explicit pool
@@ -130,6 +130,143 @@ set_brightness:
   - {t: "turn the brightness {direction:brightness_dir_en}", lang: en}
   - {t: "brightness {direction:brightness_dir_en} please", lang: en}
 
+media_control:
+  - "<pre?> <song> {action} <post?>"
+  - "<pre?> yeh <song> {action}"
+  - "<pre?> <song> ko {action}"
+  - {t: "<pre?> {action} <post?>", w: 0.4}
+  - "<pre?> spotify pe <song> {action}"
+  - {t: "{action:media_actions_en}", lang: en}
+  - {t: "{action:media_actions_en} please", lang: en}
+  - {t: "can you {action:media_actions_en}", lang: en}
+
+lock_screen:
+  - "<pre?> screen lock <karo_v> <post?>"
+  - "<pre?> laptop lock <karo_v> <post?>"
+  - "<pre?> mac lock <karo_v>"
+  - "<pre?> computer lock <karo_v>"
+  - "<pre?> main ja raha hoon screen lock <karo_v>"
+  - "<pre?> screen ko lock <karo_v>"
+  - "kya aap screen lock kar sakte ho"
+  - {t: "lock the screen", lang: en}
+  - {t: "lock my mac", lang: en}
+  - {t: "lock the laptop please", lang: en}
+
+sleep_mac:
+  - "<pre?> laptop ko sula do <post?>"
+  - "<pre?> laptop sleep mode mein daalo"
+  - "<pre?> mac ko sleep <karo_v>"
+  - "<pre?> computer sleep <karo_v> <post?>"
+  - "<pre?> system ko sleep pe daal do"
+  - "<pre?> laptop ko sleep pe daalo"
+  - "<pre?> main so raha hoon laptop sleep <karo_v>"
+  - {t: "put the mac to sleep", lang: en}
+  - {t: "put my laptop to sleep", lang: en}
+  - {t: "sleep mode please", lang: en}
+
+take_screenshot:
+  - "<pre?> screenshot <lo_v> <post?>"
+  - "<pre?> ek screenshot <lo_v>"
+  - "<pre?> screen ka screenshot <lo_v>"
+  - "<pre?> iska screenshot <lo_v> <post?>"
+  - "<pre?> screen capture <karo_v>"
+  - "<pre?> poori screen ka screenshot <lo_v>"
+  - "kya aap screenshot le sakte ho"
+  - {t: "take a screenshot", lang: en}
+  - {t: "take a screenshot please", lang: en}
+  - {t: "capture the screen", lang: en}
+
+toggle_setting:
+  - "<pre?> {setting} {state} <post?>"
+  - "<pre?> {setting} ko {state}"
+  - "<pre?> zara {setting} {state}"
+  - "<pre?> abhi ke liye {setting} {state}"
+  - {t: "turn {state:toggle_states_en} {setting}", lang: en}
+  - {t: "turn {setting} {state:toggle_states_en}", lang: en}
+  - {t: "switch {state:toggle_states_en} {setting}", lang: en}
+  - {t: "switch {setting} {state:toggle_states_en} please", lang: en}
+
+set_timer:
+  - "<pre?> {amount} {unit} ka timer <lagao_v> <post?>"
+  - "<pre?> {amount} {unit} ka timer"
+  - "<pre?> timer {amount} {unit} ka <lagao_v>"
+  - "<pre?> {amount} {unit} ke liye timer <lagao_v>"
+  - "<pre?> ek timer <lagao_v> {amount} {unit} ka"
+  - "kya aap {amount} {unit} ka timer laga sakte ho"
+  - {t: "set a timer for {amount} {unit:time_units_en}", lang: en}
+  - {t: "start a {amount} {unit:time_units_en} timer", lang: en}
+  - {t: "timer for {amount} {unit:time_units_en} please", lang: en}
+
+set_reminder:
+  - "<pre?> mujhe yaad dilana ki {task}"
+  - "<pre?> {amount} {unit} baad yaad dilana ki {task}"
+  - "<pre?> {amount} {unit} mein <remind_v> ki {task}"
+  - "<pre?> <remind_v> ki {task} <post?>"
+  - "<pre?> reminder <lagao_v> ki {task}"
+  - "<pre?> {amount} {unit} baad reminder <lagao_v> ki {task}"
+  - {t: "remind me to {task:tasks_en}", lang: en}
+  - {t: "remind me in {amount} {unit:time_units_en} to {task:tasks_en}", lang: en}
+  - {t: "set a reminder to {task:tasks_en}", lang: en}
+
+web_search:
+  - "<pre?> {engine} pe {query} <search_v> <post?>"
+  - "<pre?> {query} {engine} pe <search_v>"
+  - {t: "<pre?> {query} <search_v> <post?>", w: 0.5}
+  - "<pre?> {query} ke baare mein <search_v>"
+  - "<pre?> internet pe {query} <search_v>"
+  - {t: "<pre?> {query} {engine} karo", only: {engine: [google]}}
+  - {t: "<pre?> {engine} pe {query} ki video dikhao", only: {engine: [youtube]}}
+  - {t: "search {engine} for {query}", lang: en}
+  - {t: "search for {query}", lang: en}
+  - {t: "google {query}", lang: en}
+  - {t: "look up {query} on {engine}", lang: en}
+
+open_website:
+  - "<pre?> {site} website <open_v> <post?>"
+  - "<pre?> {site} ki site <open_v>"
+  - "<pre?> browser mein {site} <open_v>"
+  - "<pre?> {site} dot com <open_v>"
+  - {t: "<pre?> {site} <open_v> <post?>", w: 0.4}
+  - "<pre?> chrome mein {site} <open_v>"
+  - {t: "open {site} website", lang: en}
+  - {t: "go to {site}", lang: en}
+  - {t: "open {site} in the browser", lang: en}
+  - {t: "go to {site} dot com", lang: en}
+
+close_app:
+  - "<pre?> {app} <close_v> <post?>"
+  - "<pre?> {app} ko <close_v>"
+  - "<pre?> {app} app <close_v>"
+  - "<pre?> {app} quit kar do"
+  - "<pre?> {app} se bahar niklo"
+  - "kya aap {app} band kar sakte ho"
+  - {t: "close {app}", lang: en}
+  - {t: "quit {app}", lang: en}
+  - {t: "close the {app} app please", lang: en}
+
+find_file:
+  - {t: "<pre?> {path} <find_v> <post?>", w: 0.6}
+  - {t: "<pre?> {path} wali file <find_v>", kind: file}
+  - {t: "<pre?> {path} <folder_w> <find_v>", kind: folder}
+  - "<pre?> mera {path} kahan hai"
+  - "<pre?> {path} kahan rakha hai"
+  - "<pre?> laptop mein {path} <find_v>"
+  - {t: "<pre?> {path} file kahan hai", kind: file}
+  - {t: "find {path}", lang: en}
+  - {t: "where is my {path} file", lang: en, kind: file}
+  - {t: "find the {path} <folder_w>", lang: en, kind: folder}
+
+send_message:
+  - "<pre?> {name} ko <msg_w> <bhejo_v> ki {message}"
+  - {t: "<pre?> {name} ko {app} pe <msg_w> <bhejo_v> ki {message}", only: {app: [whatsapp, telegram, signal, discord]}}
+  - "<pre?> {name} ko bolo ki {message}"
+  - {t: "<pre?> {name} ko {app} karo ki {message}", only: {app: [whatsapp]}}
+  - {t: "<pre?> {app} pe {name} ko likho ki {message}", only: {app: [whatsapp, telegram, signal, discord]}}
+  - "<pre?> {name} ko <msg_w> karo ki {message}"
+  - {t: "send {name} a message saying {message:messages_en}", lang: en}
+  - {t: "text {name} that {message:messages_en}", lang: en}
+  - {t: "tell {name} on {app} that {message:messages_en}", lang: en, only: {app: [whatsapp, telegram, signal]}}
+
 # Negatives. Label = none, slots = {}. `reason` is stored in meta for analysis.
 none:
   # out of domain
@@ -137,7 +274,6 @@ none:
   - {t: "<pre?> ek joke sunao", reason: ood}
   - {t: "kal meeting kab hai", reason: ood}
   - {t: "<pre?> khana order karo", reason: ood}
-  - {t: "<pre?> koi gaana bajao", reason: ood}
   - {t: "subah saat baje ka alarm set karo", reason: ood}
   - {t: "time kya hua hai", reason: ood}
   - {t: "tumhara naam kya hai", reason: ood}
@@ -145,18 +281,11 @@ none:
   - {t: "thanks yaar", reason: ood}
   - {t: "<pre?> news sunao", reason: ood}
   # unsupported actions (near misses of supported ones)
-  - {t: "<pre?> <term> band karo", reason: unsupported}
-  - {t: "<pre?> {_:apps} band karo", reason: unsupported}
-  - {t: "<pre?> {_:apps} close karo", reason: unsupported}
-  - {t: "<pre?> {_:contacts} ko message bhejo", reason: unsupported}
-  - {t: "<pre?> {_:contacts} ko whatsapp pe message karo", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko message bhejo", reason: incomplete}
+  - {t: "<pre?> {_:contacts} ko whatsapp pe message karo", reason: incomplete}
   - {t: "<pre?> {_:folders} folder delete karo", reason: unsupported}
-  - {t: "<pre?> screenshot lo", reason: unsupported}
   - {t: "<pre?> laptop shutdown karo", reason: unsupported}
   - {t: "<pre?> laptop restart karo", reason: unsupported}
-  - {t: "<pre?> screen lock karo", reason: unsupported}
-  - {t: "<pre?> wifi band karo", reason: unsupported}
-  - {t: "<pre?> bluetooth on karo", reason: unsupported}
   - {t: "<pre?> {_:apps} uninstall karo", reason: unsupported}
   - {t: "<pre?> {_:apps} install karo", reason: unsupported}
   - {t: "<pre?> naya folder banao", reason: unsupported}
@@ -190,20 +319,15 @@ none:
   - {t: "mat karo", reason: filler}
   # more negatives (variety, English)
   - {t: "<pre?> aaj ka mausam <batao_v> <post?>", reason: ood}
-  - {t: "<pre?> kuch gaane bajao <post?>", reason: ood}
   - {t: "<pre?> kal ka alarm set karo <post?>", reason: ood}
   - {t: "<pre?> tum kaun ho", reason: ood}
   - {t: "<pre?> sab theek hai", reason: ood}
   - {t: "what's the weather today", lang: en, reason: ood}
   - {t: "tell me a joke", lang: en, reason: ood}
-  - {t: "play some music", lang: en, reason: ood}
-  - {t: "close the <term>", lang: en, reason: unsupported}
-  - {t: "send a message to {_:contacts}", lang: en, reason: unsupported}
+  - {t: "send a message to {_:contacts}", lang: en, reason: incomplete}
   - {t: "delete the {_:folders} folder", lang: en, reason: unsupported}
-  - {t: "take a screenshot", lang: en, reason: unsupported}
   - {t: "uninstall {_:apps}", lang: en, reason: unsupported}
   - {t: "<pre?> {_:files} delete karo <post?>", reason: unsupported}
-  - {t: "<pre?> {_:apps} hatao <post?>", reason: unsupported}
   - {t: "<pre?> {_:contacts} ka number <batao_v>", reason: unsupported}
   - {t: "<pre?> {_:folders} folder ka naam badlo", reason: unsupported}
   - {t: "<pre?> <term> ka wallpaper badlo", reason: unsupported}
@@ -227,3 +351,17 @@ none:
   - {t: "never mind", lang: en, reason: filler}
   - {t: "cancel", lang: en, reason: filler}
   - {t: "wait", lang: en, reason: filler}
+  # v1: near misses of the new commands
+  - {t: "<pre?> timer <lagao_v>", reason: incomplete}
+  - {t: "<pre?> mujhe yaad dilana", reason: incomplete}
+  - {t: "<pre?> reminder <lagao_v>", reason: incomplete}
+  - {t: "<pre?> search karo", reason: incomplete}
+  - {t: "<pre?> website <open_v>", reason: incomplete}
+  - {t: "<pre?> <msg_w> <bhejo_v>", reason: incomplete}
+  - {t: "<pre?> <song> ka naam kya hai", reason: ood}
+  - {t: "<pre?> {_:apps} update karo", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko email karo", reason: unsupported}
+  - {t: "<pre?> wifi ka password <batao_v>", reason: unsupported}
+  - {t: "<pre?> {_:contacts} ko bolo", reason: incomplete}
+  - {t: "set a timer", lang: en, reason: incomplete}
+  - {t: "remind me", lang: en, reason: incomplete}

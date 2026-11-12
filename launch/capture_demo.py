@@ -9,7 +9,7 @@ from bolo.evaluate import _exact
 from bolo.pipeline import Bolo
 from bolo.speech_eval import environment, load_set
 
-rows = load_set("data/say_test/manifest.jsonl", "data/text/v0/test.jsonl", "say_test")
+rows = load_set("data/say_test/manifest.jsonl", "data/text/v1/test.jsonl", "say_test")
 b = Bolo.load(asr="models/bolo-whisper-fp16", env=environment(load_config()))
 b.listen(rows[0]["_wav"])  # warm-up
 want = [("open_terminal", "terminal.wav"), ("set_volume", "volume.wav"), ("none", "not_a_command.wav")]

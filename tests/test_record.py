@@ -12,9 +12,10 @@ import pytest
 from bolo.record.prompts import build_prompts, describe_goal
 from bolo.record.server import TUNNEL_RE, AuthError, Store, make_handler, validate_wav
 
-TEST = Path("data/text/v0/test.jsonl")
+TEST = Path("data/text/v1/test.jsonl")
 pytestmark = pytest.mark.skipif(not TEST.exists(), reason="run `bolo generate` first")
 CONSENT = {"record": True, "project_use": True}
+N_TYPES = len({json.loads(line)["intent"] for line in open(TEST)}) if TEST.exists() else 0  # 20 commands + none
 
 
 def wav(seconds=1.0, sr=16000, ch=1):
@@ -30,7 +31,7 @@ def test_prompts_from_test_only_and_stratified():
     test_ids = {json.loads(line)["id"] for line in open(TEST)}
     assert len(ps) == 120 and all(p["source_id"] in test_ids for p in ps)
     assert len({p["source_id"] for p in ps}) == 120
-    assert len({p["intent"] for p in ps if p["kind"] == "free"}) == 9
+    assert len({p["intent"] for p in ps if p["kind"] == "free"}) == N_TYPES
     assert all(p["asr_text"] for p in ps if p["kind"] == "read")
     assert describe_goal("call_contact", {"name": "ankita", "app": "whatsapp"}) == "Call ankita on whatsapp"
 
@@ -159,7 +160,7 @@ def test_short_balanced_assignment_covers_everything(tmp_path):
     sets = [st.prompts_for(s) for s in ids]
     for ps in sets:
         assert sum(p["kind"] == "read" for p in ps) == 40 and sum(p["kind"] == "free" for p in ps) == 15
-        assert len({p["intent"] for p in ps if p["kind"] == "read"}) == 9  # every command type for every speaker
+        assert len({p["intent"] for p in ps if p["kind"] == "read"}) == N_TYPES  # every command type for every speaker
     reads = [{p["prompt_id"] for p in ps if p["kind"] == "read"} for ps in sets]
     assert len(reads[0] | reads[1]) >= 76  # two speakers cover almost all 80 read prompts
     assert len(reads[0] | reads[1] | reads[2]) == 80  # three cover all of them

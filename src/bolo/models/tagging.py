@@ -10,14 +10,25 @@ from __future__ import annotations
 from ..config import Config
 from ..normalize import Normalizer, phonetic_key
 
-OPEN_TAGS = ["folder", "path", "name", "app", "level"]
+OPEN_TAGS = ["folder", "path", "name", "app", "level", "amount", "task", "query", "site", "message"]
+NUMBER_SLOTS = ("level", "amount")
+CALLAPP_INTENTS = ("call_contact", "send_message")
+
+
+def closed_slots(cfg: Config) -> dict[str, list[str]]:
+    """slot name -> closed values, for closed slots that carry their value in the tag (call apps are separate)."""
+    st, out = cfg.schema["slot_types"], {}
+    for spec in cfg.schema["intents"].values():
+        for slot, sdef in (spec.get("slots") or {}).items():
+            vals = st[sdef["type"]].get("values")
+            if vals and sdef["type"] != "call_app":
+                out[slot] = sorted(set(out.get(slot, [])) | {str(v) for v in vals})
+    return out
 
 
 def label_names(cfg: Config) -> list[str]:
     st = cfg.schema["slot_types"]
-    closed = [f"target={v}" for v in st["status_target"]["values"]]
-    dirs = sorted(set(st["volume_direction"]["values"]) | set(st["brightness_direction"]["values"]))
-    closed += [f"direction={v}" for v in dirs]
+    closed = [f"{slot}={v}" for slot, vals in sorted(closed_slots(cfg).items()) for v in vals]
     closed += [f"callapp={v}" for v in st["call_app"]["values"]]
     labels = ["O"]
     for t in OPEN_TAGS + closed:
@@ -25,10 +36,13 @@ def label_names(cfg: Config) -> list[str]:
     return labels
 
 
+CLOSED_TAG_SLOTS = ("target", "direction", "action", "setting", "state", "unit", "engine")
+
+
 def span_tag(intent: str, slot: str, value) -> str:
-    if slot in ("target", "direction"):
+    if slot in CLOSED_TAG_SLOTS:
         return f"{slot}={value}"
-    if slot == "app" and intent == "call_contact":
+    if slot == "app" and intent in CALLAPP_INTENTS:
         return f"callapp={value}"
     return slot
 
@@ -90,10 +104,10 @@ def decode(cfg: Config, norm: Normalizer, numbers: NumberParser, intent: str,
                 slots[slot] = value
             continue
         roman = [norm.to_roman(w) for w in ws]
-        if name == "level":
+        if name in NUMBER_SLOTS:
             v = numbers.parse(roman)
-            if v is not None and "level" in allowed and "level" not in slots:
-                slots["level"] = v
+            if v is not None and name in allowed and name not in slots:
+                slots[name] = v
             continue
         if name in allowed and name not in slots:
             slots[name] = " ".join(roman).lower()

@@ -29,7 +29,7 @@ rr = Rerank(**cands[best]["rerank"])
 
 stream = []
 for name in ("say_test", "say_test_v1"):
-    rows = E.load_set(f"data/{name}/manifest.jsonl", "data/text/v0/test.jsonl", name)
+    rows = E.load_set(f"data/{name}/manifest.jsonl", "data/text/v1/test.jsonl", name)
     dec = E.decode(name, rows, E.audio(rows), beams, bonus)
     pas = list(zip(rows, dec))
     random.Random(5).shuffle(pas)

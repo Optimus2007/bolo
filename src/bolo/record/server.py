@@ -332,7 +332,7 @@ def start_tunnel(port: int, timeout: float = 45.0) -> tuple[subprocess.Popen, st
     raise RuntimeError("could not start the Cloudflare tunnel (check internet)")
 
 
-def serve(root: Path | str = "recordings", test_path: Path | str = "data/text/v0/test.jsonl",
+def serve(root: Path | str = "recordings", test_path: Path | str = "data/text/v1/test.jsonl",
           port: int = 8765, open_browser: bool = True, share: bool = False, minutes: int = 120,
           n_read: int = 40, n_free: int = 15):
     store = Store(Path(root), Path(test_path), n_read=n_read, n_free=n_free)
