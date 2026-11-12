@@ -127,6 +127,37 @@ default speech model. On the same 55 clips it makes fewer word errors (18.3% vs 
 226 ms), with the same 80.0% correct action (2 fixed, 2 broken); on the 240 computer-voice commands 85.0% vs 83.8%.
 Details: `results/speech/speech_v1.json`.
 
+## Meet Myna
+
+<img src="docs/myna.svg" width="120" align="right" alt="Myna, a teal bird">
+
+Myna is the assistant on top of the Bolo models: a small teal myna bird (mynas are the birds that copy speech).
+She answers in short Hinglish, shows a mood, and can say the reply out loud with the voice already on your computer.
+
+```bash
+uv run bolo app            # Myna in your browser: hold Space, speak, see what she will do, press "Karo"
+uv run bolo app --run      # allowed to really do things (still asks before closing apps or sleeping)
+uv run bolo do "battery kitni hai" --run --speak
+#   ,/|\,
+#  ( ^ ^ )   Myna: Battery 100% hai.
+#   ( v )
+```
+
+- **The app** (`bolo app`) runs on 127.0.0.1 only. A random token in the page address must come back with every request,
+  so other websites open in your browser cannot send Myna commands. Audio is deleted as soon as it is understood.
+- **Timers and reminders** work while the app is open (with a ring, a notification and the reply spoken), and
+  `bolo do "5 minute ka timer" --run` counts down in the terminal.
+- **Routines:** teach one phrase that does several things, then say it:
+
+  ```bash
+  uv run bolo sikhao "coding mode" "spotify kholo" "projects folder mein terminal kholo" "dnd on karo"
+  uv run bolo do "coding mode chalu karo" --run
+  ```
+
+  Each step is shown as understood before it is saved and grounded again every time it runs. A routine only starts
+  when what you say sounds like its whole name, so "coding folder kholo" does not set it off.
+- **Rename her** with `bolo name Jarvis`; replies avoid gendered verb forms, so any name fits.
+
 ## Doing the command (Windows, Linux, macOS)
 
 `bolo do` understands a command and shows what it would do on this computer. Nothing happens unless you add `--run`:
@@ -142,7 +173,7 @@ Every command has a plan on all three systems (`src/bolo/actions/`). Words heard
 shell code, websites Myna does not know are searched instead of guessed, closing an app or sleeping asks first, and
 when an OS cannot do something without admin rights (Wi-Fi or Bluetooth on Windows) Myna opens the right settings page
 and says so. Calls and messages open the app (or its web version) and copy the message; picking the contact is still
-manual. Timers and reminders need the background app, which is not built yet. Tested on macOS; the Windows and Linux
+manual. Timers and reminders run while `bolo app` is open (or count down with `bolo do --run`). Tested on macOS; the Windows and Linux
 plans are unit tested but not yet tried on real machines.
 
 The full reports with every metric and caveat live in `results/`.
@@ -245,7 +276,7 @@ an existing Hinglish Whisper. `scripts/kaggle_push.py` uploads and runs both as 
 ## What comes next
 
 1. More real voices, ideally ten people or more, half female and half male.
-2. Myna, the assistant built on Bolo: a wake word ("Hey Myna"), a small voice of her own, and replies.
+2. Myna: a wake word ("Hey Myna"), a small Hinglish voice of her own (today she borrows the system voice), and an installer that starts the app with the computer.
 3. Running on Android, with real phone timings.
 
 ## Data and models we build on

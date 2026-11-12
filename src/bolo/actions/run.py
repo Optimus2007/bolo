@@ -164,8 +164,10 @@ def _reveal(path: str, os_name: str) -> None:
         subprocess.Popen(["xdg-open", str(Path(path).parent)])
 
 
-def perform(p: dict, execute: bool = False, confirm=None, log=print) -> list[str]:
-    """Run (or, by default, only describe) a plan. `confirm(question) -> bool` is asked for risky commands."""
+def perform(p: dict, execute: bool = False, confirm=None, log=print, schedule=None) -> list[str]:
+    """Run (or, by default, only describe) a plan. `confirm(question) -> bool` is asked for risky commands.
+    `schedule(seconds, text) -> str` carries out timers and reminders (the Myna app runs them in the background,
+    `bolo do --run` counts down in the terminal); without it they are only described."""
     lines = [describe(s) for s in p["steps"]]
     if not p.get("ok", True):
         log(p["say"])
@@ -213,7 +215,11 @@ def perform(p: dict, execute: bool = False, confirm=None, log=print) -> list[str
             else:
                 said.append(f"no {s['name']} under your home folder")
         elif d == "schedule":
-            said.append("timers need the Myna background app, which is not built yet")
+            if schedule is None or not s.get("seconds"):
+                said.append("timers need the Myna app (`bolo app`) or `bolo do --run`" if schedule is None
+                            else "how long? say it with a number, like 5 minute")
+            else:
+                said.append(schedule(int(s["seconds"]), s.get("text") or "Timer done"))
     for x in said:
         log("   " + x)
     return said

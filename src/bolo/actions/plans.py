@@ -335,7 +335,7 @@ def plan(pred: dict, env=None, os_name: str | None = None) -> dict:
     elif intent in ("set_timer", "set_reminder"):
         secs = int(s["amount"]) * UNIT_S[s["unit"]] if s.get("amount") and s.get("unit") else None
         out["steps"] = [{"do": "schedule", "seconds": secs, "text": s.get("task") or "Timer done"}]
-        out["partial"] = "timers and reminders need the Myna background app (not built yet)"
+        out["partial"] = "runs while Myna is open (`bolo app`, or `bolo do --run` counts down in the terminal)"
     elif intent in ("call_contact", "send_message"):
         app = CALL_APP.get(s.get("app") or "whatsapp")
         steps = []

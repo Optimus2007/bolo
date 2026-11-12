@@ -206,3 +206,18 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   Next for Windows: Windows app names in lexicon + templates (file explorer, task manager, control panel, notepad,
   edge, settings), new TTS clips, retrain both models; a real Windows test (a friend's laptop, or a free VM image).
   Seen while testing: "chrome kholo" -> open_website without a site (abstains), "moneycontrol kholo" -> a file.
+
+## 2026-11-12 night: Myna gets a face, a voice and routines
+
+- `bolo/persona.py`: Hinglish replies for all 20 commands (preview and done), status answers in Hinglish
+  ("53 GB khaali hai"), honest failure replies, a 3-line terminal mascot with moods (same bird as the cartoon),
+  and speaking aloud with the system voice (macOS `say` with an Indian English voice, Windows SAPI, Linux espeak-ng).
+  Text reaches the voice through stdin or an env var, never as code. Replies avoid gendered verb forms.
+- `bolo/routines.py` + `bolo sikhao`: one phrase -> several commands; matched only against the whole name.
+- Timers: `perform(..., schedule=)`; `bolo do --run` counts down in the terminal, the app runs them in the background.
+- `bolo app`: local page with the animated mascot (blink, listening waves, hop, shake, sleepy), push-to-talk (16 kHz
+  WAV made in the browser), text box, plan preview, "Karo" button, confirm for risky commands, timers with ring and
+  notification, offline speech synthesis (local voices only). Security: 127.0.0.1, token in path + header, Host and
+  Origin checks, CSP, audio deleted right after use. Tests: tests/test_myna.py (8). 255 tests pass.
+- Seen while testing (not fixed, model work): "kuch bhi random baat" -> call_contact random (a false action);
+  "cpu kitna busy hai" -> battery; "vs code kholo" -> none; grounding mapped "coding folder" -> recordings.

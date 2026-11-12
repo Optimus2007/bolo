@@ -88,9 +88,33 @@ def _cmd_understand(args: argparse.Namespace) -> None:
     print(json.dumps(out, ensure_ascii=False, indent=1))
 
 
+def _countdown(seconds: int, text: str, name: str, speak_on: bool, os_name: str) -> str:
+    """`bolo do --run` timers: count down in this terminal (Ctrl+C cancels). The Myna app runs them in the background."""
+    import time
+
+    from .persona import mascot, speak
+
+    end = time.time() + seconds
+    try:
+        while (left := end - time.time()) > 0:
+            print(f"\r   ⏳ {int(left) // 60:02d}:{int(left) % 60:02d}  (Ctrl+C to cancel) ", end="", flush=True)
+            time.sleep(min(1.0, left))
+    except KeyboardInterrupt:
+        print()
+        return "timer cancelled"
+    print("\a")
+    msg = "Time ho gaya!" if text == "Timer done" else f"Yaad hai? {text}"
+    print(mascot("happy", msg, name))
+    if speak_on:
+        speak(msg, os_name, wait=True)
+    return "timer finished"
+
+
 def _cmd_do(args: argparse.Namespace) -> None:
     from .actions import current_os, perform, plan, scan_system
+    from .persona import mascot, outcome, reply, speak
     from .pipeline import Bolo
+    from .routines import get_routines, match
 
     here = current_os()
     os_name = args.os or here
@@ -99,11 +123,90 @@ def _cmd_do(args: argparse.Namespace) -> None:
     env = scan_system() if os_name == here else None  # another OS's files are not on this machine
     b = Bolo.load(asr=args.asr if args.audio else None, env=env, prompt="commands+apps" if env else "commands")
     out = b.listen(args.input) if args.audio else b.understand(args.input)
+    talk = args.speak and args.run
+    color = False if args.plain else None
+
+    def show(mood, text):
+        print(mascot(mood, text, b.name, color=color))
+        if talk:
+            speak(text, os_name)
+
+    sched = (lambda sec, text: _countdown(sec, text, b.name, talk, os_name)) if args.run else None
+    confirm = (lambda q: True) if args.yes else None
+    routine = match(b._strip(out["transcript"])[0]) if out["transcript"] else None
+    if routine:
+        steps = get_routines()[routine]
+        print(f"heard: {out['transcript']!r} -> routine {routine!r} ({len(steps)} steps)")
+        show("happy" if args.run else "thinking", f"{routine.title()} routine" + (" shuru!" if args.run else ", --run lagao toh chalu karoon."))
+        for st in steps:
+            o = b.understand(st["text"])
+            if o["intent"] == "none":
+                print(f"   skipped {st['text']!r}: {o.get('reason')}")
+                continue
+            p = plan(o, env, os_name)
+            perform(p, execute=args.run, confirm=confirm, schedule=sched, log=lambda m: print("   " + m))
+        return
     print(f"heard: {out['transcript']!r} -> {out['intent']} {json.dumps(out['slots'], ensure_ascii=False)}")
     if out["intent"] == "none":
-        print(f"not doing anything ({out.get('reason')})")
+        show(*reply(None, heard=out))
+        print(f"   (not doing anything: {out.get('reason')})")
         return
-    perform(plan(out, env, os_name), execute=args.run, confirm=(lambda q: True) if args.yes else None)
+    p = plan(out, env, os_name)
+    if not args.run or not p.get("ok", True):
+        show(*reply(p, done=False))
+        perform(p, execute=False, log=lambda m: print("   " + m))
+        return
+    timer = p["intent"] in ("set_timer", "set_reminder")
+    if timer:
+        show(*reply(p, done=True))
+    said = perform(p, execute=True, confirm=confirm, schedule=sched, log=lambda m: None)
+    if said == ["cancelled"]:
+        show("thinking", "Theek hai, nahi kiya.")
+        return
+    mood, text = outcome(p, said)
+    if not timer:
+        show(mood, text)
+    if p["intent"] not in ("check_status",) and not text.startswith("Hmm"):
+        for x in said:
+            print("   " + x)
+    if p.get("partial"):
+        print(f"   note: {p['partial']}")
+
+
+def _cmd_sikhao(args: argparse.Namespace) -> None:
+    from .persona import mascot
+    from .pipeline import Bolo
+    from .routines import forget, get_routines, teach
+
+    if args.list or (not args.name and not args.forget):
+        r = get_routines()
+        if not r:
+            print('No routines yet. Teach one: bolo sikhao "coding mode" "vs code kholo" "dnd on karo"')
+        for n, steps in r.items():
+            print(f"{n}:  " + "  ->  ".join(s["text"] for s in steps))
+        return
+    if args.forget:
+        print("forgotten" if forget(args.forget) else f"no routine called {args.forget!r}")
+        return
+    if not args.steps:
+        raise SystemExit("bolo sikhao: give the routine's name, then each command in quotes")
+    b = Bolo.load()
+    steps = []
+    for t in args.steps:
+        o = b.understand(t)
+        print(f"   {t!r} -> {o['intent']} {json.dumps(o['slots'], ensure_ascii=False)}")
+        steps.append({"text": t, "intent": o["intent"], "slots": o["slots"]})
+    try:
+        n = teach(args.name, steps)
+    except ValueError as e:
+        raise SystemExit(f"bolo sikhao: {e}")
+    print(mascot("happy", f"Seekh liya! Ab bolo \"{n} chalu karo\".", b.name))
+
+
+def _cmd_app(args: argparse.Namespace) -> None:
+    from .app.server import serve
+
+    serve(asr=args.asr, port=args.port, allow_run=args.run, open_browser=not args.no_browser)
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -166,7 +269,23 @@ def main(argv: list[str] | None = None) -> None:
     d.add_argument("--run", action="store_true", help="actually do it (default: only show what would happen)")
     d.add_argument("--yes", action="store_true", help="do not ask before closing apps or sleeping")
     d.add_argument("--os", choices=["windows", "linux", "mac"], help="preview the plan for another OS")
+    d.add_argument("--speak", action="store_true", help="Myna says the reply out loud (with --run; offline system voice)")
+    d.add_argument("--plain", action="store_true", help="no colours")
     d.set_defaults(func=_cmd_do)
+
+    ap = sub.add_parser("app", help="Myna on your screen: talk to it in the browser (local only)")
+    ap.add_argument("--run", action="store_true", help="let Myna really do things (default: preview)")
+    ap.add_argument("--asr", default=default_asr, help="Whisper model id or local dir")
+    ap.add_argument("--port", type=int, default=0, help="0 = any free port")
+    ap.add_argument("--no-browser", action="store_true")
+    ap.set_defaults(func=_cmd_app)
+
+    sk = sub.add_parser("sikhao", help="teach Myna a routine: one phrase that does several commands")
+    sk.add_argument("name", nargs="?", help='the phrase, e.g. "coding mode"')
+    sk.add_argument("steps", nargs="*", help='each command in quotes, e.g. "vs code kholo" "dnd on karo"')
+    sk.add_argument("--list", action="store_true")
+    sk.add_argument("--forget", metavar="NAME")
+    sk.set_defaults(func=_cmd_sikhao)
 
     nm = sub.add_parser("name", help="show or change what you call the assistant (default: Myna)")
     nm.add_argument("new", nargs="*", help="new name, e.g. Jarvis")

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myna</title>
+<style>
+:root {
+  --bg: #fbf7ef; --card: #ffffff; --ink: #1e2230; --muted: #6b7184; --line: #e6e0d4;
+  --teal: #2ec4b6; --teal-d: #1c968c; --amber: #ffb703; --coral: #ef476f; --soft: #eef9f7;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #161a28; --card: #1f2435; --ink: #eef0f6; --muted: #9aa1b6; --line: #2e3448; --soft: #1b3236; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 640px; overflow-wrap: anywhere; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+h1 { font-size: 22px; margin: 0; letter-spacing: .2px; }
+.pill { font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: var(--card); }
+.pill.live { color: #fff; background: var(--coral); border-color: var(--coral); }
+.stage { display: flex; flex-direction: column; align-items: center; margin-top: 18px; }
+#bird { width: 220px; height: 260px; overflow: visible; }
+.bubble { position: relative; background: var(--card); border: 2px solid var(--ink); border-radius: 22px; padding: 14px 18px; min-height: 56px;
+  max-width: 100%; font-size: 19px; font-weight: 600; text-align: center; margin-top: 6px; }
+.bubble::before { content: ""; position: absolute; top: -12px; left: 50%; margin-left: -10px; border: 10px solid transparent; border-bottom-color: var(--ink); border-top: 0; }
+.heard { color: var(--muted); font-size: 14px; margin-top: 8px; min-height: 20px; text-align: center; }
+.mic { margin-top: 18px; width: 96px; height: 96px; border-radius: 50%; border: 0; background: var(--teal); color: #fff; font-size: 38px; cursor: pointer;
+  box-shadow: 0 6px 0 var(--teal-d); transition: transform .08s; }
+.mic:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--teal-d); }
+.mic.rec { background: var(--coral); box-shadow: 0 6px 0 #b8304f; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 6px 0 #b8304f, 0 0 0 14px rgba(239,71,111,.18); } }
+.hint { font-size: 13px; color: var(--muted); margin-top: 8px; }
+form { display: flex; gap: 8px; margin-top: 18px; width: 100%; }
+input[type=text] { flex: 1; min-width: 0; font: inherit; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+button.small { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 14px; border: 0; background: var(--ink); color: var(--bg); cursor: pointer; }
+button.go { background: var(--teal); color: #fff; }
+button.no { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.panel { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin-top: 14px; }
+.panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 6px; }
+.steps { margin: 0; padding-left: 18px; font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+.note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.timer { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-top: 1px dashed var(--line); }
+.timer:first-of-type { border-top: 0; }
+.timer b { font-variant-numeric: tabular-nums; }
+.hidden { display: none !important; }
+.tips { font-size: 14px; color: var(--muted); }
+/* chips */
+.tips code { display: inline-block; margin: 2px 0; background: var(--soft); padding: 1px 6px; border-radius: 6px; color: var(--ink); }
+footer { margin-top: 22px; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* the mascot */
+#bird .body { fill: var(--teal); } #bird .dark { fill: var(--teal-d); } #bird .beak { fill: var(--amber); }
+#bird .ink { fill: #1e2230; } #bird .white { fill: #fff; } #bird .shine { fill: #fff; opacity: .35; }
+#bird .wave { fill: none; stroke: var(--teal-d); stroke-width: 6; stroke-linecap: round; opacity: .25; }
+#bird .mouth { stroke: #1e2230; stroke-width: 5; stroke-linecap: round; fill: none; }
+#bird g.all, #bird .lids { transform-box: fill-box; }
+#bird g.all { transform-origin: 50% 100%; animation: bob 3s ease-in-out infinite; }
+#bird .lids { transform-origin: 50% 50%; animation: blink 4s infinite; }
+@keyframes bob { 50% { transform: translateY(-4px) scale(1.01, .99); } }
+@keyframes blink { 0%, 95%, 100% { transform: scaleY(0); } 97% { transform: scaleY(1); } }
+#bird .m { display: none; } .happy #bird .m-happy, .thinking #bird .m-flat, .listening #bird .m-o, .unsure #bird .m-side,
+.oops #bird .m-o, .sleepy #bird .m-flat { display: inline; }
+.listening #bird .wave { opacity: 1; animation: wave 1s infinite; } .listening #bird .wave:nth-of-type(2) { animation-delay: .15s; }
+.listening #bird .wave:nth-of-type(3) { animation-delay: .3s; }
+@keyframes wave { 50% { opacity: .2; } }
+.happy #bird g.all { animation: hop .5s ease-out 2, bob 3s ease-in-out 1s infinite; }
+@keyframes hop { 40% { transform: translateY(-22px) scale(.97, 1.04); } 80% { transform: translateY(0) scale(1.05, .95); } }
+.oops #bird g.all { animation: shake .4s 2; }
+@keyframes shake { 25% { transform: translateX(-8px) rotate(-3deg); } 75% { transform: translateX(8px) rotate(3deg); } }
+.unsure #bird g.all { transform: rotate(-8deg); animation: none; }
+.sleepy #bird .lids { transform: scaleY(1); animation: none; }
+.thinking #bird .pupils { animation: look 1.6s ease-in-out infinite; }
+@keyframes look { 50% { transform: translate(6px, -5px); } }
+#bird .zzz, #bird .q { display: none; font: 700 30px ui-rounded, system-ui; fill: var(--muted); }
+.sleepy #bird .zzz, .unsure #bird .q { display: inline; }
+@media (prefers-reduced-motion: reduce) { #bird *, #bird g.all, .mic.rec { animation: none !important; } }
+</style>
+</head>
+<body class="happy">
+<main>
+  <header>
+    <h1 id="title">Myna</h1>
+    <span id="mode" class="pill">preview</span>
+  </header>
+
+  <section class="stage">
+    <svg id="bird" viewBox="-120 -175 240 290" role="img" aria-label="Myna, a teal bird">
+      <g class="all">
+        <path class="wave" d="M -20 -93 A 26 26 0 0 1 20 -93"/>
+        <path class="wave" d="M -34 -104 A 44 44 0 0 1 34 -104"/>
+        <path class="wave" d="M -48 -116 A 62 62 0 0 1 48 -116"/>
+        <polygon class="dark" points="-25,-62 -12,-100 -7,-62"/>
+        <polygon class="dark" points="-9,-62 4,-110 9,-62"/>
+        <polygon class="dark" points="7,-62 20,-98 25,-62"/>
+        <polygon class="body" points="-30,49 -60,96 4,59.5"/>
+        <ellipse class="body" cx="0" cy="0" rx="78" ry="70"/>
+        <ellipse class="shine" cx="-24" cy="-26" rx="22" ry="14"/>
+        <ellipse class="white" cx="-26" cy="-6" rx="17" ry="21"/>
+        <ellipse class="white" cx="26" cy="-6" rx="17" ry="21"/>
+        <g class="pupils">
+          <ellipse class="ink" cx="-23" cy="-3" rx="9" ry="11"/><ellipse class="ink" cx="29" cy="-3" rx="9" ry="11"/>
+          <circle class="white" cx="-20" cy="-8" r="3"/><circle class="white" cx="32" cy="-8" r="3"/>
+        </g>
+        <g class="lids"><ellipse class="body" cx="-26" cy="-6" rx="19" ry="23"/><ellipse class="body" cx="26" cy="-6" rx="19" ry="23"/></g>
+        <polygon class="beak" points="-13,10 13,10 0,26"/>
+        <path class="m m-happy ink" d="M -20 32 Q 0 54 20 32 Z"/>
+        <path class="m m-flat mouth" d="M -12 38 L 12 38"/>
+        <ellipse class="m m-o ink" cx="0" cy="40" rx="7" ry="8"/>
+        <path class="m m-side mouth" d="M -14 40 L 14 35"/>
+        <text class="zzz" x="58" y="-70">z</text><text class="zzz" x="78" y="-96" style="font-size:22px">z</text>
+        <text class="q" x="62" y="-72">?</text>
+      </g>
+    </svg>
+    <div id="bubble" class="bubble" aria-live="polite">Namaste! Bolo, kya karna hai?</div>
+    <div id="heard" class="heard"></div>
+    <button id="mic" class="mic" aria-label="Hold to talk">🎤</button>
+    <div class="hint">hold the button or <b>Space</b> while you speak</div>
+    <form id="form"><input id="txt" type="text" placeholder="ya yahan type karo: volume kam karo" autocomplete="off"><button class="small">Bhejo</button></form>
+
+    <div id="planbox" class="panel hidden">
+      <h2>What Myna will do</h2>
+      <ol id="steps" class="steps"></ol>
+      <div id="notes" class="note"></div>
+      <div class="row">
+        <button id="doit" class="small go">Karo</button>
+        <button id="nah" class="small no">Rehne do</button>
+      </div>
+    </div>
+
+    <div id="timerbox" class="panel hidden"><h2>Timers</h2><div id="timers"></div></div>
+
+    <div class="panel tips">
+      <h2>Try saying</h2>
+      <code>battery kitni hai</code> · <code>volume chaalis pe kar do</code> · <code>youtube pe lofi chalao</code> ·
+      <code>5 minute ka timer lagao</code> · <code>downloads folder kholo</code> · <code>dark mode on karo</code>
+      <div class="row"><label><input id="voice" type="checkbox" checked> Myna bole (offline voice)</label></div>
+    </div>
+  </section>
+  <footer>Runs on this computer only. Audio is deleted right after it is understood.</footer>
+</main>
+<script>
+const TOKEN = "__TOKEN__";
+const $ = id => document.getElementById(id);
+const api = (path, opts = {}) => fetch("api/" + path, { ...opts, headers: { "X-Myna-Token": TOKEN, ...(opts.headers || {}) } })
+  .then(r => r.json());
+let canRun = false, planId = null, needConfirm = false, since = 0, name = "Myna";
+
+function mood(m) { document.body.className = m || "happy"; }
+function say(text, m) {
+  mood(m); $("bubble").textContent = text;
+  if ($("voice").checked && "speechSynthesis" in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/--run/g, ""));
+    const vs = speechSynthesis.getVoices().filter(v => v.localService);   // on-device voices only
+    u.voice = vs.find(v => /en-IN|hi-IN/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+    if (u.voice) { u.lang = u.voice.lang; speechSynthesis.speak(u); }
+  }
+}
+function show(r) {
+  if (r.error) return say("Oho: " + r.error, "oops");
+  $("heard").textContent = r.heard ? `suna: “${r.heard}”` + (r.routine ? `  → routine ${r.routine}` : "") : "";
+  say(r.reply, r.mood);
+  planId = r.plan_id || null; needConfirm = !!r.confirm;
+  const box = $("planbox");
+  if (planId && r.steps && r.steps.length) {
+    $("steps").innerHTML = ""; r.steps.forEach(s => { const li = document.createElement("li"); li.textContent = s; $("steps").appendChild(li); });
+    $("notes").textContent = (r.notes || []).join(" · ");
+    $("doit").textContent = !canRun ? "Preview only" : needConfirm ? "Haan, pakka karo" : "Karo";
+    $("doit").disabled = !canRun;
+    box.classList.remove("hidden");
+  } else box.classList.add("hidden");
+}
+async function doIt() {
+  if (!planId) return;
+  if (needConfirm && !confirm("Pakka? " + $("bubble").textContent)) return;
+  const r = await api("do", { method: "POST", body: JSON.stringify({ plan_id: planId, confirmed: needConfirm }) });
+  $("planbox").classList.add("hidden"); planId = null;
+  say(r.reply, r.mood); tick();
+}
+$("doit").onclick = doIt;
+$("nah").onclick = () => { $("planbox").classList.add("hidden"); planId = null; say("Theek hai, nahi kiya.", "thinking"); };
+$("form").onsubmit = async e => {
+  e.preventDefault(); const t = $("txt").value.trim(); if (!t) return;
+  mood("thinking"); $("txt").value = "";
+  show(await api("text", { method: "POST", body: JSON.stringify({ text: t }) }));
+};
+
+// ---- push to talk: 16 kHz mono WAV, made in the browser
+let ctx, stream, proc, chunks = [], recording = false, inRate = 48000;
+async function ensureMic() {
+  if (stream) return;
+  stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+  ctx = new (window.AudioContext || window.webkitAudioContext)(); inRate = ctx.sampleRate;
+  const src = ctx.createMediaStreamSource(stream); proc = ctx.createScriptProcessor(4096, 1, 1);
+  src.connect(proc); proc.connect(ctx.destination);
+  proc.onaudioprocess = e => { if (recording) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+}
+function resample(buf, from, to) {
+  if (from === to) return buf;
+  const ratio = from / to, n = Math.floor(buf.length / ratio), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const a = Math.floor(i * ratio), b = Math.min(buf.length, Math.floor((i + 1) * ratio));
+    let s = 0; for (let j = a; j < b; j++) s += buf[j]; out[i] = s / Math.max(1, b - a); }
+  return out;
+}
+function wav(samples, sr) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return new Blob([buf], { type: "audio/wav" });
+}
+async function start() {
+  if (recording) return;
+  try { await ensureMic(); } catch (e) { return say("Mic ki permission nahi mili: " + e.message, "oops"); }
+  if (ctx.state === "suspended") await ctx.resume();
+  speechSynthesis && speechSynthesis.cancel();
+  chunks = []; recording = true; $("mic").classList.add("rec"); mood("listening"); $("bubble").textContent = "Sun rahe hain...";
+}
+async function stop() {
+  if (!recording) return;
+  recording = false; $("mic").classList.remove("rec");
+  await new Promise(r => setTimeout(r, 250));            // the last few words
+  let len = chunks.reduce((a, c) => a + c.length, 0), all = new Float32Array(len), o = 0;
+  for (const c of chunks) { all.set(c, o); o += c.length; }
+  const pcm = resample(all, inRate, 16000).slice(0, 16000 * 15);
+  if (pcm.length < 16000 * 0.4) return say("Thoda lamba dabao, button pakad ke bolo.", "unsure");
+  mood("thinking"); $("bubble").textContent = "Samajh rahe hain...";
+  show(await api("listen", { method: "POST", body: wav(pcm, 16000) }));
+}
+const mic = $("mic");
+mic.addEventListener("pointerdown", e => { e.preventDefault(); start(); });
+["pointerup", "pointerleave", "pointercancel"].forEach(ev => mic.addEventListener(ev, stop));
+document.addEventListener("keydown", e => { if (e.code === "Space" && !e.repeat && document.activeElement.tagName !== "INPUT") { e.preventDefault(); start(); } });
+document.addEventListener("keyup", e => { if (e.code === "Space" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); stop(); } });
+
+// ---- timers and the app state
+function beep() {
+  try { const a = new (window.AudioContext || window.webkitAudioContext)();
+    [0, .25, .5].forEach(t => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = 880; o.connect(g); g.connect(a.destination);
+      g.gain.setValueAtTime(.2, a.currentTime + t); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + t + .2); o.start(a.currentTime + t); o.stop(a.currentTime + t + .22); });
+  } catch (e) {}
+}
+async function tick() {
+  let s; try { s = await api("state?since=" + since); } catch (e) { return; }
+  canRun = s.can_run; name = s.name;
+  $("title").textContent = name; document.title = name;
+  $("mode").textContent = canRun ? "can do things" : "preview"; $("mode").className = "pill" + (canRun ? " live" : "");
+  for (const ev of s.events) { since = Math.max(since, ev.n); beep(); say(ev.reply, ev.mood);
+    if (window.Notification && Notification.permission === "granted") new Notification(name, { body: ev.reply }); }
+  const tb = $("timers"); tb.innerHTML = "";
+  s.timers.forEach(t => {
+    const d = document.createElement("div"); d.className = "timer";
+    const left = `${String(Math.floor(t.left / 60)).padStart(2, "0")}:${String(t.left % 60).padStart(2, "0")}`;
+    d.innerHTML = `<span></span><span><b>${left}</b> <button class="small no">✕</button></span>`;
+    d.firstChild.textContent = t.text === "Timer done" ? "Timer" : t.text;
+    d.querySelector("button").onclick = async () => { await api("cancel", { method: "POST", body: JSON.stringify({ id: t.id }) }); tick(); };
+    tb.appendChild(d);
+  });
+  $("timerbox").classList.toggle("hidden", !s.timers.length);
+}
+setInterval(tick, 1000); tick();
+if (window.Notification && Notification.permission === "default") document.addEventListener("click", () => Notification.requestPermission(), { once: true });
+if ("speechSynthesis" in window) speechSynthesis.getVoices();
+</script>
+</body>
+</html>
