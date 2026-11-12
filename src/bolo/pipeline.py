@@ -65,6 +65,24 @@ RERANK = {"w_nlu": 0.5, "w_ground": 2.0, "w_none": 1.0}
 COMMAND_WORDS = "terminal, claude code, folder, volume, brightness, battery, wifi, bluetooth"
 
 
+def looped(text: str) -> bool:
+    """Whisper sometimes gets stuck repeating itself ("cpu cpu cpu cpu ..."). Such a transcript is not something the
+    user said, so it must never be acted on."""
+    w = text.lower().split()
+    if len(w) < 4:
+        return False
+    run = 1
+    for i in range(1, len(w)):
+        run = run + 1 if w[i] == w[i - 1] else 1
+        if run >= 4:
+            return True
+    for n in (2, 3):  # a phrase repeated 3+ times in a row
+        for i in range(len(w) - 3 * n + 1):
+            if w[i:i + n] == w[i + n:i + 2 * n] == w[i + 2 * n:i + 3 * n]:
+                return True
+    return len(w) >= 10 and len(set(w)) / len(w) < 0.3
+
+
 def build_prompt(kind: str | None, env: Environment | None = None, max_chars: int = 600) -> str | None:
     if kind is None:
         return None
@@ -165,12 +183,16 @@ class Bolo:
         if self.beams <= 1:
             text = self.asr(x)
             asr_ms = (time.perf_counter() - t0) * 1000
-            out = self.understand(text, env)
+            out = self._didnt_catch(text) if looped(text) else self.understand(text, env)
             out["ms"]["asr"] = round(asr_ms, 1)
             return out
         hyps = self.asr.nbest(x, beams=self.beams)
         heard = hyps
-        hyps = [(self._strip(h)[0], sc) for h, sc in hyps]
+        hyps = [(self._strip(h)[0], sc) for h, sc in hyps if not looped(h)]
+        if not hyps:
+            out = self._didnt_catch(heard[0][0])
+            out["ms"]["asr"] = round((time.perf_counter() - t0) * 1000, 1)
+            return out
         asr_ms = (time.perf_counter() - t0) * 1000
         t1 = time.perf_counter()
         if self.memory is not None:
@@ -188,6 +210,11 @@ class Bolo:
                 "abstain": abstain, "reason": (reason or "not a supported command") if abstain else None,
                 "transcript": text, "alternatives": [h for h, _ in heard], "grounding": pred.get("grounding"),
                 "ms": {"asr": round(asr_ms, 1), "nlu": round((time.perf_counter() - t1) * 1000, 2)}}
+
+    def _didnt_catch(self, text: str) -> dict:
+        return {"intent": "none", "slots": {}, "confidence": 0.0, "abstain": True,
+                "reason": "could not hear that clearly (the recogniser got stuck repeating itself)", "transcript": text,
+                "addressed": False, "grounding": None, "ms": {"nlu": 0.0}}
 
     def feedback(self, intent: str, slots: dict | None = None):
         """Tell Bolo what the last `listen()` should have done (or confirm it). Needs memory=Memory()."""

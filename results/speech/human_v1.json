@@ -1,0 +1,65 @@
+{
+ "n": 55,
+ "speakers": 1,
+ "kinds": {
+  "read": 40,
+  "free": 15
+ },
+ "note": "human recordings; speech model trained on the 9-command set unless stated",
+ "configs": {
+  "bolo_sun_beam5": {
+   "e2e": 0.6182,
+   "e2e_lenient": 0.6727,
+   "e2e_read": 0.7,
+   "e2e_free": 0.4,
+   "intent_acc": 0.7455,
+   "acted_on_none": "1/3",
+   "wrong_action": 0.2,
+   "over_abstain": 0.1923,
+   "wer_read": {
+    "wer": 0.308,
+    "cer": 0.1591,
+    "phonetic_wer": 0.2902,
+    "sentence_exact": 0.425,
+    "n": 40
+   },
+   "ms_mean": 224.6
+  },
+  "bolo_sun_greedy": {
+   "e2e": 0.5273,
+   "e2e_lenient": 0.5818,
+   "e2e_read": 0.6,
+   "e2e_free": 0.3333,
+   "intent_acc": 0.6727,
+   "acted_on_none": "1/3",
+   "wrong_action": 0.1818,
+   "over_abstain": 0.3077,
+   "wer_read": {
+    "wer": 0.3571,
+    "cer": 0.1922,
+    "phonetic_wer": 0.3482,
+    "sentence_exact": 0.375,
+    "n": 40
+   },
+   "ms_mean": 108.1
+  },
+  "swift_greedy": {
+   "e2e": 0.5091,
+   "e2e_lenient": 0.5455,
+   "e2e_read": 0.55,
+   "e2e_free": 0.4,
+   "intent_acc": 0.6364,
+   "acted_on_none": "1/3",
+   "wrong_action": 0.2,
+   "over_abstain": 0.3077,
+   "wer_read": {
+    "wer": 0.3125,
+    "cer": 0.126,
+    "phonetic_wer": 0.2902,
+    "sentence_exact": 0.175,
+    "n": 40
+   },
+   "ms_mean": 134.9
+  }
+ }
+}

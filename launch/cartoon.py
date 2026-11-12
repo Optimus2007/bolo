@@ -515,6 +515,26 @@ def since(id_, t):
 BOLO_HOME = (1150, 660)
 
 
+def name_tag(img, nm, cmd, k):
+    bx, by = cam(BOLO_HOME[0], BOLO_HOME[1])
+    layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    f = font(46, weight=800)
+    tw = d.textlength(nm, font=f)
+    s = 0.85 + 0.15 * back_out(k)
+    w2, h2 = (tw / 2 + 36) * s, 40 * s
+    ty = by - 215
+    rr(d, [bx - w2, ty - h2, bx + w2, ty + h2], h2, fill=PAPER, outline=TEAL_D, width=5)
+    d.polygon([(bx - 14, ty + h2 - 2), (bx + 14, ty + h2 - 2), (bx, ty + h2 + 18)], fill=TEAL_D)
+    d.text((bx, ty), nm, font=f, fill=INK, anchor="mm")
+    if cmd:
+        cf = font(30, mono=True)
+        cw = d.textlength(cmd, font=cf)
+        rr(d, [bx - cw / 2 - 22, ty - 130, bx + cw / 2 + 22, ty - 76], 14, fill=(20, 24, 36, 235))
+        d.text((bx, ty - 103), cmd, font=cf, fill=TEAL, anchor="mm")
+    img.alpha_composite(layer)
+
+
 def scene_room(img, t, b):
     sid = b["scene"]
     day = ease((t - BY["n09"]["start"]) / 2.5) if t >= BY["n09"]["start"] else 0.0
@@ -587,29 +607,13 @@ def scene_room(img, t, b):
         k = ease((t - BY["a04"]["start"] - BY["a04"]["dur"] * 0.7) / 0.3)
         bubble(img, (1140, 200, 1720, 380), cam(BOLO_HOME[0] + 30, BOLO_HOME[1] - 70), "Kaun sa folder? Naam bata do.",
                40, k, border=TEAL_D, fill=(230, 252, 249))
+    if sid == "popup" and since("n03", t) > 1.0:  # the name is shown, never spoken
+        name_tag(img, "Myna", "", ease((since("n03", t) - 1.0) / 0.3))
     if sid == "rename":
         names = ["Myna", "Jarvis", "Chotu", "Friday", "Myna"]
         q = min(len(names) - 1, int(local(b, t) * len(names)))
         k = ease((t - b["start"] - q * b["dur"] / len(names)) / 0.25)
-        bx, by = cam(BOLO_HOME[0], BOLO_HOME[1])
-        layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        d = ImageDraw.Draw(layer)
-        nm = names[q]
-        f = font(46, weight=800)
-        tw = d.textlength(nm, font=f)
-        s = 0.85 + 0.15 * back_out(k)
-        w2, h2 = (tw / 2 + 36) * s, 40 * s
-        ty = by - 215
-        rr(d, [bx - w2, ty - h2, bx + w2, ty + h2], h2, fill=PAPER, outline=TEAL_D, width=5)
-        d.polygon([(bx - 14, ty + h2 - 2), (bx + 14, ty + h2 - 2), (bx, ty + h2 + 18)], fill=TEAL_D)
-        d.text((bx, ty), nm, font=f, fill=INK, anchor="mm")
-        cmd = "" if q == 0 else "$ bolo name " + (nm if q < len(names) - 1 else "--reset")
-        cf = font(30, mono=True)
-        cw = d.textlength(cmd, font=cf)
-        if cmd:
-            rr(d, [bx - cw / 2 - 22, ty - 130, bx + cw / 2 + 22, ty - 76], 14, fill=(20, 24, 36, 235))
-            d.text((bx, ty - 103), cmd, font=cf, fill=TEAL, anchor="mm")
-        img.alpha_composite(layer)
+        name_tag(img, names[q], "" if q == 0 else "$ bolo name " + (names[q] if q < len(names) - 1 else "--reset"), k)
     if sid == "offline":
         p = since("n07", t)
         dim(img, 0.25 * ease(p / 0.4))
