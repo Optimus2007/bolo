@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "data/kaggle"
 KAGGLE = ["uvx", "--with", "six", "kaggle"]
+STORY = False  # narr: cartoon voices from launch/story.json (--story)
 ONLY = None  # narr: comma separated line ids to regenerate (--only)
 KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb"),
            "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb"), "narr": ("bolo-narration", "04_narration.ipynb")}
@@ -64,7 +65,7 @@ def dataset():
 def kernel(which: str, trial: bool, gpu: bool):
     subprocess.run([sys.executable, str(ROOT / "scripts/make_notebooks.py")], check=True)
     if which == "narr":
-        subprocess.run([sys.executable, str(ROOT / "scripts/make_narration_notebook.py")] + ([ONLY] if ONLY else []), check=True)
+        subprocess.run([sys.executable, str(ROOT / "scripts/make_narration_notebook.py")] + (["--story"] if STORY else []) + ([ONLY] if ONLY else []), check=True)
     slug, nbname = KERNELS[which]
     u = user()
     d = WORK / f"kernel_{slug}"
@@ -109,8 +110,9 @@ if __name__ == "__main__":
     ap.add_argument("--trial", action="store_true")
     ap.add_argument("--no-gpu", action="store_true")
     ap.add_argument("--only", help="narr: comma separated line ids")
+    ap.add_argument("--story", action="store_true", help="narr: the cartoon's voices")
     a = ap.parse_args()
-    ONLY = a.only
+    ONLY, STORY = a.only, a.story
     if a.cmd == "dataset":
         dataset()
     elif a.cmd in ("tts", "ft", "abl", "narr"):
