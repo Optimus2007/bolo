@@ -15,6 +15,7 @@ the caller decides what to run, and should ask the user before anything risky.
 
 from __future__ import annotations
 
+import json
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -114,6 +115,8 @@ class Bolo:
 
         cfg = load_config()
         nlu = BoloTiny.load(cfg, nlu_path)
+        tf = Path(nlu_path) / "threshold.json"  # confidence cut-off tuned on dev (see scripts/rescore_tiny.py)
+        thr = json.loads(tf.read_text())["threshold"] if tf.exists() else 0.0
         asr_model = None
         if asr:
             from .speech_eval import WhisperASR
@@ -123,7 +126,8 @@ class Bolo:
             asr_model = WhisperASR(asr, asr_language, prompt=(get_name() + ", " + p) if p and prompt != p else p)
         from .asr.decode import Rerank
 
-        return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env, beams=beams, rerank=Rerank(**RERANK), memory=memory)
+        return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env, beams=beams, rerank=Rerank(**RERANK), memory=memory,
+                   threshold=thr)
 
     def understand(self, text: str, env: Environment | None = None) -> dict:
         t0 = time.perf_counter()
@@ -176,7 +180,7 @@ class Bolo:
         else:
             from .asr.decode import choose
 
-            c = choose(hyps, self.nlu, self.cfg, env, self.rerank)
+            c = choose(hyps, self.nlu, self.cfg, env, self.rerank, self.threshold)
             pred, text = c.pred, c.text
         abstain = pred["intent"] == "none"
         reason = pred.get("abstain_reason") or (pred.get("grounding") or {}).get("abstain")

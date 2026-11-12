@@ -136,15 +136,24 @@ def consistency(rows: list[dict], main_preds: list[dict], view_preds: list[list[
     return round(same / len(rows), 4)
 
 
-def choose_threshold(rows: list[dict], raw_preds: list[dict], schema: dict) -> float:
-    """Pick the confidence threshold maximizing exact match on (dev) rows."""
-    best_t, best = 0.0, -1.0
+MAX_FAR = 0.03  # acting on something that is not a command is worse than asking again
+
+
+def choose_threshold(rows: list[dict], raw_preds: list[dict], schema: dict, max_far: float | None = MAX_FAR) -> float:
+    """Pick the confidence threshold with the best exact match on (dev) rows among those whose false action rate
+    (acting on a `none` row) is at most `max_far`; if none qualifies, the one with the lowest false action rate.
+    max_far=None: plain best exact match (the old rule; it often picked 0, i.e. never abstain on confidence)."""
+    none_idx = [i for i, r in enumerate(rows) if r["intent"] == "none"]
+    cands = []
     for t in [x / 100 for x in range(0, 100, 2)]:
         preds = [finalize(p, schema, t) for p in raw_preds]
         em = sum(_exact(r, p) for r, p in zip(rows, preds))
-        if em > best:
-            best, best_t = em, t
-    return best_t
+        far = sum(preds[i]["intent"] != "none" for i in none_idx) / max(1, len(none_idx))
+        cands.append((t, em, far))
+    ok = [c for c in cands if max_far is None or c[2] <= max_far]
+    if ok:
+        return max(ok, key=lambda c: (c[1], -c[0]))[0]
+    return min(cands, key=lambda c: (c[2], -c[1]))[0]
 
 
 def latency_ms(predictor, texts: list[str], n: int = 200) -> dict:

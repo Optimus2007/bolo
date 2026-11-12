@@ -65,6 +65,7 @@ for seed in args.seeds:
         out_dir = Path(f"models/bolo-tiny/{name}-s{seed}")
         m.save(out_dir)
         res = run(m, cfg.schema, test, dev_rows=dev)
+        (out_dir / "threshold.json").write_text(json.dumps({"threshold": res["threshold"], "rule": "best dev EM with dev FAR <= 3%"}))
         if para_test:
             from bolo.evaluate import finalize, score
             pp = [finalize(p, cfg.schema, res["threshold"]) for p in m.predict([r["text"] for r in para_test])]

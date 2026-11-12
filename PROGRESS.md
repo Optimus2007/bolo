@@ -146,3 +146,13 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
 - OpenSLR-104 license: OpenSLR says CC BY-SA 4.0, Srota card says CC BY 4.0. Treat as BY-SA.
 - HiACC license on Zenodo: not yet confirmed.
 - Qwen Research License: do its terms cover outputs (our paraphrases)? Until resolved, treat them as research-only.
+- 2026-11-12: Commands expanded 9 -> 20 (+ none). Bolo Tiny v1, 3 seeds on the 2000-row v1 test set: exact match 86.2 ± 0.8%,
+  intent 92.6 ± 0.8%, false actions 6.1 ± 1.5%, over-abstain 3.6 ± 1.1%. (The first single run's 2.2% false actions was a
+  lucky run; training on the M2 is not bit-for-bit repeatable, so text results are now reported as 3-seed means.)
+- 2026-11-12: Confidence cut-off is now chosen as best dev exact match with dev false actions <= 3% (the old rule maximised
+  exact match only and sometimes picked 0). It is saved as threshold.json next to the model and the pipeline uses it;
+  before this the pipeline always used 0, so shipped behaviour did not match the reported text numbers.
+- 2026-11-12: Remaining false actions are confident (~0.9) mistakes on unseen near-miss patterns ("naya folder banao",
+  "X ka number batao", "file kholo"); no cut-off can catch them. Fix later with more varied near-miss negatives.
+  Tried: more weight on bare "terminal kholo" templates: no change over 3 seeds (EM 85.5%, FAR 6.7%), reverted.
+- 2026-11-12: Assistant name is user-settable (`bolo name`, default Myna); the pipeline strips a spoken address.
