@@ -188,3 +188,9 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   macOS voices 83.75 -> 85.0% (16/13, n.s.). Now the default (models/bolo-whisper-v1-fp16); v0 kept on disk.
   Next: Bolo Tiny was trained on v0's mistakes. Re-make train_asr with v1, but v1 was trained on those very clips, so
   transcribe noised/reverbed copies (or new TTS clips) or the errors will be unrealistically few. Also try more epochs.
+- 2026-11-12: Tried Bolo Tiny on Bolo Sun v1 transcripts of noised/reverbed TTS train clips (`phono_views_aug_asr1`,
+  8332 rows). With Bolo Sun v1, 3 seeds: human 81.2% (current default) vs 77.0% (seed 2 broke 7, fixed 0; acted on
+  chat 1/4 in 2 seeds); macOS voices 83.9% vs 85.0% (n.s.). Fails the keep rule (must not be worse on human, no more
+  false actions): rejected, default unchanged. Likely reason: v1 trained on these clips, so even noised copies give
+  fewer, less realistic errors than v0 did on unseen clips. Better source of realistic errors: new TTS clips v1 never saw.
+  Current default stack: Bolo Sun v1 + phono_views_aug_asr-s0 = human 80.0% (3-seed mean 81.2%), macOS voices 85.0%.
