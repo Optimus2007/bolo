@@ -16,9 +16,11 @@ import sys
 import time
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from bolo.audio.augment import SR, read_wav, resample  # noqa: E402
+from bolo.audio.augment import SR, augment, read_wav, resample  # noqa: E402
 from bolo.config import load_config  # noqa: E402
 from bolo.grounding import similarity  # noqa: E402
 from bolo.normalize import Normalizer  # noqa: E402
@@ -32,6 +34,9 @@ ap.add_argument("--tts", required=True)
 ap.add_argument("--data", default="data/text/v1")
 ap.add_argument("--asr", default="models/bolo-whisper-fp16")
 ap.add_argument("--limit", type=int, default=0)
+ap.add_argument("--name", default="train_asr", help="output file stem in --data")
+ap.add_argument("--augment", action="store_true",
+                help="add noise/echo/speed (bolo.audio.augment) before transcribing: needed when --asr was trained on these clips")
 a = ap.parse_args()
 
 cfg = load_config()
@@ -69,6 +74,7 @@ def locate(hyp_words, used, surface):
     return best
 
 
+rng = np.random.default_rng(0)
 out, kept, dropped, same, stale, t0 = [], 0, 0, 0, 0, time.perf_counter()
 for n, m in enumerate(man):
     g = train.get(m["source_id"])
@@ -76,7 +82,10 @@ for n, m in enumerate(man):
         stale += 1
         continue  # the clip was made from different text (data regenerated since): its labels do not apply
     x, sr = read_wav(str(Path(a.tts) / m["audio"]))
-    hyps = asr.nbest(resample(x, sr, SR), beams=BEAMS)
+    x = resample(x, sr, SR)
+    if a.augment:
+        x, _ = augment(x, rng)
+    hyps = asr.nbest(x, beams=BEAMS)
     clean = " ".join(roman(g["text"]))
     for h, _ in hyps:
         hw = [(norm.to_roman(w), s, e) for w, s, e in norm.words(h)]
@@ -96,11 +105,11 @@ for n, m in enumerate(man):
             continue
         out.append({"id": f"{g['id']}-asr{len(out)}", "text": h, "script": "asr", "intent": g["intent"],
                     "slots": g["slots"], "spans": sorted(spans, key=lambda s: s["start"]),
-                    "meta": {"source": "asr_nbest", "clip": m["utt_id"]}})
+                    "meta": {"source": "asr_nbest", "clip": m["utt_id"], "asr": a.asr, "augmented": a.augment}})
         kept += 1
     if n % 200 == 0:
         print(f"{n}/{len(man)} kept {kept} dropped {dropped} same-as-clean {same} ({time.perf_counter() - t0:.0f}s)", flush=True)
 random.Random(0).shuffle(out)
 out = out[: len(train)]
-(ROOT / a.data / "train_asr.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in out) + "\n")
-print(f"wrote {len(out)} rows -> {a.data}/train_asr.jsonl (kept {kept}, dropped {dropped}, same-as-clean {same}, stale clips {stale})")
+(ROOT / a.data / f"{a.name}.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in out) + "\n")
+print(f"wrote {len(out)} rows -> {a.data}/{a.name}.jsonl (kept {kept}, dropped {dropped}, same-as-clean {same}, stale clips {stale})")

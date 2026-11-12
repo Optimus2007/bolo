@@ -38,6 +38,9 @@ VARIANTS = {
     # + Bolo Sun's own 5-beam transcripts of the TTS train clips, slots re-aligned (scripts/make_asr_noised.py), 1:1 with clean
     "phono_views_aug_asr": dict(features="phono", use_views=True, consistency=0.0, augment=True,
                                 train_files=["train", "train_asr"]),
+    # same, but the noisy text is what Bolo Sun v1 hears from noised/reverbed copies of the TTS train clips
+    "phono_views_aug_asr1": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                 train_files=["train", "train_asr_v1"]),
 }
 
 ap = argparse.ArgumentParser()

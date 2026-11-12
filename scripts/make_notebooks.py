@@ -226,7 +226,7 @@ for mid, lang in BASELINES:
 '''),
     ("markdown", "## Fine-tune"),
     ("code", r'''
-CFG = dict(epochs=5, batch_size=32, lr=1e-5, warmup=50, eval_every=150, seed=0, freeze_encoder=False)
+CFG = dict(epochs=10, batch_size=32, lr=1e-5, warmup=50, eval_every=150, seed=0, freeze_encoder=False)
 proc = WhisperProcessor.from_pretrained(W.BASE)
 model = WhisperForConditionalGeneration.from_pretrained(W.BASE)
 OUTDIR = WORK + "/bolo-whisper"
