@@ -27,6 +27,7 @@ ap.add_argument("--test", default="data/text/v1/test.jsonl")
 ap.add_argument("--out", default="results/speech/human_v1.json")
 ap.add_argument("--configs", default="bolo_sun_beam5,bolo_sun_greedy,swift_greedy")
 ap.add_argument("--nlu", default="models/bolo-tiny/phono_views_aug_asr-s0", help="Bolo Tiny model dir")
+ap.add_argument("--asr", default="models/bolo-whisper-fp16", help="Bolo Sun model dir for the bolo_sun_* configs")
 ap.add_argument("--detail", default="data/eval/human", help="where per-utterance output goes (gitignored)")
 a = ap.parse_args()
 
@@ -34,8 +35,8 @@ cfg = load_config()
 env = environment(cfg)
 rows = load_set(ROOT / a.manifest, ROOT / a.test)
 CONFIGS = {
-    "bolo_sun_beam5": dict(asr="models/bolo-whisper-fp16", beams=5),
-    "bolo_sun_greedy": dict(asr="models/bolo-whisper-fp16", beams=1),
+    "bolo_sun_beam5": dict(asr=a.asr, beams=5),
+    "bolo_sun_greedy": dict(asr=a.asr, beams=1),
     "swift_greedy": dict(asr="Oriserve/Whisper-Hindi2Hinglish-Swift", beams=1),
 }
 norm = Normalizer.from_config(cfg)
@@ -48,7 +49,7 @@ def same_lenient(gold: dict, pred: dict) -> bool:
     k = lambda v: phonetic_key(str(v).replace(" ", ""))
     return gold["intent"] == pred["intent"] and {a: k(v) for a, v in gold["slots"].items()} == \
         {a: k(v) for a, v in (pred.get("slots") or {}).items()}
-res = {"nlu": a.nlu, "n": len(rows), "speakers": len({r["speaker"] for r in rows}),
+res = {"nlu": a.nlu, "asr": a.asr, "n": len(rows), "speakers": len({r["speaker"] for r in rows}),
        "kinds": {k: sum(r["set"].endswith(k) for r in rows) for k in ("read", "free")},
        "note": "human recordings; speech model trained on the 9-command set unless stated", "configs": {}}
 detail_dir = ROOT / a.detail
