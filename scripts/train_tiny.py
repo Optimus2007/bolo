@@ -35,6 +35,9 @@ VARIANTS = {
                                train_files=["train_kd"], kd_alpha=0.5),
     "phono_views_aug_para_kd": dict(features="phono", use_views=True, consistency=0.0, augment=True,
                                     train_files=["train_kd", "para_train_kd"], kd_alpha=0.5),
+    # + Bolo Sun's own 5-beam transcripts of the TTS train clips, slots re-aligned (scripts/make_asr_noised.py), 1:1 with clean
+    "phono_views_aug_asr": dict(features="phono", use_views=True, consistency=0.0, augment=True,
+                                train_files=["train", "train_asr"]),
 }
 
 ap = argparse.ArgumentParser()

@@ -156,3 +156,10 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   "X ka number batao", "file kholo"); no cut-off can catch them. Fix later with more varied near-miss negatives.
   Tried: more weight on bare "terminal kholo" templates: no change over 3 seeds (EM 85.5%, FAR 6.7%), reverted.
 - 2026-11-12: Assistant name is user-settable (`bolo name`, default Myna); the pipeline strips a spoken address.
+- 2026-11-12 (evening, in progress): step 5 of docs/research/REAL_VOICE_ACCURACY.md. `scripts/make_asr_noised.py` made
+  data/text/v1/train_asr.jsonl from Bolo Sun 5-beam transcripts of 2193 partial-download TTS train clips (slots re-located
+  by sound; rows with unfound slots dropped). Variant `phono_views_aug_asr` in scripts/train_tiny.py. To finish: train
+  seeds 0-2 of both phono_views_aug and phono_views_aug_asr, evaluate each with
+  `scripts/eval_human.py --configs bolo_sun_beam5 --nlu <model>` on recordings/ (human, locked test) and
+  data/say_test_v1 (computer voices), plus the clean text test; keep only if it helps on both without more false actions.
+  Step 4 (word-level sound repair) dropped: real errors are closer to other words than to the intended ones.
