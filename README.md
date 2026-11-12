@@ -142,6 +142,23 @@ bolo.understand("volume 40 pe kar do")
 bolo.listen("command.wav")
 ```
 
+### The assistant's name
+
+Bolo is the name of the models. The assistant built on them is called **Myna** by default, and you can call it
+anything you like:
+
+```bash
+uv run bolo name             # Myna
+uv run bolo name Jarvis      # from now on: "Jarvis, volume kam karo"
+uv run bolo name --reset     # back to Myna
+```
+
+Commands work with or without the name in front ("Myna, wifi band karo", "hey myna screenshot lo",
+"volume kam karo, myna", "मैना ..."). The name is matched by sound, so small spelling differences from the recogniser
+still count. It is not removed when it is clearly a person you mean ("myna ko call karo" calls a contact named
+Myna). A wake word for a custom name ("Hey Jarvis") comes later with the voice assistant; for now the name only
+matters inside a command.
+
 Bolo never runs anything by itself. Your program decides what to do with the result, and anything risky should be
 confirmed by the user first.
 

@@ -29,6 +29,21 @@ def _write_sample(data_dir: Path, sample_path: Path, n: int, seed: int) -> None:
                 out.write(line + "\n")
 
 
+def _cmd_name(args: argparse.Namespace) -> None:
+    from .assistant import DEFAULT_NAME, get_name, set_name, settings_path
+
+    if args.reset or args.new:
+        try:
+            name = set_name(None if args.reset else " ".join(args.new))
+        except ValueError as e:
+            raise SystemExit(f"bolo name: {e}")
+        print(f"The assistant is now called {name}. Say \"{name}, volume kam karo\" or just \"volume kam karo\".")
+        print(f"(saved in {settings_path()})")
+    else:
+        name = get_name()
+        print(name + ("" if name != DEFAULT_NAME else "  (default; change it with `bolo name <new name>`)"))
+
+
 def _cmd_stats(args: argparse.Namespace) -> None:
     manifest = json.loads((Path(args.data) / "manifest.json").read_text(encoding="utf-8"))
     print(json.dumps(manifest["stats"], ensure_ascii=False, indent=2))
@@ -125,6 +140,11 @@ def main(argv: list[str] | None = None) -> None:
     u.add_argument("--no-prompt", action="store_true", help="do not give the recogniser a vocabulary hint")
     u.add_argument("--beams", type=int, default=0, help="1 = greedy; >1 = beam search + rerank by meaning (default: built in)")
     u.set_defaults(func=_cmd_understand)
+
+    nm = sub.add_parser("name", help="show or change what you call the assistant (default: Myna)")
+    nm.add_argument("new", nargs="*", help="new name, e.g. Jarvis")
+    nm.add_argument("--reset", action="store_true", help="back to the default name")
+    nm.set_defaults(func=_cmd_name)
 
     args = p.parse_args(argv)
     args.func(args)

@@ -85,6 +85,19 @@ class Bolo:
     beams: int = 1
     rerank: object | None = None
     memory: object | None = None
+    name: str | None = None  # what the user calls the assistant (default: settings, else "Myna")
+
+    def __post_init__(self):
+        from .assistant import get_name
+        from .normalize import Normalizer
+
+        self.name = self.name or get_name()
+        self._to_roman = Normalizer.from_config(self.cfg).to_roman
+
+    def _strip(self, text: str) -> tuple[str, bool]:
+        from .assistant import strip_name
+
+        return strip_name(text, self.name, self._to_roman)
 
     @classmethod
     def load(cls, nlu_path: str = "models/bolo-tiny/phono_views_aug-s0", asr: str | None = None,
@@ -104,14 +117,24 @@ class Bolo:
         asr_model = None
         if asr:
             from .speech_eval import WhisperASR
-            asr_model = WhisperASR(asr, asr_language, prompt=build_prompt(prompt, env))
+            from .assistant import get_name
+
+            p = build_prompt(prompt, env)
+            asr_model = WhisperASR(asr, asr_language, prompt=(get_name() + ", " + p) if p and prompt != p else p)
         from .asr.decode import Rerank
 
         return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env, beams=beams, rerank=Rerank(**RERANK), memory=memory)
 
     def understand(self, text: str, env: Environment | None = None) -> dict:
         t0 = time.perf_counter()
-        raw = self.nlu.predict([" ".join(text.lower().replace("।", " ").split())])[0]
+        clean = lambda s: " ".join(s.lower().replace("।", " ").split())
+        bare, named = self._strip(text)
+        raw = self.nlu.predict([clean(bare)])[0]
+        if named and raw["intent"] == "none":  # the "name" may have been part of the command after all
+            alt = self.nlu.predict([clean(text)])[0]
+            vals = [str(v) for v in (alt.get("slots") or {}).values()]
+            if alt["intent"] != "none" and not any(self._strip(v + " x")[1] for v in vals):  # name must not become a slot
+                raw, named = alt, False
         pred = finalize(raw, self.cfg.schema, self.threshold)
         env = env or self.env
         if env is not None and pred["intent"] != "none":
@@ -124,7 +147,7 @@ class Bolo:
             reason = "not a supported command"
         return {"intent": pred["intent"], "slots": pred["slots"], "confidence": round(float(pred.get("confidence", 1.0)), 4),
                 "abstain": abstain, "reason": reason if abstain else None, "transcript": text,
-                "grounding": pred.get("grounding"), "ms": {"nlu": round(ms, 2)}}
+                "addressed": named, "grounding": pred.get("grounding"), "ms": {"nlu": round(ms, 2)}}
 
     def listen(self, wav_path: str | Path, env: Environment | None = None) -> dict:
         if self.asr is None:
@@ -142,6 +165,8 @@ class Bolo:
             out["ms"]["asr"] = round(asr_ms, 1)
             return out
         hyps = self.asr.nbest(x, beams=self.beams)
+        heard = hyps
+        hyps = [(self._strip(h)[0], sc) for h, sc in hyps]
         asr_ms = (time.perf_counter() - t0) * 1000
         t1 = time.perf_counter()
         if self.memory is not None:
@@ -157,7 +182,7 @@ class Bolo:
         reason = pred.get("abstain_reason") or (pred.get("grounding") or {}).get("abstain")
         return {"intent": pred["intent"], "slots": pred["slots"], "confidence": round(float(pred.get("confidence", 1.0)), 4),
                 "abstain": abstain, "reason": (reason or "not a supported command") if abstain else None,
-                "transcript": text, "alternatives": [h for h, _ in hyps], "grounding": pred.get("grounding"),
+                "transcript": text, "alternatives": [h for h, _ in heard], "grounding": pred.get("grounding"),
                 "ms": {"asr": round(asr_ms, 1), "nlu": round((time.perf_counter() - t1) * 1000, 2)}}
 
     def feedback(self, intent: str, slots: dict | None = None):
