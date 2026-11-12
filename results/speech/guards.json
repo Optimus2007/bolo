@@ -1,0 +1,18 @@
+{
+ "n": 320,
+ "chars_per_speech_second": {
+  "0": 6.75,
+  "0.5": 7.5,
+  "1": 7.9,
+  "5": 10.07,
+  "50": 12.91,
+  "95": 16.45,
+  "99": 17.51,
+  "99.5": 17.99,
+  "100": 19.23
+ },
+ "speech_seconds_min": 0.51,
+ "rate_min": 3.8,
+ "rate_max": 28.8,
+ "rule": "rate_min = 0.5 x 0.5th percentile, rate_max = 1.6 x 99.5th percentile, computer voices only"
+}

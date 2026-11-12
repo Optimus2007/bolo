@@ -103,7 +103,7 @@ class WhisperASR:
                 text = text[len(p):].strip()
         return text
 
-    def nbest(self, wav, beams: int = 5, boost=None) -> list[tuple[str, float]]:
+    def nbest(self, wav, beams: int = 5, boost=None, max_new: int = 48) -> list[tuple[str, float]]:
         """Beam search; returns up to `beams` (text, mean log prob per token) pairs, best first, duplicates merged.
         boost: an optional bonus processor (bolo.asr.decode.TrieBoost) used for ranking only."""
         from .asr.decode import beam_search
@@ -114,7 +114,7 @@ class WhisperASR:
         prefix += [tok.convert_tokens_to_ids(t) for t in ("<|startoftranscript|>", f"<|{self.language or 'en'}|>",
                                                            "<|transcribe|>", "<|notimestamps|>")]
         g = self.model.generation_config
-        hyps = beam_search(self.model, feats, tok, prefix, beams=beams, boost=boost,
+        hyps = beam_search(self.model, feats, tok, prefix, beams=beams, boost=boost, max_new=max_new,
                            suppress=list(g.suppress_tokens or []), begin_suppress=list(g.begin_suppress_tokens or []))
         seen, res = set(), []
         for ids, s in hyps:
@@ -124,9 +124,9 @@ class WhisperASR:
                 res.append((t, float(s)))
         return res
 
-    def __call__(self, wav) -> str:
+    def __call__(self, wav, max_new: int = 64) -> str:
         feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev, self.dtype)
-        kw = {"task": "transcribe", "max_new_tokens": 64}
+        kw = {"task": "transcribe", "max_new_tokens": max_new}
         if self.language:
             kw["language"] = self.language
         if self.prompt_ids is not None:

@@ -176,21 +176,27 @@ class Bolo:
             raise RuntimeError("no ASR model loaded: Bolo.load(asr='models/bolo-whisper') or a Whisper model id")
         from .audio.augment import SR, read_wav, resample
 
+        from .asr.guards import MIN_SPEECH, max_tokens, rate_ok, speech_seconds
+
         x, sr = read_wav(str(wav_path))
         x = resample(x, sr, SR)
         t0 = time.perf_counter()
         env = env or self.env
+        sec = speech_seconds(x)
+        if sec < MIN_SPEECH:
+            return self._didnt_catch("", "no speech heard")
+        ok = lambda h: not looped(h) and rate_ok(h, sec)
         if self.beams <= 1:
-            text = self.asr(x)
+            text = self.asr(x, max_new=max_tokens(sec))
             asr_ms = (time.perf_counter() - t0) * 1000
-            out = self._didnt_catch(text) if looped(text) else self.understand(text, env)
+            out = self.understand(text, env) if ok(text) else self._didnt_catch(text)
             out["ms"]["asr"] = round(asr_ms, 1)
             return out
-        hyps = self.asr.nbest(x, beams=self.beams)
+        hyps = self.asr.nbest(x, beams=self.beams, max_new=max_tokens(sec))
         heard = hyps
-        hyps = [(self._strip(h)[0], sc) for h, sc in hyps if not looped(h)]
+        hyps = [(self._strip(h)[0], sc) for h, sc in hyps if ok(h)]
         if not hyps:
-            out = self._didnt_catch(heard[0][0])
+            out = self._didnt_catch(heard[0][0] if heard else "")
             out["ms"]["asr"] = round((time.perf_counter() - t0) * 1000, 1)
             return out
         asr_ms = (time.perf_counter() - t0) * 1000
@@ -211,9 +217,9 @@ class Bolo:
                 "transcript": text, "alternatives": [h for h, _ in heard], "grounding": pred.get("grounding"),
                 "ms": {"asr": round(asr_ms, 1), "nlu": round((time.perf_counter() - t1) * 1000, 2)}}
 
-    def _didnt_catch(self, text: str) -> dict:
+    def _didnt_catch(self, text: str, why: str = "could not hear that clearly") -> dict:
         return {"intent": "none", "slots": {}, "confidence": 0.0, "abstain": True,
-                "reason": "could not hear that clearly (the recogniser got stuck repeating itself)", "transcript": text,
+                "reason": why, "transcript": text,
                 "addressed": False, "grounding": None, "ms": {"nlu": 0.0}}
 
     def feedback(self, intent: str, slots: dict | None = None):
