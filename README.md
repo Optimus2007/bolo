@@ -89,7 +89,8 @@ grounding step pick the one that makes the most sense as a command on this machi
 That is 23 commands fixed and 3 broken, a gain of 8.3 points (95% interval 4.2 to 12.5), and it closes about 40% of
 the distance to the ceiling. It costs about 70 ms. Pass `beams=1` for the old, faster behaviour.
 We also tried boosting known app and folder names during decoding; it did not help on top of the vocabulary hint, so
-it is off. Details: `results/SPEECH_RESULTS.md`, section 5, and the full story of what we tried, with the research behind it, in `docs/research/IMPROVING_SPEECH_ACCURACY.md`.
+it is off. Details: `results/SPEECH_RESULTS.md`, section 5, and the full story of what we tried, with the research behind it, in `docs/research/IMPROVING_SPEECH_ACCURACY.md`. What the first real-voice test showed, and the plan it led to:
+`docs/research/REAL_VOICE_ACCURACY.md`.
 
 On 977 synthetic test clips in voices it never heard in training, Bolo Sun gets 10.6% word errors against 29.5% for
 Swift. These clips and the macOS voices are still synthetic.
