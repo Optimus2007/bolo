@@ -10,7 +10,7 @@ Everything runs on your own laptop or phone. No audio leaves the device, nothing
 
 ```
 "bhai rust learning folder mein terminal kholo"
-        │  Bolo Sun, the speech recogniser (142 MB)          about 100 ms on an M2
+        │  Bolo Sun, the speech recogniser (142 MB)          about 180 ms on an M2 (5 guesses)
         ▼
 "bhai rust learning folder mein terminal kholo"
         │  Bolo Tiny (0.8 MB, built from scratch)            about 1 ms
@@ -74,6 +74,22 @@ Bolo Tiny ends up within a point of a model a thousand times its size once groun
 | Plain Whisper base | 120.7% | 38.8% | 0% | 131 ms |
 | Hinglish Whisper (Oriserve Swift) | 28.8% | 62.5% | 0% | 129 ms |
 | **Bolo Sun (our fine tune)** | **13.3%** | **82.5%** | **0%** | **127 ms (100 ms in float16)** |
+
+**Smarter decoding** (240 different commands, also macOS voices, kept apart from everything we tuned on)
+
+Instead of taking Bolo Sun's single best guess, Bolo now keeps its five best guesses and lets Bolo Tiny and the
+grounding step pick the one that makes the most sense as a command on this machine.
+
+| Decoding | Word errors | Correct action | Asks instead of acting when it should not | Time per command |
+|---|---|---|---|---|
+| Perfect transcript (the ceiling) | 0% | 93.8% | | |
+| One guess (before) | 16.0% | 73.8% | 17.4% | 107 ms |
+| **Five guesses, picked by meaning (now the default)** | **12.5%** | **82.1%** | **7.0%** | **177 ms** |
+
+That is 23 commands fixed and 3 broken, a gain of 8.3 points (95% interval 4.2 to 12.5), and it closes about 40% of
+the distance to the ceiling. It costs about 70 ms. Pass `beams=1` for the old, faster behaviour.
+We also tried boosting known app and folder names during decoding; it did not help on top of the vocabulary hint, so
+it is off. Details: `results/SPEECH_RESULTS.md`, section 5.
 
 On 977 synthetic test clips in voices it never heard in training, Bolo Sun gets 10.6% word errors against 29.5% for
 Swift. These clips and the macOS voices are still synthetic.

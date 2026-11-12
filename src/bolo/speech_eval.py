@@ -96,6 +96,34 @@ class WhisperASR:
         self.torch = torch
         self.prompt_ids = self.proc.get_prompt_ids(prompt, return_tensors="pt").to(self.dev) if prompt else None
 
+    def _strip_prompt(self, text: str) -> str:
+        if self.prompt_ids is not None:  # some transformers versions return the prompt text too
+            p = self.proc.decode(self.prompt_ids, skip_special_tokens=True).strip()
+            if p and text.startswith(p):
+                text = text[len(p):].strip()
+        return text
+
+    def nbest(self, wav, beams: int = 5, boost=None) -> list[tuple[str, float]]:
+        """Beam search; returns up to `beams` (text, mean log prob per token) pairs, best first, duplicates merged.
+        boost: an optional bonus processor (bolo.asr.decode.TrieBoost) used for ranking only."""
+        from .asr.decode import beam_search
+
+        tok = self.proc.tokenizer
+        feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev, self.dtype)
+        prefix = self.prompt_ids.tolist() if self.prompt_ids is not None else []
+        prefix += [tok.convert_tokens_to_ids(t) for t in ("<|startoftranscript|>", f"<|{self.language or 'en'}|>",
+                                                           "<|transcribe|>", "<|notimestamps|>")]
+        g = self.model.generation_config
+        hyps = beam_search(self.model, feats, tok, prefix, beams=beams, boost=boost,
+                           suppress=list(g.suppress_tokens or []), begin_suppress=list(g.begin_suppress_tokens or []))
+        seen, res = set(), []
+        for ids, s in hyps:
+            t = tok.decode(ids, skip_special_tokens=True).strip()
+            if t.lower() not in seen:  # case variants are the same command
+                seen.add(t.lower())
+                res.append((t, float(s)))
+        return res
+
     def __call__(self, wav) -> str:
         feats = self.proc.feature_extractor([wav], sampling_rate=SR, return_tensors="pt").input_features.to(self.dev, self.dtype)
         kw = {"task": "transcribe", "max_new_tokens": 64}

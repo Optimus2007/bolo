@@ -1,0 +1,64 @@
+{
+ "chosen_on_dev": "beam5_boost0_rerank",
+ "settings": {
+  "w_nlu": 0.5,
+  "w_ground": 2,
+  "w_none": 1,
+  "temp": 1.0
+ },
+ "greedy (current default)": {
+  "wer": 0.16,
+  "phonetic_wer": 0.1474,
+  "e2e": 0.7375,
+  "wrong_action": 0.1083,
+  "acted_on_none": 0.037,
+  "over_abstain": 0.1737,
+  "nbest_oracle": 0.7375,
+  "ms_median": 106.8,
+  "ms_p90": 119.6
+ },
+ "beam5": {
+  "wer": 0.1497,
+  "phonetic_wer": 0.1371,
+  "e2e": 0.75,
+  "wrong_action": 0.1083,
+  "acted_on_none": 0.037,
+  "over_abstain": 0.1596,
+  "nbest_oracle": 0.8833,
+  "ms_median": 176.8,
+  "ms_p90": 220.9
+ },
+ "beam5 + rerank": {
+  "wer": 0.1253,
+  "phonetic_wer": 0.1103,
+  "e2e": 0.8208,
+  "wrong_action": 0.1167,
+  "acted_on_none": 0.037,
+  "over_abstain": 0.0704,
+  "nbest_oracle": 0.8833,
+  "ms_median": 176.8,
+  "ms_p90": 220.9
+ },
+ "best boost top1 (beam5_boost0_top1)": {
+  "wer": 0.1497,
+  "phonetic_wer": 0.1371,
+  "e2e": 0.75,
+  "wrong_action": 0.1083,
+  "acted_on_none": 0.037,
+  "over_abstain": 0.1596,
+  "nbest_oracle": 0.8833,
+  "ms_median": 176.8,
+  "ms_p90": 220.9
+ },
+ "chosen (beam5_boost0_rerank)": {
+  "wer": 0.1253,
+  "phonetic_wer": 0.1103,
+  "e2e": 0.8208,
+  "wrong_action": 0.1167,
+  "acted_on_none": 0.037,
+  "over_abstain": 0.0704,
+  "nbest_oracle": 0.8833,
+  "ms_median": 176.8,
+  "ms_p90": 220.9
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "decoding": "beam5_boost0_rerank",
+ "start_weights": {
+  "w_nlu": 0.5,
+  "w_ground": 2,
+  "w_none": 1,
+  "temp": 1.0
+ },
+ "static": {
+  "pass1": {
+   "e2e": 0.8167,
+   "wrong_action": 0.1458
+  },
+  "pass2": {
+   "e2e": 0.8083,
+   "wrong_action": 0.1458
+  },
+  "final_w": {
+   "asr": 1.0,
+   "nlu": 0.5,
+   "ground": 2,
+   "none": -1,
+   "prior": 0.0
+  },
+  "aliases_learned": 0
+ },
+ "aliases": {
+  "pass1": {
+   "e2e": 0.8167,
+   "wrong_action": 0.1458
+  },
+  "pass2": {
+   "e2e": 0.8167,
+   "wrong_action": 0.1375
+  },
+  "final_w": {
+   "asr": 1.0,
+   "nlu": 0.5,
+   "ground": 2,
+   "none": -1,
+   "prior": 0.0
+  },
+  "aliases_learned": 49
+ },
+ "bandit": {
+  "pass1": {
+   "e2e": 0.8208,
+   "wrong_action": 0.1417
+  },
+  "pass2": {
+   "e2e": 0.8083,
+   "wrong_action": 0.1458
+  },
+  "final_w": {
+   "asr": 1.0,
+   "nlu": 0.477,
+   "ground": 2.844,
+   "none": -0.562,
+   "prior": 1.054
+  },
+  "aliases_learned": 0
+ },
+ "adaptive": {
+  "pass1": {
+   "e2e": 0.8208,
+   "wrong_action": 0.1417
+  },
+  "pass2": {
+   "e2e": 0.8125,
+   "wrong_action": 0.1417
+  },
+  "final_w": {
+   "asr": 1.0,
+   "nlu": 0.472,
+   "ground": 2.898,
+   "none": -0.545,
+   "prior": 1.026
+  },
+  "aliases_learned": 55
+ }
+}

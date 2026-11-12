@@ -59,6 +59,8 @@ def scan_mac(home: Path | str | None = None, max_depth: int = 2, max_entries: in
     return Environment(uniq(folders), uniq(files), uniq(apps), [])
 
 
+BEAMS = 5  # beam search + rerank: +8.3 points correct actions on held-out macOS voices (results/speech/decoding_test.json)
+RERANK = {"w_nlu": 0.5, "w_ground": 2.0, "w_none": 1.0}
 COMMAND_WORDS = "terminal, claude code, folder, volume, brightness, battery, wifi, bluetooth"
 
 
@@ -80,14 +82,21 @@ class Bolo:
     asr: object | None = None
     env: Environment | None = None
     threshold: float = 0.0
+    beams: int = 1
+    rerank: object | None = None
+    memory: object | None = None
 
     @classmethod
     def load(cls, nlu_path: str = "models/bolo-tiny/phono_views_aug-s0", asr: str | None = None,
-             asr_language: str = "en", env: Environment | None = None, prompt: str | None = "commands") -> "Bolo":
+             asr_language: str = "en", env: Environment | None = None, prompt: str | None = "commands",
+             beams: int = BEAMS, memory=None) -> "Bolo":
         """asr: a Whisper model id or local dir (e.g. "models/bolo-whisper-fp16"); None = text only.
         prompt: vocabulary hint for the recogniser. "commands" (default) = core command words; "commands+apps" also
         adds the app names found in `env` (helps rare names); None = no prompt; any other string is used as is.
-        Measured on the macOS voice set: WER 13.3% -> 12.4% ("commands") / 11.2% ("commands+apps"); see results/."""
+        Measured on the macOS voice set: WER 13.3% -> 12.4% ("commands") / 11.2% ("commands+apps"); see results/.
+        beams: 1 = greedy (fastest); >1 = beam search, and the N best transcripts are reranked by what they mean
+        (NLU confidence + grounding), see bolo.asr.decode. memory: an optional bolo.adapt.Memory that learns
+        from `feedback()`."""
         from .models.tiny import BoloTiny
 
         cfg = load_config()
@@ -96,7 +105,9 @@ class Bolo:
         if asr:
             from .speech_eval import WhisperASR
             asr_model = WhisperASR(asr, asr_language, prompt=build_prompt(prompt, env))
-        return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env)
+        from .asr.decode import Rerank
+
+        return cls(nlu=nlu, cfg=cfg, asr=asr_model, env=env, beams=beams, rerank=Rerank(**RERANK), memory=memory)
 
     def understand(self, text: str, env: Environment | None = None) -> dict:
         t0 = time.perf_counter()
@@ -123,8 +134,35 @@ class Bolo:
         x, sr = read_wav(str(wav_path))
         x = resample(x, sr, SR)
         t0 = time.perf_counter()
-        text = self.asr(x)
+        env = env or self.env
+        if self.beams <= 1:
+            text = self.asr(x)
+            asr_ms = (time.perf_counter() - t0) * 1000
+            out = self.understand(text, env)
+            out["ms"]["asr"] = round(asr_ms, 1)
+            return out
+        hyps = self.asr.nbest(x, beams=self.beams)
         asr_ms = (time.perf_counter() - t0) * 1000
-        out = self.understand(text, env)
-        out["ms"]["asr"] = round(asr_ms, 1)
-        return out
+        t1 = time.perf_counter()
+        if self.memory is not None:
+            top, cands = self.memory.choose(hyps, self.nlu, self.cfg, env)
+            pred, text = top["pred"], top["text"]
+            self._last = cands, top
+        else:
+            from .asr.decode import choose
+
+            c = choose(hyps, self.nlu, self.cfg, env, self.rerank)
+            pred, text = c.pred, c.text
+        abstain = pred["intent"] == "none"
+        reason = pred.get("abstain_reason") or (pred.get("grounding") or {}).get("abstain")
+        return {"intent": pred["intent"], "slots": pred["slots"], "confidence": round(float(pred.get("confidence", 1.0)), 4),
+                "abstain": abstain, "reason": (reason or "not a supported command") if abstain else None,
+                "transcript": text, "alternatives": [h for h, _ in hyps], "grounding": pred.get("grounding"),
+                "ms": {"asr": round(asr_ms, 1), "nlu": round((time.perf_counter() - t1) * 1000, 2)}}
+
+    def feedback(self, intent: str, slots: dict | None = None):
+        """Tell Bolo what the last `listen()` should have done (or confirm it). Needs memory=Memory()."""
+        if self.memory is None or not getattr(self, "_last", None):
+            return
+        cands, top = self._last
+        self.memory.feedback(cands, {"intent": intent, "slots": slots or {}}, top)

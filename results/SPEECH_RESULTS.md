@@ -88,14 +88,64 @@ the default. One detail is worth noting: freezing the encoder still loses 2 poin
 the forgetting sits in the decoder (spelling style and vocabulary), not in the acoustic encoder. A future fix would
 mix some general Hinglish text or speech into training, with a licence that allows it.
 
+## 5. Smarter decoding: keep five guesses and choose by meaning
+
+Plain decoding keeps one transcript. With beam search Bolo Sun returns its five best transcripts; each is read by Bolo
+Tiny and grounded, and the final action maximises
+
+    S = mean log p(transcript)  +  0.5 * log p_nlu(intent)  +  2 * grounding score  -  1 * [abstains]
+
+with hypotheses that lead to the same action pooling their probability (`src/bolo/asr/decode.py`). The three weights
+were picked on the 80 clip macOS set and then checked once on 240 new commands from the test split, read by the same
+four macOS voices (`scripts/make_say_eval.py --heldout 240`, `scripts/eval_decoding.py`). All runs use the short
+command vocabulary prompt.
+
+| Held out set (240) | WER | Phonetic WER | Correct action | Acted on a non command | Over abstain | Right action in top 5 | Median ms | p90 ms |
+|---|---|---|---|---|---|---|---|---|
+| perfect transcript | 0 | 0 | 93.8% | | | | | |
+| greedy (before) | 16.0% | 14.7% | 73.8% | 3.7% | 17.4% | 73.8% | 107 | 120 |
+| beam 5, top guess | 15.0% | 13.7% | 75.0% | 3.7% | 16.0% | 88.3% | 177 | 221 |
+| **beam 5, reranked** | **12.5%** | **11.0%** | **82.1%** | **3.7%** | **7.0%** | 88.3% | 177 | 221 |
+
+Paired against greedy on the same clips: 23 commands fixed, 3 broken, gain 8.3 points, bootstrap 95% interval 4.2 to
+12.5 points. Most of the gain is fewer needless abstentions: the right reading was often the second or third guess, and
+only grounding could tell. On the tuning set the same settings gave 86.3% to 91.3%.
+
+Hotword boosting (a bonus of 1 to 4 for tokens that continue a known app, folder, file or contact name, a prefix tree
+over token ids) did not help on top of the vocabulary prompt: the best boosted setting tied the unboosted one after
+reranking, and strong bonuses hurt (tuning set, beam 5, bonus 4: 80.0% top guess against 87.5%). It stays in the code, off.
+
+Beam 5 is now the default in `Bolo.listen`. The extra 70 ms keeps the median under 200 ms on an M2; `beams=1` restores
+greedy decoding.
+
+## 6. Learning from use (simulation)
+
+`bolo.adapt.Memory` learns from feedback, text only, never audio: aliases for misheard names ("doctor" meant docker),
+a usage prior, and the reranking weights by an online policy gradient step (a contextual bandit; see the module
+docstring for the maths). We simulated one user: the 240 held out commands, then the same commands again in other
+voices, acting first and learning from the correct answer after each one (`scripts/eval_adapt.py`).
+
+| | First pass | Second pass |
+|---|---|---|
+| no learning | 81.7% | 80.8% |
+| aliases only | 81.7% | 81.7% |
+| weights only | 82.1% | 80.8% |
+| everything | 82.1% | 81.3% |
+
+Honest reading: no gain beyond noise in this simulation. A first version made things worse (72.1% on the second pass)
+because it memorised numbers and fixed choices (volume 80 meant 85) as if they were mishearings; aliases are now limited
+to name slots and to pairs that sound alike. This simulation is weak evidence either way, since synthetic voices do not
+repeat a person's habits. Memory stays opt in (`Bolo.load(..., memory=Memory())`, then `bolo.feedback(...)`) until it
+can be tested by someone using it.
+
 ## What we take from this
 
 1. **Fine tuning on synthetic command speech works, and it carries over to a synthesiser it never heard.** Word errors
    fell by about 55% to 65% and correct actions rose by 20 points on the macOS voices.
 2. **There is a real trade off.** The specialised model is slightly worse on long general speech. For a command assistant
    that is the right trade, so Bolo Sun is the default and the blend is kept as an option.
-3. **Speech is still the bottleneck.** Even with Bolo Sun, about 12 points of action accuracy are lost between speech and
-   a perfect transcript. Remaining errors are mostly rare names and English words inside Hindi sentences
+3. **Speech is still the bottleneck, but less so.** With one guess, 12 to 20 points of action accuracy are lost between
+   speech and a perfect transcript; choosing among five guesses by meaning wins back about 40% of that. Remaining errors are mostly rare names and English words inside Hindi sentences
    (docker heard as "doctor", raspberry pi as "rasberry py").
 4. **Plain Whisper is not usable for this.** It produces Devanagari, loops on itself and often invents words.
 5. **The real test is still missing.** None of the numbers above come from people saying commands. That needs the
