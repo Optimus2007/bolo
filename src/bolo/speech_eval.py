@@ -164,7 +164,8 @@ def nlu_models(cfg, names: list[str]):
             yield n, RuleBaseline(cfg), 0.0
         elif n == "tiny":
             from .models.tiny import BoloTiny
-            yield n, BoloTiny.load(cfg, "models/bolo-tiny/phono_views_aug-s0"), 0.0
+            from .pipeline import DEFAULT_NLU
+            yield n, BoloTiny.load(cfg, DEFAULT_NLU), 0.0
         elif n == "muril":
             from .models.encoder import EncoderTagger
             thr = json.loads(Path("results/text/muril_aug-s0.json").read_text())["threshold"]

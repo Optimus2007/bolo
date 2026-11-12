@@ -106,6 +106,19 @@ Swift. These clips and the macOS voices are still synthetic.
 This one is a fair warning: on long general speech Bolo Sun is a little worse than the model it started from, because it
 specialised in commands. A 50/50 weight blend of the two (`scripts/wise_ft.py`) gets most of that back if you need it.
 
+**First real voice** (one person, 55 commands on a laptop mic, quiet room; the speech model has seen 9 of the 20 commands)
+
+| Bolo Tiny trained on | Correct action (mean of 3 seeds) | Wrong action | Asks instead of acting |
+|---|---|---|---|
+| Clean text only | 60.6% | 19.4% | 21.1% |
+| **Clean text + what Bolo Sun actually heard (now the default)** | **72.1%** | **13.9%** | **14.7%** |
+
+The second model is also trained on Bolo Sun's own transcripts of synthetic clips, mistakes included, so it learns
+that "premium" can mean "previous". Across the 3 seeds it fixed 21 commands and broke 2. It is one speaker and 55 clips,
+so the 95% interval on 72% is roughly 59 to 82%: a clear direction, not a precise number. On 240 computer-voice
+commands it is unchanged (83.8% vs 83.6%), and on typed text it is no worse (exact match 87.4% vs 86.2%, false
+actions 5.2% vs 6.1%). Details: `results/speech/nlu_asr_noised.json`.
+
 The full reports with every metric and caveat live in `results/`.
 
 ## Quick start

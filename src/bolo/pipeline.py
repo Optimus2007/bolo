@@ -94,6 +94,10 @@ def build_prompt(kind: str | None, env: Environment | None = None, max_chars: in
     return kind
 
 
+# Bolo Tiny trained on clean text + what Bolo Sun actually heard (step 5, see PROGRESS.md 2026-11-12)
+DEFAULT_NLU = "models/bolo-tiny/phono_views_aug_asr-s0"
+
+
 @dataclass
 class Bolo:
     nlu: object
@@ -119,7 +123,7 @@ class Bolo:
         return strip_name(text, self.name, self._to_roman)
 
     @classmethod
-    def load(cls, nlu_path: str = "models/bolo-tiny/phono_views_aug-s0", asr: str | None = None,
+    def load(cls, nlu_path: str = DEFAULT_NLU, asr: str | None = None,
              asr_language: str = "en", env: Environment | None = None, prompt: str | None = "commands",
              beams: int = BEAMS, memory=None) -> "Bolo":
         """asr: a Whisper model id or local dir (e.g. "models/bolo-whisper-fp16"); None = text only.

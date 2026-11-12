@@ -14,7 +14,7 @@ from bolo.models.export import export_onnx, padded_ids
 from bolo.models.tagging import decode
 from bolo.models.tiny import BoloTiny
 
-src = sys.argv[1] if len(sys.argv) > 1 else "models/bolo-tiny/phono_views_aug-s0"
+src = sys.argv[1] if len(sys.argv) > 1 else "models/bolo-tiny/phono_views_aug_asr-s0"
 cfg = load_config()
 tiny = BoloTiny.load(cfg, src)
 out = Path("models/export/bolo-tiny")

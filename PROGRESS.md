@@ -156,10 +156,18 @@ Models not in git (regenerate or re-download): models/bolo-whisper (Kaggle outpu
   "X ka number batao", "file kholo"); no cut-off can catch them. Fix later with more varied near-miss negatives.
   Tried: more weight on bare "terminal kholo" templates: no change over 3 seeds (EM 85.5%, FAR 6.7%), reverted.
 - 2026-11-12: Assistant name is user-settable (`bolo name`, default Myna); the pipeline strips a spoken address.
-- 2026-11-12 (evening, in progress): step 5 of docs/research/REAL_VOICE_ACCURACY.md. `scripts/make_asr_noised.py` made
-  data/text/v1/train_asr.jsonl from Bolo Sun 5-beam transcripts of 2193 partial-download TTS train clips (slots re-located
-  by sound; rows with unfound slots dropped). Variant `phono_views_aug_asr` in scripts/train_tiny.py. To finish: train
-  seeds 0-2 of both phono_views_aug and phono_views_aug_asr, evaluate each with
-  `scripts/eval_human.py --configs bolo_sun_beam5 --nlu <model>` on recordings/ (human, locked test) and
-  data/say_test_v1 (computer voices), plus the clean text test; keep only if it helps on both without more false actions.
-  Step 4 (word-level sound repair) dropped: real errors are closer to other words than to the intended ones.
+- 2026-11-12: Step 5 of docs/research/REAL_VOICE_ACCURACY.md done. `phono_views_aug_asr` = Bolo Tiny trained on clean
+  text + 9000 rows of Bolo Sun 5-beam transcripts of the 3192 TTS train clips (`scripts/make_asr_noised.py`, slots
+  re-located by sound, 1263 rows dropped). 3 seeds each, paired (`scripts/compare_nlu.py`):
+  human (1 speaker, 55, locked test): 60.6% -> 72.1% correct action; per seed fixed/broken 5/0 (p 0.06), 8/2 (p 0.11),
+  8/0 (p 0.008). macOS voices (240): 83.6% -> 83.8%, acted on none 7.9% -> 9.5% (of 21, i.e. ~0.3 clips). Text test:
+  EM 86.2 -> 87.4%, FAR 6.1 -> 5.2%. Kept: it is the new default (`pipeline.DEFAULT_NLU`, seed 0, chosen by convention,
+  not by its human score). Step 4 (word-level sound repair) dropped: real errors are closer to other words.
+- 2026-11-12: data/say_test_v1 labels fixed: 6 of 27 "none" clips were real commands under the 20-command schema
+  (screen lock, bluetooth on x2, screenshot, close system settings / activity monitor); labelled before those commands
+  existed. Backup of the old labels: manifest.v0labels.jsonl. Real false actions there are ~2/21, not 7-9/27. Earlier
+  macOS-voice numbers for the 20-command set (82.5%) used the old labels.
+- 2026-11-12: Bolo Tiny training could crash when augmentation pushed a 40-word row to 41 tags; tags are now cut like words.
+- 2026-11-12: Speech v1 retrain prepared: real RIRs (OpenSLR 28, downloaded on Kaggle), ~3% noise-only clips with empty
+  targets, 4413 TTS clips (20 commands) as private Kaggle dataset bolo-tts-v1 (`scripts/make_tts_dataset.py`,
+  `kaggle_push.py ttsdata`).

@@ -1,0 +1,82 @@
+{
+ "human": {
+  "per_seed": [
+   {
+    "seed": "0",
+    "fixed": 5,
+    "broken": 0,
+    "p": 0.0625
+   },
+   {
+    "seed": "1",
+    "fixed": 8,
+    "broken": 2,
+    "p": 0.1094
+   },
+   {
+    "seed": "2",
+    "fixed": 8,
+    "broken": 0,
+    "p": 0.0078
+   }
+  ],
+  "mean": {
+   "phono_views_aug": {
+    "right": 0.6061,
+    "wrong_action": 0.1939,
+    "over_abstain": 0.2115,
+    "acted_on_none": 0.2222,
+    "n": 55,
+    "n_none": 3
+   },
+   "phono_views_aug_asr": {
+    "right": 0.7212,
+    "wrong_action": 0.1394,
+    "over_abstain": 0.1474,
+    "acted_on_none": 0.0,
+    "n": 55,
+    "n_none": 3
+   }
+  }
+ },
+ "say": {
+  "per_seed": [
+   {
+    "seed": "0",
+    "fixed": 9,
+    "broken": 9,
+    "p": 1.0
+   },
+   {
+    "seed": "1",
+    "fixed": 7,
+    "broken": 6,
+    "p": 1.0
+   },
+   {
+    "seed": "2",
+    "fixed": 12,
+    "broken": 12,
+    "p": 1.0
+   }
+  ],
+  "mean": {
+   "phono_views_aug": {
+    "right": 0.8361,
+    "wrong_action": 0.1,
+    "over_abstain": 0.07,
+    "acted_on_none": 0.0794,
+    "n": 240,
+    "n_none": 21
+   },
+   "phono_views_aug_asr": {
+    "right": 0.8375,
+    "wrong_action": 0.1,
+    "over_abstain": 0.0685,
+    "acted_on_none": 0.0952,
+    "n": 240,
+    "n_none": 21
+   }
+  }
+ }
+}

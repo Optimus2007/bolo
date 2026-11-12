@@ -252,6 +252,7 @@ class BoloTiny:
                 y_int = torch.tensor([y for _, _, y, _ in items])
                 y_tag = torch.full(tl.shape[:2], -100, dtype=torch.long)
                 for b, (_, t, _, _) in enumerate(items):
+                    t = t[: y_tag.shape[1]]  # augmentation can push a max-length row one word over; words are cut the same way
                     y_tag[b, :len(t)] = torch.tensor(t)
                 loss = F.cross_entropy(il, y_int) + F.cross_entropy(tl.reshape(-1, tl.shape[-1]),
                                                                     y_tag.reshape(-1), ignore_index=-100)

@@ -160,7 +160,8 @@ on-the-fly noise/reverb/speed/phone-band augmentation (`bolo.audio.augment`).
 Download both into `models/bolo-whisper/` and `results/asr/` locally (models/ is gitignored).
 """),
     ("code", FIND_BUNDLE + r'''
-tm = glob.glob("/kaggle/input/**/bolo-tts/manifest.jsonl", recursive=True) + glob.glob(WORK + "/bolo-tts/manifest.jsonl")
+tm = (glob.glob("/kaggle/input/**/bolo-tts-v1/**/manifest.jsonl", recursive=True)
+      + glob.glob("/kaggle/input/**/bolo-tts/manifest.jsonl", recursive=True) + glob.glob(WORK + "/bolo-tts/manifest.jsonl"))
 assert tm, "add the bolo-tts-v1 dataset (or notebook 01's output) as an input"
 TTS_MAN = tm[0]
 print("tts manifest:", TTS_MAN)

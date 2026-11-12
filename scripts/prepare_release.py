@@ -55,7 +55,7 @@ def bolo_tiny():
     import torch
     from safetensors.torch import save_file
 
-    src = ROOT / "models/bolo-tiny/phono_views_aug-s0"
+    src = ROOT / "models/bolo-tiny/phono_views_aug_asr-s0"
     d = OUT / "bolo-tiny"
     shutil.rmtree(d, ignore_errors=True)
     d.mkdir(parents=True)
