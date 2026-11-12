@@ -57,6 +57,13 @@
    "style": "a bright, excited, highly expressive voice, slightly high pitched and a bit fast, like revealing a surprise"
   },
   {
+   "id": "n03b",
+   "scene": "rename",
+   "voice": "narrator",
+   "text": "Not a fan of the name? Give it your own. Myna is just the default.",
+   "style": "a playful, teasing, highly expressive voice, slightly high pitched and a bit fast"
+  },
+  {
    "id": "a03",
    "scene": "listen",
    "voice": "aarav",

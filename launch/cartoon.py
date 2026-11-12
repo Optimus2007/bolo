@@ -526,8 +526,8 @@ def scene_room(img, t, b):
         mood, face = "sad", min(1.0, since("n02", t) * 1.5) * (1 - ease((since("n02", t) - b["dur"] + 0.4) * 2))
     if sid in ("popup",):
         mood, look = "surprised", (0.8, 0.2)
-    if sid in ("listen", "pipeline", "unsure", "unsure2", "offline"):
-        mood, look = ("happy" if sid in ("pipeline", "offline") else "neutral"), (0.8, 0.3)
+    if sid in ("listen", "pipeline", "unsure", "unsure2", "offline", "rename"):
+        mood, look = ("happy" if sid in ("pipeline", "offline", "rename") else "neutral"), (0.8, 0.3)
     if sid == "sunrise":
         mood, stretch = "happy", ease(since("n09", t) / 1.5) * (1 - ease((since("n09", t) - 3) / 1.0))
     aarav(img, t, mood, look, talk(t), facepalm=face, stretch=stretch)
@@ -587,6 +587,29 @@ def scene_room(img, t, b):
         k = ease((t - BY["a04"]["start"] - BY["a04"]["dur"] * 0.7) / 0.3)
         bubble(img, (1140, 200, 1720, 380), cam(BOLO_HOME[0] + 30, BOLO_HOME[1] - 70), "Kaun sa folder? Naam bata do.",
                40, k, border=TEAL_D, fill=(230, 252, 249))
+    if sid == "rename":
+        names = ["Myna", "Jarvis", "Chotu", "Friday", "Myna"]
+        q = min(len(names) - 1, int(local(b, t) * len(names)))
+        k = ease((t - b["start"] - q * b["dur"] / len(names)) / 0.25)
+        bx, by = cam(BOLO_HOME[0], BOLO_HOME[1])
+        layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        d = ImageDraw.Draw(layer)
+        nm = names[q]
+        f = font(46, weight=800)
+        tw = d.textlength(nm, font=f)
+        s = 0.85 + 0.15 * back_out(k)
+        w2, h2 = (tw / 2 + 36) * s, 40 * s
+        ty = by - 215
+        rr(d, [bx - w2, ty - h2, bx + w2, ty + h2], h2, fill=PAPER, outline=TEAL_D, width=5)
+        d.polygon([(bx - 14, ty + h2 - 2), (bx + 14, ty + h2 - 2), (bx, ty + h2 + 18)], fill=TEAL_D)
+        d.text((bx, ty), nm, font=f, fill=INK, anchor="mm")
+        cmd = "" if q == 0 else "$ bolo name " + (nm if q < len(names) - 1 else "--reset")
+        cf = font(30, mono=True)
+        cw = d.textlength(cmd, font=cf)
+        if cmd:
+            rr(d, [bx - cw / 2 - 22, ty - 130, bx + cw / 2 + 22, ty - 76], 14, fill=(20, 24, 36, 235))
+            d.text((bx, ty - 103), cmd, font=cf, fill=TEAL, anchor="mm")
+        img.alpha_composite(layer)
     if sid == "offline":
         p = since("n07", t)
         dim(img, 0.25 * ease(p / 0.4))
