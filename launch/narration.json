@@ -1,0 +1,64 @@
+{
+ "note": "Launch video narration. Every number must match results/. {SWIFT} and {HUMAN} are filled in after the real voice test.",
+ "voices": {
+  "narrator": "Mary speaks in a warm, clear, confident voice at a moderate pace, with very clear audio and no background noise.",
+  "hinglish": "Divya speaks in a friendly, natural voice at a moderate pace, with very clear audio and no background noise."
+ },
+ "lines": [
+  {
+   "id": "01_hook",
+   "voice": "hinglish",
+   "text": "docker चालू करो. volume चालीस पे कर दो."
+  },
+  {
+   "id": "02_problem",
+   "voice": "narrator",
+   "text": "This is how millions of people in India actually talk to their computers. Hindi and English, mixed in one sentence. Most voice tools get lost."
+  },
+  {
+   "id": "03_intro",
+   "voice": "narrator",
+   "text": "Bolo is a small, open toolkit that understands Hinglish voice commands. It runs entirely on your own laptop. No internet, no cloud, and it costs nothing."
+  },
+  {
+   "id": "04_sun",
+   "voice": "narrator",
+   "text": "First, Bolo Sun, a speech model of about one hundred and forty megabytes, writes down what you said."
+  },
+  {
+   "id": "05_tiny",
+   "voice": "narrator",
+   "text": "Then Bolo Tiny, smaller than one megabyte, works out what you want, and which folder, app, or contact you mean."
+  },
+  {
+   "id": "06_ground",
+   "voice": "narrator",
+   "text": "Finally, Bolo checks your machine. Does that folder really exist? If it is not sure, it does not guess. It asks."
+  },
+  {
+   "id": "07_demo",
+   "voice": "narrator",
+   "text": "Here it is, running on a MacBook Air."
+  },
+  {
+   "id": "08_numbers",
+   "voice": "narrator",
+   "text": "On two hundred and forty test commands, spoken in computer voices it never trained on, Bolo picked the right action eighty two percent of the time. The Hinglish speech model it started from got {SWIFT} percent on its own, and {SWIFTR} percent even with Bolo's smarter decoding."
+  },
+  {
+   "id": "09_human",
+   "voice": "narrator",
+   "text": "{HUMAN}"
+  },
+  {
+   "id": "10_limits",
+   "voice": "narrator",
+   "text": "It is an early preview. It has been tested on only a few real voices, and on long, general speech it is a little worse than the model it started from. We would rather tell you that up front."
+  },
+  {
+   "id": "11_close",
+   "voice": "narrator",
+   "text": "Bolo. Open source, and free. Try it, and tell us where it fails."
+  }
+ ]
+}

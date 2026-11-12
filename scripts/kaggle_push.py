@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "data/kaggle"
 KAGGLE = ["uvx", "--with", "six", "kaggle"]
 KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb"),
-           "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb")}
+           "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb"), "narr": ("bolo-narration", "04_narration.ipynb")}
 TRIAL_N = {"tts": ('N = {"train": 5000, "dev": 300, "test": 1000}', 'N = {"train": 64, "dev": 16, "test": 32}'),
            "ft": ('CFG = dict(epochs=5,', 'CFG = dict(max_steps=20, epochs=1,')}
 
@@ -62,6 +62,8 @@ def dataset():
 
 def kernel(which: str, trial: bool, gpu: bool):
     subprocess.run([sys.executable, str(ROOT / "scripts/make_notebooks.py")], check=True)
+    if which == "narr":
+        subprocess.run([sys.executable, str(ROOT / "scripts/make_narration_notebook.py")], check=True)
     slug, nbname = KERNELS[which]
     u = user()
     d = WORK / f"kernel_{slug}"
@@ -101,14 +103,14 @@ def fetch(which: str):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["dataset", "tts", "ft", "abl", "status", "fetch"])
+    ap.add_argument("cmd", choices=["dataset", "tts", "ft", "abl", "narr", "status", "fetch"])
     ap.add_argument("which", nargs="?")
     ap.add_argument("--trial", action="store_true")
     ap.add_argument("--no-gpu", action="store_true")
     a = ap.parse_args()
     if a.cmd == "dataset":
         dataset()
-    elif a.cmd in ("tts", "ft", "abl"):
+    elif a.cmd in ("tts", "ft", "abl", "narr"):
         kernel(a.cmd, a.trial, not a.no_gpu)
     elif a.cmd == "status":
         status()
