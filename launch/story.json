@@ -57,7 +57,8 @@
    "style": "a bright, excited, highly expressive voice, slightly high pitched and a bit fast, like revealing a surprise",
    "say": [
     "This is Maina, a voice assistant built on Bolo. It is small enough to live on his laptop, and it understands Hinglish.",
-    "This is Mynah, a voice assistant built on Bolo. It is small enough to live on his laptop, and it understands Hinglish."
+    "This is My-nuh, a voice assistant built on Bolo. It is small enough to live on his laptop, and it understands Hinglish.",
+    "This is Mai na, a voice assistant built on Bolo. It is small enough to live on his laptop, and it understands Hinglish."
    ]
   },
   {
@@ -68,7 +69,8 @@
    "style": "a playful, teasing, highly expressive voice, slightly high pitched and a bit fast",
    "say": [
     "Not a fan of the name? Give it your own. Maina is just the default.",
-    "Not a fan of the name? Give it your own. Mynah is just the default."
+    "Not a fan of the name? Give it your own. My-nuh is just the default.",
+    "Not a fan of the name? Give it your own. Mai na is just the default."
    ]
   },
   {
@@ -87,7 +89,8 @@
    "style": "a lively, animated, highly expressive voice, slightly fast, with rising energy",
    "say": [
     "Maina writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens.",
-    "Mynah writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens."
+    "My-nuh writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens.",
+    "Mai na writes down what he said, works out what he wants, and checks that the folder really exists. Then the terminal opens."
    ]
   },
   {
@@ -127,7 +130,8 @@
    "style": "a clear, honest, matter of fact voice at a moderate pace",
    "say": [
     "On {N_WORDS} test commands, spoken in computer voices it never trained on, Maina picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now.",
-    "On {N_WORDS} test commands, spoken in computer voices it never trained on, Mynah picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now."
+    "On {N_WORDS} test commands, spoken in computer voices it never trained on, My-nuh picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now.",
+    "On {N_WORDS} test commands, spoken in computer voices it never trained on, Mai na picked the right action {E2E_WORDS} percent of the time. Real voices are being tested now."
    ]
   },
   {
@@ -138,7 +142,8 @@
    "style": "an upbeat, inviting, highly expressive voice, slightly high pitched",
    "say": [
     "Maina, built on Bolo. Open source, and free. Try it, and tell us where it fails.",
-    "Mynah, built on Bolo. Open source, and free. Try it, and tell us where it fails."
+    "My-nuh, built on Bolo. Open source, and free. Try it, and tell us where it fails.",
+    "Mai na, built on Bolo. Open source, and free. Try it, and tell us where it fails."
    ]
   }
  ]

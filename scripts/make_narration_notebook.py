@@ -98,7 +98,7 @@ for line in SPEC["lines"]:
         w = jiwer.wer(" ".join(strip(norm(line["text"]))) or "x", " ".join(strip(norm(hyp))) or "x") if lang == "en" else None
         name_ok = None
         if "Myna" in line["text"]:  # did it say MY-na (not Mina / Meena / Miner)?
-            name_ok = bool(re.search(r"\b(myna|mynah|maina|mainah|mayna|my na|my nah|mai na|maena)\b", hyp.lower()))
+            name_ok = bool(re.search(r"\b(my ?nah?|my ?nuh|my ?now|mine? ?(are|a|ah|uh)|mai ?nah?|mainah?|mayna|mynah?|maena)\b", hyp.lower()))
         pv = pitch_var(a)
         takes.append({"seed": seed, "variant": vi, "file": f, "name_ok": name_ok, "wer": w, "pitch_var": round(pv, 3), "dur": round(len(a) / SR, 2), "heard": hyp})
         print(line["id"], vi, seed, name_ok, w, round(pv, 3), round(len(a) / SR, 2), hyp[:90], flush=True)
