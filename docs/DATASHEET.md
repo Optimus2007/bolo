@@ -7,7 +7,7 @@ _Follows the structure of "Datasheets for Datasets" (Gebru et al.). Last updated
   desktop voice commands to `{intent, slots}`, including abstaining (`none`) on unclear input.
 - **Gap:** to our knowledge, no public Hinglish dataset covers desktop/developer commands (terminal,
   Claude Code, folders, apps, calls, volume/brightness) with slot labels and abstention examples.
-  See `RESEARCH.md`.
+  See `docs/research/BACKGROUND.md`.
 - **Creator:** the Bolo project. **Funding:** none.
 
 ## Composition

@@ -1,4 +1,4 @@
-"""Bundle code + synthetic text data for Kaggle/Colab (the repo is private, so notebooks can't git clone).
+"""Bundle code + synthetic text data for Kaggle/Colab (so the notebooks need no git clone).
 
 Output: data/kaggle/bolo-bundle.zip (gitignored). Upload it as a PRIVATE Kaggle dataset named
 `bolo-bundle`. Contains only code, configs and the synthetic text splits -- never recordings/ or audio.

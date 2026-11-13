@@ -23,7 +23,7 @@ every metric: [`results/text/SUMMARY.md`](text/SUMMARY.md). Raw per-run JSON: `r
 | Qwen2.5-0.5B LoRA, MLX 4-bit (1 seed) | 276 MB | 56.5 | – | 56.9 | 61.8 | 15.8% | ~200 ms (GPU) |
 
 ⚠️ The paraphrases came from Qwen2.5-3B-Instruct, whose **Qwen Research License** limits use to research/evaluation.
-Models and data derived from it are **not** released under Apache/CC-BY until this is resolved (see PROGRESS.md).
+Models and data derived from it are **not** released under Apache/CC-BY (and they are not in the public release).
 
 ## Ablations for Bolo-tiny (synthetic test EM, mean ± std over 3 seeds)
 | Step | EM | Δ |

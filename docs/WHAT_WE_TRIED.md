@@ -1,7 +1,7 @@
 # What we tried, what worked, what failed
 
 This page lists every experiment in Bolo in one place, including the ones that did not work. The numbers come from
-`results/` (full tables and caveats) and the dated log in `PROGRESS.md`. Weights for the kept models and the main
+`results/` (full tables and caveats). Weights for the kept models and the main
 rejected ones are on the [weights-v1 release](https://github.com/Optimus2007/bolo/releases/tag/weights-v1)
 (`uv run python scripts/get_models.py --all`).
 

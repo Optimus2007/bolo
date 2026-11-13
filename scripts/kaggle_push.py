@@ -20,10 +20,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "data/kaggle"
 KAGGLE = ["uvx", "--with", "six", "kaggle"]
-STORY = False  # narr: cartoon voices from launch/story.json (--story)
-ONLY = None  # narr: comma separated line ids to regenerate (--only)
 KERNELS = {"tts": ("bolo-tts-synth", "01_tts_synth.ipynb"), "ft": ("bolo-whisper-ft", "02_whisper_finetune.ipynb"),
-           "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb"), "narr": ("bolo-narration", "04_narration.ipynb")}
+           "abl": ("bolo-whisper-ablation", "03_whisper_ablation.ipynb")}
 TRIAL_N = {"tts": ('N = {"train": 7000, "dev": 400, "test": 1200}', 'N = {"train": 64, "dev": 16, "test": 32}'),
            "ft": ('CFG = dict(epochs=5,', 'CFG = dict(max_steps=20, epochs=1,')}
 
@@ -78,8 +76,6 @@ def tts_dataset(src: Path = ROOT / "data/kaggle/tts_v1"):
 
 def kernel(which: str, trial: bool, gpu: bool):
     subprocess.run([sys.executable, str(ROOT / "scripts/make_notebooks.py")], check=True)
-    if which == "narr":
-        subprocess.run([sys.executable, str(ROOT / "scripts/make_narration_notebook.py")] + (["--story"] if STORY else []) + ([ONLY] if ONLY else []), check=True)
     slug, nbname = KERNELS[which]
     u = user()
     d = WORK / f"kernel_{slug}"
@@ -119,19 +115,16 @@ def fetch(which: str):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["dataset", "ttsdata", "tts", "ft", "abl", "narr", "status", "fetch"])
+    ap.add_argument("cmd", choices=["dataset", "ttsdata", "tts", "ft", "abl", "status", "fetch"])
     ap.add_argument("which", nargs="?")
     ap.add_argument("--trial", action="store_true")
     ap.add_argument("--no-gpu", action="store_true")
-    ap.add_argument("--only", help="narr: comma separated line ids")
-    ap.add_argument("--story", action="store_true", help="narr: the cartoon's voices")
     a = ap.parse_args()
-    ONLY, STORY = a.only, a.story
     if a.cmd == "dataset":
         dataset()
     elif a.cmd == "ttsdata":
         tts_dataset()
-    elif a.cmd in ("tts", "ft", "abl", "narr"):
+    elif a.cmd in ("tts", "ft", "abl"):
         kernel(a.cmd, a.trial, not a.no_gpu)
     elif a.cmd == "status":
         status()

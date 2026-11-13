@@ -1,6 +1,6 @@
-# RESEARCH — Phase 1
+# Background research
 
-_Compiled 2026-11-11 from web searches and direct reads of model/dataset pages. "Verified" means the
+_Literature and resource survey done before building Bolo, compiled 2026-11-11 from web searches and direct reads of model/dataset pages. "Verified" means the
 license was read on the official page; "unverified" means a secondary source only. Recheck licenses
 before release; cards change._
 
@@ -130,7 +130,7 @@ What others do:
   [Rafae et al., EMNLP 2015](https://preview.aclanthology.org/fix_video/D15-1097.pdf) (UrduPhone + clustering, Roman Urdu).
 - **Libraries:** [dhvani](https://pypi.org/project/dhvani/) (IPA-bridged canonicalization; self-reported, unreviewed).
 
-**Bolo approach (Phase 2–3, no model needed yet):**
+**Bolo approach:**
 1. Devanagari → Roman with a deterministic scheme (`indic-transliteration`, simplified ITRANS) so every input is one script.
 2. A cheap **phonetic key** (lowercase, collapse doubled vowels, `w→v`, `ee→i`, `oo→u`, drop `h` after
    consonants in the key only, final-schwa `a` optional). Used for keyword/verb matching (`khol*`, `chala*`, `band*`).
@@ -138,69 +138,11 @@ What others do:
    phonetic key). This is how unseen-at-train names get resolved at action time.
 4. The generator uses a variant table (`kholo|kholna|khol do|kholdo|kolo`) to inject spelling noise into training text.
 
-Phase 6 (stretch) would replace step 2 with a learned Roman→phoneme/normalized model trained on Aksharantar.
+A possible extension: replace step 2 with a learned Roman→phoneme model trained on Aksharantar (not done).
 
----
+## 5. Methods to borrow, and where Bolo could add something new
 
-## 5. Proposed plan and estimates
-
-Assumptions: M2 Air 16 GB, fanless (keep local runs ≤ ~20 min); Kaggle free tier (T4/P100, ~30 GPU h/week).
-
-| Phase | What | Where | Time (rough) | Disk added |
-|---|---|---|---|---|
-| 2 | YAML schema, template generator, variant/filler tables, Devanagari renderer, unseen-slot split, datasheet, tests | Mac, CPU, seconds to run | 1–2 sessions | <50 MB (env ~0.5 GB) |
-| 2b | LLM paraphrasing: **needs your choice** (see below) | Mac MLX 4-bit, or API | +1 session; ~20–40 min generation | 1–2 GB if local model |
-| 3 | Rule/fuzzy baseline; MuRIL joint tagger (MPS); Qwen 0.5B LoRA (MLX); eval; MLX 4-bit export | Mac | 2 sessions; each training run 5–20 min | ~3 GB (torch+mlx env ~2 GB, models ~1.5 GB) |
-| 4a | `bolo record` local web tool + consent manifest | Mac | 1 session | recordings ~1 MB/min |
-| 4b | Synthetic audio with Indic Parler-TTS + augmentation (noise/speed/reverb) | **Kaggle notebook** | 2–4 GPU h | Download a subset ~1–2 GB to `data/` |
-| 4c | Whisper-base (Oriserve Swift) fine-tune notebook | **Kaggle/Colab** | 3–6 GPU h per run | Fine-tuned model ~300 MB (fp16 ~150 MB) |
-| 5 | `bolo eval`: WER/CER, intent acc, slot F1, exact match, E2E, latency; baselines (plain Whisper tiny/base/small, Oriserve Swift, Srota, lipi-hn) | Mac (eval only) | 1–2 sessions | Baselines ~4 GB; downloaded one at a time, deleted after |
-| 6 | (stretch) G2P/normalizer | Mac | later | <100 MB |
-| 7 | README, cards, LICENSE, CONTRIBUTING, CLI polish, CI | Mac | 1 session | — |
-
-Peak project disk: **~8–10 GB**, under the 15 GB cap. Downloads that would exceed 2 GB (and need your OK
-first): Indic Parler-TTS weights (~3.6 GB, only on Kaggle, so not on your Mac), Oriserve Prime/Apex
-(~3 GB, I'd skip these), and any OpenSLR-104 tarball (~several GB, Kaggle only).
-
-### Decisions I need from you before Phase 2
-1. **Paraphrasing LLM:** (a) local Qwen2.5-3B-Instruct 4-bit via MLX (~1.8 GB, free, mediocre Hinglish); (b) a
-   paid API (better Hinglish, costs a few dollars, sends only synthetic template text); (c) templates only
-   for now. My recommendation: **(a), with human spot-checks**. That keeps everything local and reproducible.
-2. **Gated models:** Indic Parler-TTS and IndicF5 need you to accept terms on Hugging Face with your account.
-   I won't handle tokens. You'll add `HF_TOKEN` as a Kaggle secret yourself.
-
-### Defaults I'll take unless you object (logged in PROGRESS.md)
-- `uv` env with Python 3.12 in `.venv/`. Licenses: code Apache-2.0, data CC BY 4.0.
-- Canonical text target = Roman Hinglish (lowercase), with Devanagari accepted as input.
-- Test split holds out slot **values** (folders, contacts, apps) entirely, plus a separate small "unclear/negative" set.
-
----
-
-## 6. Revised direction (2026-11-11): Bolo-Edge
-
-Decision: no pivot. Bolo becomes **edge-first**: offline Hinglish voice→action that fits under ~100 MB, with a
-latency target under ~300 ms on an M2 Mac and on a mid-range **Android phone** (the second target).
-
-Components:
-1. **Bolo-ASR:** Whisper tiny/base (starting from Oriserve Hinglish-Swift) fine-tuned on Kaggle, Roman output.
-2. **Bolo-tiny:** a tiny (~1–5M params) intent+slot+abstention model **trained from scratch** on our data.
-   Compared against the rule baseline, MuRIL, and Qwen-0.5B LoRA.
-3. **Bolo-bench:** real recorded voices + synthetic audio, `bolo eval`.
-4. Stretch: **direct speech→intent** head on the Whisper-tiny encoder, reported against the two-step pipeline.
-
-**Zero-cost constraint (user decision):** no paid APIs or services. Paraphrasing uses a local MLX model
-(Qwen2.5-3B-Instruct 4-bit, ~1.8 GB) after a templates-first Phase 2. Heavy compute goes on free Kaggle
-GPUs (~30 h/week) or free Colab. Hosting is GitHub (private) now, Hugging Face free tier later (published by the user).
-
-**Android path (free tools):** export ASR to whisper.cpp/GGML or ONNX (sherpa-onnx runs Whisper on Android), and
-Bolo-tiny to ONNX / LiteRT (TFLite). First measure with a command-line benchmark (Termux or `adb`); a
-minimal demo app comes later in Phase 7. Android Studio + SDK is a >2 GB install, so I'll ask before it.
-
----
-
-## 7. Phase 3 research: methods to borrow, and where Bolo can add novelty (2026-11-11)
-
-### 7a. What the literature offers
+### 5a. What the literature offers
 | Area | Key work | Takeaway for Bolo |
 |---|---|---|
 | Tiny on-device text models without a vocabulary | [PRADO (EMNLP 2019)](https://aclanthology.org/D19-1506/), pQRNN ([Google writeup](https://syncedreview.com/2020/09/23/google-approaches-bert-level-performance-using-300x-fewer-parameters-with-extension-of-its-new-nlp-model-prado/)), [pNLP-Mixer (ACL Industry 2023)](https://aclanthology.org/2023.acl-industry.6.pdf), [hashed char n-gram FFNs (Botha et al. 2017)](https://arxiv.org/html/1708.00214), [Subword Semantic Hashing](https://ar5iv.labs.arxiv.org/html/1810.07150) | Projection/hash features + a small encoder reach near-BERT accuracy at 100–300x fewer params with no pretraining. pNLP-Mixer beats pQRNN on MTOP (semantic parsing). Hashing removes the vocabulary, so it handles OOV and misspellings by construction. **Basis of Bolo-tiny.** |
@@ -212,7 +154,7 @@ minimal demo app comes later in Phase 7. Android Studio + SDK is a >2 GB install
 | ASR biasing & speech-to-intent | [CB-Whisper](https://arxiv.org/html/2309.09552v3), [Hou et al. Interspeech 2025](https://www.isca-archive.org/interspeech_2025/hou25_interspeech.pdf), [TCPGen-Whisper](https://arxiv.org/html/2509.09197v1), [zero-shot trie biasing](https://web3.arxiv.org/pdf/2508.17796), [Skit-S2I (Indian-accented speech-to-intent)](https://arxiv.org/pdf/2212.13015), [edge Whisper tiny/base](https://arxiv.org/pdf/2502.01649) | Biasing Whisper with the user's own entity list (folders, contacts) improves entity recall. A naive comma-list prompt can hallucinate, so measure it. Whisper-small → SLURP intent ≈ 0.77 acc (Skit-S2I paper), so a tiny direct speech→intent model is a real open question. |
 | Synthetic code-mixing | [Pratapa et al. EC theory (MSR)](https://www.microsoft.com/en-us/research/blog/cracking-code-mixing-an-important-step-in-making-human-computer-interaction-more-engaging/), [GCM toolkit (EACL 2021 demo)](https://preview.aclanthology.org/moar-dois/2021.eacl-demos.24.pdf), [CALCS 2021 comparison](https://aclanthology.org/2021.calcs-1.6) | Linguistically constrained switching is principled, but simpler methods are often competitive. Our templates already put switches at phrase boundaries. Revisit for v1 paraphrasing. |
 
-### 7b. Bolo's candidate contributions (to our knowledge, not established in prior work for Hinglish edge SLU)
+### 5b. Bolo's candidate contributions, as planned before the experiments (outcomes in [WHAT_WE_TRIED.md](../WHAT_WE_TRIED.md))
 1. **Phonetic projection embeddings (PhonoHash).** Each token → Devanagari→Roman transliteration →
    a Hinglish-aware phonetic key and a consonant skeleton (kholo/kolo/khollo → same key; karo/kro → same
    skeleton) → hashed character n-grams of raw + key + skeleton into a small Bloom-style table. No vocabulary,
@@ -225,8 +167,8 @@ minimal demo app comes later in Phase 7. Android Studio + SDK is a >2 GB install
    thing) is worse than asking again.
 4. **Environment-grounded slot resolution.** At action time, slot spans are matched against the user's actual
    folders / apps / contacts by phonetic key + edit distance. If nothing matches, Bolo abstains. The same entity
-   list later biases Whisper. Evaluated as strict vs grounded slot accuracy (Phase 5: end-to-end).
-5. Later (Phase 4/5): ASR-noise-aware text training (train on Whisper's real outputs for TTS audio), and a tiny
+   list later biases Whisper. Evaluated as strict vs grounded slot accuracy.
+5. ASR-noise-aware text training (train on Whisper's real outputs for TTS audio), and a tiny
    direct speech→intent head on the Whisper-tiny encoder.
 
 Honesty note: every ingredient above exists separately in the literature. The claim is the combination for

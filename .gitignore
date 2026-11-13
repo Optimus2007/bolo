@@ -46,6 +46,3 @@ runs/
 *secret*
 hf_token*
 
-# launch video build outputs
-launch/out/
-launch/audio/
