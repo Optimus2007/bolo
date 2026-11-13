@@ -135,7 +135,7 @@ Myna is the assistant on top of the Bolo models: a small teal myna bird (mynas a
 She answers in short Hinglish, shows a mood, and can say the reply out loud with the voice already on your computer.
 
 ```bash
-uv run bolo app            # Myna in your browser: hold Space, speak, see what she will do, press "Karo"
+uv run bolo app            # Myna in your browser: hold Space, speak, see what it will do, press "Karo"
 uv run bolo app --run      # allowed to really do things (still asks before closing apps or sleeping)
 uv run bolo do "battery kitni hai" --run --speak
 #   ,/|\,
@@ -176,15 +176,17 @@ and says so. Calls and messages open the app (or its web version) and copy the m
 manual. Timers and reminders run while `bolo app` is open (or count down with `bolo do --run`). Tested on macOS; the Windows and Linux
 plans are unit tested but not yet tried on real machines.
 
-The full reports with every metric and caveat live in `results/`.
+The full reports with every metric and caveat live in `results/`. Every experiment, including the ones that failed,
+is listed in [docs/WHAT_WE_TRIED.md](docs/WHAT_WE_TRIED.md).
 
 ## Quick start
 
 You need Python 3.10 or newer. We use [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone <this repo> && cd bolo
+git clone https://github.com/Optimus2007/bolo && cd bolo
 uv venv && uv pip install -e ".[dev,train,speech]"
+uv run python scripts/get_models.py        # trained models from the release (about 220 MB)
 uv run bolo generate                     # builds the synthetic dataset in data/text/v0
 uv run pytest -q                         # everything should pass
 ```
@@ -276,7 +278,7 @@ an existing Hinglish Whisper. `scripts/kaggle_push.py` uploads and runs both as 
 ## What comes next
 
 1. More real voices, ideally ten people or more, half female and half male.
-2. Myna: a wake word ("Hey Myna"), a small Hinglish voice of her own (today she borrows the system voice), and an installer that starts the app with the computer.
+2. Myna: a wake word ("Hey Myna"), a small Hinglish voice of its own (today it borrows the system voice), and an installer that starts the app with the computer.
 3. Running on Android, with real phone timings.
 
 ## Data and models we build on
