@@ -156,7 +156,7 @@ uv run bolo do "battery kitni hai" --run --speak
 
   Each step is shown as understood before it is saved and grounded again every time it runs. A routine only starts
   when what you say sounds like its whole name, so "coding folder kholo" does not set it off.
-- **Rename her** with `bolo name Jarvis`; replies avoid gendered verb forms, so any name fits.
+- **Rename it** with `bolo name Jarvis`; replies avoid gendered verb forms, so any name fits.
 
 ## Doing the command (Windows, Linux, macOS)
 
