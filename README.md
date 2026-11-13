@@ -6,8 +6,6 @@ Bolo is a research project on that question. Commands look like *"downloads fold
 *"volume 40 pe kar do"*. The aim is to turn speech into the right action on a laptop with no cloud, under ~250 MB, and in
 about 0.2 s. This README covers what we built, what we measured, what worked, what failed, and why.
 
-> **Status: closed (November 2026).** The code, models and results stay up as a record. They are not maintained.
-
 ```
 "bhai rust learning folder mein terminal kholo"   (speech)
         │  Bolo Sun: Whisper-base fine-tuned on synthetic Hinglish speech (142 MB)    ~180 ms on an M2, 5 guesses

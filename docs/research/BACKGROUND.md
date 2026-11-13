@@ -172,5 +172,5 @@ A possible extension: replace step 2 with a learned Roman→phoneme model traine
    direct speech→intent head on the Whisper-tiny encoder.
 
 Honesty note: every ingredient above exists separately in the literature. The claim is the combination for
-Hinglish on-device SLU, plus an open benchmark. Results will be reported with ablations, including where
-the ideas don't help.
+Hinglish on-device SLU, plus an open benchmark. The results, with ablations and the ideas that
+didn't help, are in [WHAT_WE_TRIED.md](../WHAT_WE_TRIED.md).

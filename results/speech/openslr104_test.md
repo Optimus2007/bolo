@@ -19,4 +19,4 @@ Caveats (read before quoting these numbers):
 - The domain is tutorial narration, not short commands. This measures robustness to real Hinglish voices only;
   command (speech -> action) accuracy needs command recordings (`bolo record`).
 - The data was deleted after this run (re-download: 443 MB, see the script docstring). The fine-tuned
-  `bolo-whisper` will be added to this table once it is trained.
+  Bolo Sun v0 scored 0.591 WER on the same segments (see `results/SPEECH_RESULTS.md`).

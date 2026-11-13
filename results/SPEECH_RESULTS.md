@@ -152,10 +152,10 @@ can be tested by someone using it.
    speech and a perfect transcript; choosing among five guesses by meaning wins back about 40% of that. Remaining errors are mostly rare names and English words inside Hindi sentences
    (docker heard as "doctor", raspberry pi as "rasberry py").
 4. **Plain Whisper is not usable for this.** It produces Devanagari, loops on itself and often invents words.
-5. **The real test is still missing.** None of the numbers above come from people saying commands. That needs the
-   `bolo record` sessions with friends, and those will be the headline numbers.
+5. **None of the numbers above come from people saying commands.** The real-speech test (55 clips, one speaker) is in
+   the README and [docs/WHAT_WE_TRIED.md](../docs/WHAT_WE_TRIED.md).
 
-## Not yet measured
+## Not measured
 
-Speech to action on real people saying commands, results by speaker group, phone latency, and any model larger than
+Speech to action on more than one real speaker, results by speaker group, phone latency, and any model larger than
 whisper base.
