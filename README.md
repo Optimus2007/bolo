@@ -191,6 +191,9 @@ uv run bolo generate                     # builds the synthetic dataset in data/
 uv run pytest -q                         # everything should pass
 ```
 
+The models are also on Hugging Face: [kungfupanda12/bolo-sun](https://huggingface.co/kungfupanda12/bolo-sun) (speech)
+and [kungfupanda12/bolo-tiny](https://huggingface.co/kungfupanda12/bolo-tiny) (commands).
+
 Understand a typed command:
 
 ```bash
